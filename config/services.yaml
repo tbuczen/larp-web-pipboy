@@ -1,0 +1,11 @@
+parameters:
+    app.discord_enabled: '%env(bool:DISCORD_CLIENT_ID)%'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude: '../src/{Entity,Enum,Kernel.php}'

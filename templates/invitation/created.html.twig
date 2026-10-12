@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Invitation created</title></head>
+<body>
+    <h1>Invitation created</h1>
+    <p>For {{ invitation.email }} · {{ invitation.larp.name }} · expires {{ invitation.expiresAt|date('Y-m-d H:i T') }}</p>
+    <label for="invitation-link">Send this personal link to the player:</label>
+    <input id="invitation-link" type="text" value="{{ link }}" readonly>
+    <p>This link is shown only now. You can revoke the invitation and generate another if needed.</p>
+    <a href="{{ path('admin') }}">Back to admin</a>
+</body>
+</html>

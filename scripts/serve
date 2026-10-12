@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+exec php -S "${1:-0.0.0.0:8000}" -t public \
+    2> >(php scripts/redact-server-log.php >&2)

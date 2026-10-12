@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PipBoy — Sign in</title>
+    <style>
+        body { background: #07110a; color: #8affaa; font: 1rem monospace; margin: 0; min-height: 100vh; display: grid; place-items: center; }
+        main { width: min(24rem, 85vw); padding: 2rem; border: 1px solid #38774a; }
+        label { display: block; margin-top: 1.25rem; }
+        input, button { box-sizing: border-box; width: 100%; padding: .8rem; font: inherit; margin-top: .5rem; }
+        input { background: #0d2114; color: #fff; border: 1px solid #38774a; }
+        button { background: #8affaa; color: #07110a; border: 0; margin-top: 1.5rem; cursor: pointer; }
+        .error { color: #ffb9b9; }
+    </style>
+</head>
+<body>
+<main>
+    <h1>PipBoy</h1>
+    <p>Sign in to your account.</p>
+    {% for message in app.flashes('success') %}<p role="status">{{ message }}</p>{% endfor %}
+    {% for message in app.flashes('error') %}<p class="error" role="alert">{{ message }}</p>{% endfor %}
+    {% if error %}<p class="error" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</p>{% endif %}
+    <form method="post" action="{{ path('app_login') }}">
+        <label for="email">Email</label>
+        <input id="email" type="email" name="_username" value="{{ last_username }}" autocomplete="username" required autofocus>
+        <label for="password">Password</label>
+        <input id="password" type="password" name="_password" autocomplete="current-password" required>
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <button type="submit">Sign in</button>
+    </form>
+    {% if discord_enabled %}<p><a href="{{ path('connect_discord') }}">Sign in with Discord</a></p>{% endif %}
+    <p><a href="{{ path('app_register') }}">Create an account</a></p>
+    <p>To join a LARP, use your personal invitation link from the organizer.</p>
+</main>
+</body>
+</html>

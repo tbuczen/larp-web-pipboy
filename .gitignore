@@ -1,0 +1,10 @@
+/vendor/
+/var/
+/.env.local
+/.env.*.local
+/tests/_output/
+/tests/Support/_generated/
+/.phpunit.cache/
+/.docker/
+/public/bundles/
+/config/reference.php

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Create your PipBoy account</title></head>
+<body>
+    <h1>Create your account</h1>
+    <p>Sign in after creating your account, then use an invitation from your organizer to join a LARP.</p>
+    {% if discord_enabled %}<p><a href="{{ path('connect_discord') }}">Register with Discord</a></p>{% endif %}
+    {% if discord_verified %}<p>Your Discord email is verified. Enter your name to complete your account.</p>{% endif %}
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <button type="submit">Create account</button>
+    {{ form_end(form) }}
+    <a href="{{ path('app_login') }}">Already have an account? Sign in</a>
+</body>
+</html>

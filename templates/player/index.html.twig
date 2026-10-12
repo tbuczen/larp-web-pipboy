@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>PipBoy — Your LARPs</title></head>
+<body>
+    <h1>Your LARPs</h1>
+    {% for player in players %}
+        <article>
+            <h2>{{ player.larp.name }}</h2>
+            <p>{{ player.name }} · PipBoy {{ player.pipboyNumber }}</p>
+            <p>Status: {{ player.status.value }}</p>
+            {% if player.status.value == 'pending' %}<p>Waiting for organizer approval.</p>{% endif %}
+        </article>
+    {% else %}<p>You have not joined a LARP. Use your organizer’s registration link.</p>{% endfor %}
+    <a href="{{ path('app_logout') }}">Sign out</a>
+</body>
+</html>

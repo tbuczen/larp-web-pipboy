@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><title>Join {{ event_name }}</title></head>
+<body>
+    <h1>Join {{ event_name }}</h1>
+    <p>Your player will need organizer approval before game features become available.</p>
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <button type="submit">Accept invitation</button>
+    {{ form_end(form) }}
+    <a href="{{ path('app_pipboy') }}">Your LARPs</a>
+</body>
+</html>

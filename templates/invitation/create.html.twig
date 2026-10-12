@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Invite player</title></head>
+<body>
+    <h1>Invite a player to {{ larp.name }}</h1>
+    <p>The link can be accepted once by an account with this email. Your approval will still be required.</p>
+    {{ form_start(form) }}{{ form_widget(form) }}<button type="submit">Generate invitation</button>{{ form_end(form) }}
+    <a href="{{ path('admin') }}">Back to admin</a>
+</body>
+</html>

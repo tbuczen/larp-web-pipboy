@@ -1,0 +1,63 @@
+name: larp-pipboy
+
+services:
+  app:
+    build:
+      context: .
+      target: development
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-}
+      secrets:
+        - source: environment_proxy_ca
+          target: proxy_ca
+      extra_hosts:
+        - "proxy:${PIPBOY_PROXY_IP:-127.0.0.1}"
+    environment:
+      APP_ENV: dev
+      APP_SECRET: ${APP_SECRET:-local-development-only-change-before-production}
+      DISCORD_CLIENT_ID:
+      DISCORD_CLIENT_SECRET:
+      DATABASE_URL: postgresql://pipboy:pipboy@database:5432/pipboy?serverVersion=17&charset=utf8
+      HTTP_PROXY: ${HTTP_PROXY:-}
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1},database
+    ports:
+      - "127.0.0.1:8000:8000"
+    extra_hosts:
+      - "proxy:${PIPBOY_PROXY_IP:-127.0.0.1}"
+    volumes:
+      - .:/app
+      - composer_cache:/home/app/.composer/cache
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8000/') === false ? 1 : 0);"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: pipboy
+      POSTGRES_USER: pipboy
+      POSTGRES_PASSWORD: pipboy
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/10-test-database.sql:/docker-entrypoint-initdb.d/10-test-database.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pipboy -d pipboy"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+secrets:
+  environment_proxy_ca:
+    file: ${PIPBOY_PROXY_CA:-./docker/empty-ca.crt}
+
+volumes:
+  composer_cache:
+  postgres_data:
