@@ -25,46 +25,7 @@ case "${1:-up}" in
         docker compose down
         ;;
     test)
-        docker compose exec -T -e APP_ENV=test app bash -euo pipefail -s <<'TEST_SCRIPT'
-php bin/console doctrine:database:create --if-not-exists --env=test
-php bin/console doctrine:migrations:migrate --no-interaction --env=test
-php vendor/bin/codecept build
-
-php -r '$socket = @fsockopen("127.0.0.1", 8001, $code, $message, 0.5); if ($socket !== false) { fclose($socket); fwrite(STDERR, "Test server port 8001 is already in use.\n"); exit(1); }'
-
-mkdir -p var
-bash scripts/serve 127.0.0.1:8001 > var/test-server.log 2>&1 &
-test_server_pid=$!
-
-cleanup_test_server() {
-    kill "$test_server_pid" 2>/dev/null || true
-    wait "$test_server_pid" 2>/dev/null || true
-}
-trap cleanup_test_server EXIT
-trap 'exit 130' INT
-trap 'exit 143' TERM
-
-test_server_ready=0
-for attempt in {1..30}; do
-    if ! kill -0 "$test_server_pid" 2>/dev/null; then
-        printf 'Test server stopped before becoming ready; see var/test-server.log.\n' >&2
-        exit 1
-    fi
-    if php -r '@file_get_contents("http://127.0.0.1:8001/login"); exit(isset($http_response_header[0]) && preg_match("~^HTTP/\\S+ 200\\b~", $http_response_header[0]) ? 0 : 1);'; then
-        test_server_ready=1
-        break
-    fi
-    sleep 1
-done
-
-if [[ "$test_server_ready" != 1 ]]; then
-    printf 'Test server did not become ready; see var/test-server.log.\n' >&2
-    exit 1
-fi
-
-php vendor/bin/phpunit
-php vendor/bin/codecept run Functional
-TEST_SCRIPT
+        docker compose exec -T -e APP_ENV=test app bash scripts/test
         ;;
     console)
         shift

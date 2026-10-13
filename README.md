@@ -48,6 +48,12 @@ The helper migrates the separate `pipboy_test` database, builds the Codeception 
 
 The tests cover approval and feature permissions, event isolation, grant revocation, condition intervals, organizer authorization, login/CSRF, and HTTP registration/admin flows. PhpBrowser tests do not execute browser JavaScript; add Codeception WebDriver tests when camera, map, or PWA interactions are introduced.
 
+## Continuous integration
+
+[CI](.github/workflows/ci.yml) runs on pull requests targeting `main`, pushes to `main`, and manual dispatches. The `PHP checks` job uses PHP 8.4, PostgreSQL 17, locked Composer dependencies, Composer validation/platform checks/audit, and Symfony configuration/template checks.
+
+Both CI and `scripts/dev test` use [scripts/test](scripts/test) for test database creation, migrations, schema validation, assets, PHPUnit, and Codeception. Each GitHub run gets a disposable PostgreSQL service and test-only settings. CI uses read-only repository permissions and needs no production secrets. The shared runner stops its test server on success or failure and redacts invitation paths in diagnostic logs.
+
 ## Discord
 
 Discord OAuth is optional. Without configuration, password login and registration work and Discord links remain hidden.

@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: PHP checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    env:
+      APP_ENV: test
+      APP_SECRET: ci-${{ github.run_id }}-${{ github.run_attempt }}
+      DATABASE_URL: postgresql://pipboy:${{ github.run_id }}-${{ github.run_attempt }}@127.0.0.1:5432/pipboy?serverVersion=17&charset=utf8
+      DISCORD_CLIENT_ID: ''
+      DISCORD_CLIENT_SECRET: ''
+
+    services:
+      database:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: pipboy
+          POSTGRES_USER: pipboy
+          POSTGRES_PASSWORD: ${{ github.run_id }}-${{ github.run_attempt }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pipboy -d pipboy"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP 8.4 and Composer
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: '8.4'
+          ini-values: variables_order=EGPCS
+          extensions: ctype, dom, iconv, intl, mbstring, pdo_pgsql, xml, xmlwriter, zip
+          tools: composer:v2
+          coverage: none
+
+      - name: Locate Composer cache
+        id: composer-cache
+        run: printf 'directory=%s\n' "$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer downloads
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.composer-cache.outputs.directory }}
+          key: composer-${{ runner.os }}-php8.4-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-php8.4-
+
+      - name: Validate Composer files
+        run: composer validate --strict
+
+      - name: Install locked dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Check platform requirements
+        run: composer check-platform-reqs
+
+      - name: Audit locked dependencies
+        run: composer audit --locked --no-interaction
+
+      - name: Validate Symfony configuration and templates
+        run: |
+          php bin/console lint:yaml config
+          php bin/console lint:container
+          php bin/console lint:twig templates
+
+      - name: Validate schema and run unit and HTTP tests
+        run: bash scripts/test
+
+      - name: Show test server diagnostics on failure
+        if: failure()
+        run: |
+          if [[ -f var/test-server.log ]]; then
+            tail -n 100 var/test-server.log
+          fi
