@@ -16,6 +16,14 @@ Reviewed on 2026-10-12. The commands below are documented in [README.md](../READ
 
 Live processes must restart after restoring a cloud task. Reuse the checkout, dependencies, and persistent data; avoid a new worktree unless requested. Saved cloud setup/start instructions are separate from executed commands and publication. A successful draft save does not publish an environment.
 
+## Continuous integration
+
+The [GitHub Actions workflow](../.github/workflows/ci.yml) runs the `PHP checks` job for pull requests into `main`, pushes to `main`, and manual dispatches. It provisions PHP 8.4 and an isolated PostgreSQL 17 service, validates Composer/platform/Symfony configuration, audits the lockfile, and runs [the shared test runner](../scripts/test). GitHub runs PHP directly; local development invokes the same runner inside Compose.
+
+The runner creates/migrates the `_test` database, validates its schema, installs EasyAdmin assets, and executes PHPUnit and Codeception against a temporary HTTP server. CI settings and database credentials are disposable test values. The workflow has read-only repository permissions, uses actions pinned to immutable commit SHAs, and does not select `prod` or consume its secrets. Diagnostic output retains errors while redacting invitation paths. Production deployment remains a separate workflow.
+
+CI sets PHP's `variables_order=EGPCS` so the HTTP test server exposes the supplied test configuration through `$_ENV`. Without it, Symfony can load development values from `.env` during HTTP requests even when CLI commands use the test environment.
+
 ## Production configuration
 
 The user selected this repository's GitHub environment named `prod` and an existing Discord OAuth application. API reads confirmed a `prod` environment exists for both PipBoy and webspace. Secret/variable metadata endpoints returned HTTP 403; the presence of individual bindings and their usability remain unverified. Names below describe the configuration contract, not confirmed credentials.
