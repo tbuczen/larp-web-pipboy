@@ -2,6 +2,8 @@
 
 A Symfony 7.4 LTS application running on PHP 8.4 and PostgreSQL 17, with EasyAdmin 5 for organizers. This initial delivery covers accounts, event registration and approval, organizer authorization, and the first game-data entities. The remaining gameplay milestones are tracked in [docs/roadmap.md](docs/roadmap.md).
 
+Project guidance: [agent workflow](AGENTS.md), [product decisions and roadmap](docs/roadmap.md), [architecture](docs/architecture.md), and [environment/deployment context](docs/operations.md). Operations also records the read-only review of `tbuczen/webspace` and hosting compatibility questions.
+
 ## Development
 
 Docker Engine and Docker Compose are required. The application runs as a non-root user. Start from the existing checkout; cloud tasks are already isolated and do not need a Git worktree.
@@ -62,13 +64,7 @@ The deployment workflow must securely provide these values to the running Symfon
 
 ## Design
 
-- Global `User` is the account; `Player` is membership and identity in one LARP.
-- PostgreSQL enforces one player per account/LARP and a unique PipBoy number within each LARP.
-- Organizer assignments govern queries, association choices, record access, and submitted writes. Superadministrators can manage all events and accounts.
-- Existing players cannot be moved between accounts/events, and holodisks cannot be moved between events.
-- Features, notes, simulated conditions, and holodisk grants belong to the event player. Pending or rejected players cannot use features.
-- Holodisk grants can be revoked and restored. Reading content will also require an approved player and the holodisk feature when the player discovery interface is added.
-- Domain rules stay in small entities and policies. Controllers use Doctrine directly for straightforward persistence; repositories and additional domain abstractions will be introduced only when queries or workflows justify them.
+The application separates global accounts from event-specific players, scopes organizer access to assigned LARPs, and keeps personal names out of player communication. Domain rules live in small entities/policies/services, with Symfony validation and PostgreSQL constraints. See [architecture](docs/architecture.md) for model boundaries and extension conventions, and [the roadmap](docs/roadmap.md) for confirmed gameplay requirements.
 
 The lockfile pins maintained Composer packages. Its GitHub archive URLs use the official `codeload.github.com` endpoint at the same immutable commits because the cloud proxy initially denied the GitHub REST API. TLS and integrity checks remain enabled. To refresh dependencies, use `scripts/dev composer update` with GitHub API network access enabled.
 
