@@ -89,9 +89,32 @@ jobs:
       - name: Validate schema and run unit and HTTP tests
         run: bash scripts/test
 
+      # Runs last because it replaces the development dependencies with the
+      # production install that scripts/deploy performs on the server.
+      - name: Smoke-test the production deploy scripts
+        run: |
+          APP_SECRET="smoke-$GITHUB_RUN_ID" php scripts/write-prod-env.php
+          env -u APP_ENV -u APP_SECRET -u DATABASE_URL -u DISCORD_CLIENT_ID -u DISCORD_CLIENT_SECRET \
+            bash scripts/deploy
+          env -u APP_ENV -u APP_SECRET -u DATABASE_URL -u DISCORD_CLIENT_ID -u DISCORD_CLIENT_SECRET \
+            php -S 127.0.0.1:8002 -t public > var/prod-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          status=000
+          for attempt in {1..20}; do
+            status=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8002/login || true)
+            [[ "$status" == 200 ]] && break
+            sleep 0.5
+          done
+          echo "Production build served /login with HTTP $status"
+          [[ "$status" == 200 ]]
+
       - name: Show test server diagnostics on failure
         if: failure()
         run: |
-          if [[ -f var/test-server.log ]]; then
-            tail -n 100 var/test-server.log
-          fi
+          for log in var/test-server.log var/prod-server.log; do
+            if [[ -f "$log" ]]; then
+              echo "== $log"
+              tail -n 100 "$log" | php scripts/redact-server-log.php
+            fi
+          done

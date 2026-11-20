@@ -11,7 +11,7 @@ Ask focused questions when business behavior is unclear. Continue useful work th
 ## Collaboration and Git workflow
 
 - Use the existing checkout. Cloud tasks are isolated; create a worktree only when the user requests one.
-- Work on a feature, fix, or documentation branch and open a pull request targeting `main`. Subsequent work must follow this route rather than direct pushes to `main`.
+- Work on a branch named `task/short-description` (lowercase, hyphenated, e.g. `task/prod-deploy-workflow`) and open a pull request targeting `main`. Subsequent work must follow this route rather than direct pushes to `main`.
 - Preserve existing changes. Review the diff and run relevant checks before committing and pushing. Merge or deploy when the user authorizes that action.
 - The user permits orchestration with up to three workers when separable tasks benefit from parallel work. Give each worker a bounded scope and explicit file ownership; avoid overlapping edits.
 - Assign one owner at a time to Composer changes, migration generation, and HTTP tests using the shared test database. Parallel unit checks and read-only reviews are appropriate.
