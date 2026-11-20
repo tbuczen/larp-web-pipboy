@@ -31,7 +31,7 @@ CI sets PHP's `variables_order=EGPCS` so the HTTP test server exposes the suppli
 On the server the workflow:
 
 1. refuses to continue if `PROJECT_DIR` is not a git checkout or has local changes to tracked files;
-2. fetches `origin main` and checks out the tested commit (detached);
+2. fetches `main` over HTTPS from `REPOSITORY_URL` (default: this public repository), regardless of the checkout's own `origin`, and checks out the tested commit (detached). If the fetch fails, it prints the checkout's remote and any `url.*.insteadOf` rewrite rules;
 3. runs [`scripts/write-prod-env.php`](../scripts/write-prod-env.php), which writes `.env.local.php` (mode 640, git-ignored) from the injected secrets, then removes those values from the shell so Symfony reads the file;
 4. runs [`scripts/deploy`](../scripts/deploy): PHP 8.4 check, `composer install --no-dev`, cache clear, `doctrine:migrations:migrate`, `assets:install public`, cache warmup.
 
@@ -55,12 +55,13 @@ The deploy job checks names before connecting and prints only the missing names,
 | `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` | ID variable or secret; secret | Existing OAuth application; set both or neither. LARPilot's `OAUTH_DISCORD_*` names are accepted as a fallback |
 | `PHP_BIN`, `COMPOSER_BIN` | variable or secret | Server binaries when `php` is not PHP 8.4 or Composer is not on `PATH` |
 | `HEALTHCHECK_URL` | variable | For example `https://<domain>/login`; without it the run warns and skips the check |
+| `REPOSITORY_URL` | variable | Fetch URL used on the server; defaults to `https://github.com/tbuczen/larp-web-pipboy.git`. Needs credentials if the repository becomes private |
 
 The names of the secrets and variables already added to `prod` were not readable from the cloud session that wrote this workflow; the first deploy run reports any that are missing.
 
 ### One-time server preparation
 
-- Clone this repository to `PROJECT_DIR` so that `git fetch origin main` works non-interactively for the deploy account.
+- Clone this repository to `PROJECT_DIR` as the deploy account. No GitHub SSH key or `known_hosts` entry is needed: the deploy fetches over HTTPS. Do not add a global `url.*.insteadOf` rule that rewrites `https://github.com/` to SSH.
 - Provide PHP 8.4 (CLI and web), the `pdo_pgsql`, `intl`, `mbstring`, `xml`, `ctype` and `iconv` extensions, and Composer.
 - Create the PostgreSQL 17 database and user.
 - Serve `PROJECT_DIR/public` as the document root and route requests to `index.php`. Redact `/invite/<token>` paths in the web server's access logs.
