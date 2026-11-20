@@ -33,6 +33,9 @@ jobs:
     # secrets on the "prod" environment; secrets win when both exist.
     env:
       DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      # The repository is public, so the server fetches over HTTPS without
+      # SSH keys or known_hosts. Set REPOSITORY_URL if that ever changes.
+      REPOSITORY_URL: ${{ vars.REPOSITORY_URL || format('https://github.com/{0}.git', github.repository) }}
       SSH_HOST: ${{ secrets.SSH_HOST || vars.SSH_HOST }}
       SSH_PORT: ${{ secrets.SSH_PORT || vars.SSH_PORT || '22' }}
       SSH_USER: ${{ secrets.SSH_USER || vars.SSH_USER }}
@@ -95,7 +98,7 @@ jobs:
           passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
           fingerprint: ${{ secrets.SSH_FINGERPRINT || vars.SSH_FINGERPRINT }}
           command_timeout: 20m
-          envs: DEPLOY_SHA,PROJECT_DIR,PHP_BIN,COMPOSER_BIN,APP_SECRET,DATABASE_URL,DATABASE_HOST,DATABASE_PORT,DATABASE_NAME,DATABASE_USER,DATABASE_PASSWORD,DATABASE_SERVER_VERSION,DISCORD_CLIENT_ID,DISCORD_CLIENT_SECRET,OAUTH_DISCORD_CLIENT_ID,OAUTH_DISCORD_CLIENT_SECRET
+          envs: DEPLOY_SHA,REPOSITORY_URL,PROJECT_DIR,PHP_BIN,COMPOSER_BIN,APP_SECRET,DATABASE_URL,DATABASE_HOST,DATABASE_PORT,DATABASE_NAME,DATABASE_USER,DATABASE_PASSWORD,DATABASE_SERVER_VERSION,DISCORD_CLIENT_ID,DISCORD_CLIENT_SECRET,OAUTH_DISCORD_CLIENT_ID,OAUTH_DISCORD_CLIENT_SECRET
           script: |
             set -eu
 
@@ -112,7 +115,15 @@ jobs:
               exit 1
             fi
 
-            git fetch --quiet --prune origin main
+            # Fetch from REPOSITORY_URL rather than the checkout's own remote,
+            # so an SSH origin without keys or known_hosts cannot block deploys.
+            if ! GIT_TERMINAL_PROMPT=0 git fetch --quiet "$REPOSITORY_URL" "+refs/heads/main:refs/remotes/origin/main"; then
+              echo "Could not fetch main from $REPOSITORY_URL on the server." >&2
+              echo "Remote of the checkout: $(git remote get-url origin 2>/dev/null | sed -E 's#//[^/@]*@#//#')" >&2
+              echo "URL rewrite rules that may turn HTTPS into SSH (git config url.*.insteadOf):" >&2
+              git config --show-origin --get-regexp '^url\..*\.insteadof$' >&2 || echo "  none" >&2
+              exit 1
+            fi
             if ! git merge-base --is-ancestor "$DEPLOY_SHA" origin/main; then
               echo "$DEPLOY_SHA is not on origin/main; refusing to deploy it." >&2
               exit 1
