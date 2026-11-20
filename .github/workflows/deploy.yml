@@ -1,0 +1,149 @@
+name: Deploy to production
+
+# Deploys main after the CI workflow passes for a push to main. A manual run
+# deploys the current head of main without waiting for CI.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+# Deploy one commit at a time, in order; never cancel a deploy halfway.
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+      || (github.event.workflow_run.conclusion == 'success'
+          && github.event.workflow_run.event == 'push'
+          && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    environment: prod
+
+    # Non-secret settings may be stored as either environment variables or
+    # secrets on the "prod" environment; secrets win when both exist.
+    env:
+      DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      SSH_HOST: ${{ secrets.SSH_HOST || vars.SSH_HOST }}
+      SSH_PORT: ${{ secrets.SSH_PORT || vars.SSH_PORT || '22' }}
+      SSH_USER: ${{ secrets.SSH_USER || vars.SSH_USER }}
+      PROJECT_DIR: ${{ secrets.PROJECT_DIR || vars.PROJECT_DIR }}
+      PHP_BIN: ${{ secrets.PHP_BIN || vars.PHP_BIN || 'php' }}
+      COMPOSER_BIN: ${{ secrets.COMPOSER_BIN || vars.COMPOSER_BIN }}
+      APP_SECRET: ${{ secrets.APP_SECRET }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_HOST: ${{ secrets.DATABASE_HOST || vars.DATABASE_HOST }}
+      DATABASE_PORT: ${{ secrets.DATABASE_PORT || vars.DATABASE_PORT }}
+      DATABASE_NAME: ${{ secrets.DATABASE_NAME || vars.DATABASE_NAME }}
+      DATABASE_USER: ${{ secrets.DATABASE_USER || vars.DATABASE_USER }}
+      DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+      DATABASE_SERVER_VERSION: ${{ secrets.DATABASE_SERVER_VERSION || vars.DATABASE_SERVER_VERSION }}
+      DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID || vars.DISCORD_CLIENT_ID }}
+      DISCORD_CLIENT_SECRET: ${{ secrets.DISCORD_CLIENT_SECRET }}
+      OAUTH_DISCORD_CLIENT_ID: ${{ secrets.OAUTH_DISCORD_CLIENT_ID || vars.OAUTH_DISCORD_CLIENT_ID }}
+      OAUTH_DISCORD_CLIENT_SECRET: ${{ secrets.OAUTH_DISCORD_CLIENT_SECRET }}
+      HAS_SSH_PASSWORD: ${{ secrets.SSH_PASSWORD != '' }}
+      HAS_SSH_KEY: ${{ secrets.SSH_KEY != '' }}
+      HAS_SSH_FINGERPRINT: ${{ secrets.SSH_FINGERPRINT != '' || vars.SSH_FINGERPRINT != '' }}
+      HEALTHCHECK_URL: ${{ vars.HEALTHCHECK_URL }}
+
+    steps:
+      - name: Check the prod environment configuration
+        # Reports missing names only; values are never printed.
+        run: |
+          missing=()
+          for name in SSH_HOST SSH_USER PROJECT_DIR APP_SECRET; do
+            [[ -n "${!name}" ]] || missing+=("$name")
+          done
+          if [[ "$HAS_SSH_PASSWORD" != true && "$HAS_SSH_KEY" != true ]]; then
+            missing+=("SSH_PASSWORD or SSH_KEY")
+          fi
+          if [[ -z "$DATABASE_URL" ]]; then
+            for name in DATABASE_HOST DATABASE_NAME DATABASE_USER DATABASE_PASSWORD; do
+              [[ -n "${!name}" ]] || missing+=("$name (or DATABASE_URL)")
+            done
+          fi
+          if (( ${#missing[@]} > 0 )); then
+            printf '::error::Missing on the "prod" environment: %s\n' "${missing[@]}"
+            exit 1
+          fi
+          if [[ "$HAS_SSH_FINGERPRINT" != true ]]; then
+            echo "::warning::SSH_FINGERPRINT is not set, so the server's host key is not verified. See docs/operations.md."
+          fi
+          if [[ -z "$DISCORD_CLIENT_ID$OAUTH_DISCORD_CLIENT_ID" ]]; then
+            echo "::warning::DISCORD_CLIENT_ID is not set; Discord login will be disabled."
+          fi
+          echo "Deploying $DEPLOY_SHA"
+
+      - name: Check out the commit and build it on the server
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        with:
+          host: ${{ env.SSH_HOST }}
+          port: ${{ env.SSH_PORT }}
+          username: ${{ env.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
+          fingerprint: ${{ secrets.SSH_FINGERPRINT || vars.SSH_FINGERPRINT }}
+          command_timeout: 20m
+          envs: DEPLOY_SHA,PROJECT_DIR,PHP_BIN,COMPOSER_BIN,APP_SECRET,DATABASE_URL,DATABASE_HOST,DATABASE_PORT,DATABASE_NAME,DATABASE_USER,DATABASE_PASSWORD,DATABASE_SERVER_VERSION,DISCORD_CLIENT_ID,DISCORD_CLIENT_SECRET,OAUTH_DISCORD_CLIENT_ID,OAUTH_DISCORD_CLIENT_SECRET
+          script: |
+            set -eu
+
+            PROJECT_DIR="$(printf '%s' "$PROJECT_DIR" | tr -d '\r')"
+            if [ ! -d "$PROJECT_DIR/.git" ]; then
+              echo "PROJECT_DIR ($PROJECT_DIR) is not a git checkout. Clone this repository there once before the first deploy (see docs/operations.md)." >&2
+              exit 1
+            fi
+            cd "$PROJECT_DIR"
+
+            if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+              echo "The server checkout has local changes to tracked files. Commit them to the repository or discard them on the server, then re-run the deploy." >&2
+              git status --short --untracked-files=no >&2
+              exit 1
+            fi
+
+            git fetch --quiet --prune origin main
+            if ! git merge-base --is-ancestor "$DEPLOY_SHA" origin/main; then
+              echo "$DEPLOY_SHA is not on origin/main; refusing to deploy it." >&2
+              exit 1
+            fi
+            git checkout --quiet --detach "$DEPLOY_SHA"
+
+            "${PHP_BIN:-php}" scripts/write-prod-env.php
+
+            # Symfony never overrides variables already present in the
+            # process environment, even empty ones, so the injected values
+            # would shadow .env.local.php. Remove them before building.
+            unset APP_SECRET DATABASE_URL DATABASE_HOST DATABASE_PORT DATABASE_NAME DATABASE_USER \
+              DATABASE_PASSWORD DATABASE_SERVER_VERSION DISCORD_CLIENT_ID DISCORD_CLIENT_SECRET \
+              OAUTH_DISCORD_CLIENT_ID OAUTH_DISCORD_CLIENT_SECRET
+            bash scripts/deploy
+
+      - name: Check the site responds after deploy
+        if: ${{ success() && env.HEALTHCHECK_URL != '' }}
+        run: |
+          status=000
+          for attempt in 1 2 3 4 5 6; do
+            status=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$HEALTHCHECK_URL" || true)
+            echo "Attempt $attempt: $HEALTHCHECK_URL returned HTTP $status"
+            if [ "$status" -ge 200 ] 2>/dev/null && [ "$status" -lt 400 ]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::$HEALTHCHECK_URL returned HTTP $status after the deploy. Check the PHP error log on the server."
+          exit 1
+
+      - name: Note the missing health check
+        if: ${{ success() && env.HEALTHCHECK_URL == '' }}
+        run: echo "::warning::Set the HEALTHCHECK_URL variable on the prod environment (for example https://<domain>/login) to verify the site after each deploy."

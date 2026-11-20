@@ -54,6 +54,10 @@ The tests cover approval and feature permissions, event isolation, grant revocat
 
 Both CI and `scripts/dev test` use [scripts/test](scripts/test) for test database creation, migrations, schema validation, assets, PHPUnit, and Codeception. Each GitHub run gets a disposable PostgreSQL service and test-only settings. CI uses read-only repository permissions and needs no production secrets. The shared runner stops its test server on success or failure and redacts invitation paths in diagnostic logs.
 
+## Deployment
+
+Each push to `main` deploys to production after CI passes, using the `prod` GitHub environment. See [operations](docs/operations.md#production-deployment) for the required secrets, server preparation and limitations.
+
 ## Discord
 
 Discord OAuth is optional. Without configuration, password login and registration work and Discord links remain hidden.

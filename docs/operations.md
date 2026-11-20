@@ -20,26 +20,55 @@ Live processes must restart after restoring a cloud task. Reuse the checkout, de
 
 The [GitHub Actions workflow](../.github/workflows/ci.yml) runs the `PHP checks` job for pull requests into `main`, pushes to `main`, and manual dispatches. It provisions PHP 8.4 and an isolated PostgreSQL 17 service, validates Composer/platform/Symfony configuration, audits the lockfile, and runs [the shared test runner](../scripts/test). GitHub runs PHP directly; local development invokes the same runner inside Compose.
 
-The runner creates/migrates the `_test` database, validates its schema, installs EasyAdmin assets, and executes PHPUnit and Codeception against a temporary HTTP server. CI settings and database credentials are disposable test values. The workflow has read-only repository permissions, uses actions pinned to immutable commit SHAs, and does not select `prod` or consume its secrets. Diagnostic output retains errors while redacting invitation paths. Production deployment remains a separate workflow.
+The runner creates/migrates the `_test` database, validates its schema, installs EasyAdmin assets, and executes PHPUnit and Codeception against a temporary HTTP server. CI settings and database credentials are disposable test values. The workflow has read-only repository permissions, uses actions pinned to immutable commit SHAs, and does not select `prod` or consume its secrets. Diagnostic output retains errors while redacting invitation paths. Production deployment is the separate [deploy workflow](#production-deployment), which runs only after this workflow passes on `main`.
 
 CI sets PHP's `variables_order=EGPCS` so the HTTP test server exposes the supplied test configuration through `$_ENV`. Without it, Symfony can load development values from `.env` during HTTP requests even when CLI commands use the test environment.
 
-## Production configuration
+## Production deployment
 
-The user selected this repository's GitHub environment named `prod` and an existing Discord OAuth application. API reads confirmed a `prod` environment exists for both PipBoy and webspace. Secret/variable metadata endpoints returned HTTP 403; the presence of individual bindings and their usability remain unverified. Names below describe the configuration contract, not confirmed credentials.
+[`deploy.yml`](../.github/workflows/deploy.yml) follows the [LARPilot deploy workflow](https://github.com/tbuczen/LARPilot/blob/main/.github/workflows/deploy.yml): SSH into the server, update a git checkout in place, write production configuration and build there. It runs when the `CI` workflow succeeds for a push to `main`, and deploys exactly the commit CI tested. A manual run (`workflow_dispatch`, `main` only) deploys the head of `main` without waiting for CI. Deploys are serialized and never cancelled halfway.
 
-| Configuration | Storage / purpose |
-| --- | --- |
-| `APP_ENV=prod` | Non-secret runtime configuration |
-| `APP_SECRET` | PipBoy-specific GitHub `prod` secret, provided securely to Symfony |
-| `DATABASE_URL` | GitHub `prod` secret for the PipBoy PostgreSQL database |
-| `DISCORD_CLIENT_ID` | GitHub `prod` variable or secret; existing OAuth application's public client ID |
-| `DISCORD_CLIENT_SECRET` | GitHub `prod` secret; existing OAuth application's client secret |
-| Deployment path, host, and SSH configuration | Hosting-dependent; select after the target is confirmed |
+On the server the workflow:
 
-A deployment job declares `environment: prod` and supplies configuration to the running app. GitHub job secrets do not automatically configure a hosting service or cloud development task. GitHub environment names and repository secrets are scoped to the repository; webspace's bindings do not automatically transfer to PipBoy.
+1. refuses to continue if `PROJECT_DIR` is not a git checkout or has local changes to tracked files;
+2. fetches `origin main` and checks out the tested commit (detached);
+3. runs [`scripts/write-prod-env.php`](../scripts/write-prod-env.php), which writes `.env.local.php` (mode 640, git-ignored) from the injected secrets, then removes those values from the shell so Symfony reads the file;
+4. runs [`scripts/deploy`](../scripts/deploy): PHP 8.4 check, `composer install --no-dev`, cache clear, `doctrine:migrations:migrate`, `assets:install public`, cache warmup.
 
-Register the exact production callback ending in `/connect/discord/check` on the existing Discord OAuth application. Development callbacks/configuration are separate. Live OAuth, SMTP, production database access, and production PHP runtimes have not been tested. Read secret names/presence, never values; use existing injected authentication and secure settings.
+A final step requests `HEALTHCHECK_URL` and fails the run unless it answers 2xx/3xx. CI's last step runs both scripts in production mode on PHP 8.4 and checks that `/login` returns HTTP 200, so a build that cannot boot without development dependencies fails before it reaches `main`.
+
+### `prod` environment configuration
+
+The deploy job checks names before connecting and prints only the missing names, never values. Settings marked "variable or secret" may be stored as either.
+
+| Name | Kind | Purpose |
+| --- | --- | --- |
+| `SSH_HOST`, `SSH_USER` | variable or secret, required | Server address and account |
+| `SSH_PORT` | variable or secret | Defaults to 22 |
+| `SSH_PASSWORD` or `SSH_KEY` (+ `SSH_KEY_PASSPHRASE`) | secret, one required | SSH authentication; a key is recommended |
+| `SSH_FINGERPRINT` | variable or secret, recommended | SHA256 host key fingerprint; without it the host key is not verified and the run warns |
+| `PROJECT_DIR` | variable or secret, required | Absolute path of the repository checkout on the server |
+| `APP_SECRET` | secret, required | Symfony secret for PipBoy only |
+| `DATABASE_URL` | secret | Full PostgreSQL URL; alternatively the five settings below |
+| `DATABASE_HOST`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD` | secrets, required without `DATABASE_URL` | Combined into a URL with URL-encoded credentials |
+| `DATABASE_PORT`, `DATABASE_SERVER_VERSION` | variable or secret | Default 5432 and 17 |
+| `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` | ID variable or secret; secret | Existing OAuth application; set both or neither. LARPilot's `OAUTH_DISCORD_*` names are accepted as a fallback |
+| `PHP_BIN`, `COMPOSER_BIN` | variable or secret | Server binaries when `php` is not PHP 8.4 or Composer is not on `PATH` |
+| `HEALTHCHECK_URL` | variable | For example `https://<domain>/login`; without it the run warns and skips the check |
+
+The names of the secrets and variables already added to `prod` were not readable from the cloud session that wrote this workflow; the first deploy run reports any that are missing.
+
+### One-time server preparation
+
+- Clone this repository to `PROJECT_DIR` so that `git fetch origin main` works non-interactively for the deploy account.
+- Provide PHP 8.4 (CLI and web), the `pdo_pgsql`, `intl`, `mbstring`, `xml`, `ctype` and `iconv` extensions, and Composer.
+- Create the PostgreSQL 17 database and user.
+- Serve `PROJECT_DIR/public` as the document root and route requests to `index.php`. Redact `/invite/<token>` paths in the web server's access logs.
+- Register the production callback ending in `/connect/discord/check` on the Discord OAuth application.
+
+### Limitations
+
+The deploy updates the live checkout in place, like LARPilot: requests during the build may fail, and there is no automatic rollback. Roll back by reverting on `main`; migrations are not reversed automatically. Take a database backup before deploying destructive migrations. Persistent upload storage, release switching and a backup/restore plan remain to be designed. Live deployment, OAuth and the production PHP runtime have not been tested from this repository.
 
 ## Read-only reference: webspace
 
@@ -61,7 +90,7 @@ The inspected deployment writes into the live directory and does not declare tes
 - Hosting target: reuse the CyberFolks VPS with separate PipBoy resources, or use another target?
 - Does that target support PHP 8.4 in both CLI/migration commands and the web process? Webspace's PHP 8.2 compatibility is not evidence of PHP 8.4 support.
 - What are the PipBoy domain, deployment directory, database, and exact OAuth callback?
-- How will the deployment securely inject secrets, preserve uploads, and verify application readiness?
+- How will uploads be preserved across deploys? Secrets are injected by the deploy workflow and readiness is checked through `HEALTHCHECK_URL`.
 - What is the backup/restore and rollback plan, including database migrations?
 
 Ask for non-secret decisions and permission-bound access when required. Users supply credentials in GitHub/environment settings; never ask for values in chat. No production deployment or modification of webspace is authorized by this reference review alone.

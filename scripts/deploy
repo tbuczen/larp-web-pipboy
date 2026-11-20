@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Builds the checked-out release in place on the production server.
+# The deploy workflow checks out the commit and writes .env.local.php first.
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+PHP_BIN="${PHP_BIN:-php}"
+COMPOSER_BIN="${COMPOSER_BIN:-$(command -v composer || true)}"
+export APP_ENV=prod APP_DEBUG=0
+
+if ! "$PHP_BIN" -r 'exit(PHP_VERSION_ID >= 80400 && PHP_VERSION_ID < 80500 ? 0 : 1);'; then
+    printf '%s runs PHP %s; PipBoy requires PHP 8.4. Set the PHP_BIN variable on the "prod" environment to the PHP 8.4 binary.\n' \
+        "$PHP_BIN" "$("$PHP_BIN" -r 'echo PHP_VERSION;')" >&2
+    exit 1
+fi
+
+if [[ -z "$COMPOSER_BIN" || ! -f "$COMPOSER_BIN" ]]; then
+    printf 'Composer was not found. Install it on the server or set the COMPOSER_BIN variable to its path.\n' >&2
+    exit 1
+fi
+
+if [[ ! -f .env.local.php ]]; then
+    printf '.env.local.php is missing; run scripts/write-prod-env.php first.\n' >&2
+    exit 1
+fi
+
+console() {
+    "$PHP_BIN" -d memory_limit=-1 bin/console --env=prod --no-interaction "$@"
+}
+
+echo "Installing PHP dependencies..."
+"$PHP_BIN" -d memory_limit=-1 "$COMPOSER_BIN" install --no-dev --optimize-autoloader --classmap-authoritative \
+    --no-interaction --prefer-dist --no-progress
+
+echo "Clearing the previous release's cache..."
+rm -rf var/cache/prod
+console cache:clear --no-warmup
+
+echo "Running database migrations..."
+console doctrine:migrations:migrate --allow-no-migration
+
+echo "Installing public assets..."
+console assets:install public
+
+echo "Warming up the cache..."
+console cache:warmup
+
+mkdir -p var/log
+chmod -R u+rwX,g+rwX var
+
+echo "Deployment of $(git rev-parse --short HEAD) complete."
