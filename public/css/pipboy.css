@@ -52,7 +52,10 @@ body {
     min-height: 100vh;
     min-height: 100dvh;
     display: grid;
-    place-items: center;
+    /* minmax(0, ...) keeps long unbreakable text from widening the page. */
+    grid-template-columns: minmax(0, 36rem);
+    justify-content: center;
+    align-content: center;
     padding: .75rem;
     background: radial-gradient(ellipse at center, #0a2e12 0%, #031406 60%, var(--backdrop) 100%);
     color: var(--green);
@@ -83,7 +86,8 @@ body::after {
 }
 
 .terminal {
-    width: min(36rem, 100%);
+    width: 100%;
+    min-width: 0;
     background: radial-gradient(ellipse at 50% 35%, #08310d 0%, var(--screen) 70%);
     border: 1px solid var(--green-faint);
     box-shadow: 0 0 0 4px #020d04, 0 0 30px rgb(28 250 128 / 15%), inset 0 0 80px rgb(0 0 0 / 55%);
@@ -531,6 +535,7 @@ button:active,
 
 .status-bar__cell--wide {
     flex: 1;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
 }
