@@ -1,16 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>PipBoy — Your LARPs</title></head>
-<body>
+{% extends 'base.html.twig' %}
+
+{% block active_tab %}larps{% endblock %}
+
+{% block title %}PipBoy — Your LARPs{% endblock %}
+{% block status %}Event registry{% endblock %}
+
+{% block body %}
     <h1>Your LARPs</h1>
-    {% for player in players %}
-        <article>
-            <h2>{{ player.larp.name }}</h2>
-            <p>{{ player.name }} · PipBoy {{ player.pipboyNumber }}</p>
-            <p>Status: {{ player.status.value }}</p>
-            {% if player.status.value == 'pending' %}<p>Waiting for organizer approval.</p>{% endif %}
-        </article>
-    {% else %}<p>You have not joined a LARP. Use your organizer’s registration link.</p>{% endfor %}
-    <a href="{{ path('app_logout') }}">Sign out</a>
-</body>
-</html>
+    {% if players is not empty %}
+        <ul class="card-list">
+            {% for player in players %}
+                <li class="card">
+                    <h2>{{ player.larp.name }}</h2>
+                    <dl class="data-row"><dt>Character</dt><dd>{{ player.name }}</dd></dl>
+                    <dl class="data-row"><dt>PipBoy</dt><dd>{{ player.pipboyNumber }}</dd></dl>
+                    <dl class="data-row"><dt>Status</dt><dd><span class="badge badge--{{ player.status.value }}">{{ player.status.value }}</span></dd></dl>
+                    {% if player.status.value == 'pending' %}<p class="muted">Waiting for organizer approval.</p>{% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have not joined a LARP. Use your organizer’s registration link.</p>
+    {% endif %}
+{% endblock %}

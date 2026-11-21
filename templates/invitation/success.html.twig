@@ -1,9 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Invitation accepted</title></head>
-<body>
+{% extends 'base.html.twig' %}
+
+{% block active_tab %}larps{% endblock %}
+
+{% block title %}Invitation accepted{% endblock %}
+{% block status %}Registration received{% endblock %}
+
+{% block body %}
     <h1>Invitation accepted</h1>
     <p>Your player in {{ event_name }} is waiting for organizer approval.</p>
-    <a href="{{ path('app_pipboy') }}">Your LARPs</a>
-</body>
-</html>
+    <a class="button" href="{{ path('app_pipboy') }}">Your LARPs</a>
+{% endblock %}

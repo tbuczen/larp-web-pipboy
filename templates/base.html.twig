@@ -1,0 +1,44 @@
+{#- Player-facing layout styled as a wrist-terminal screen. Child templates
+    set `active_tab` (login, register, larps) to highlight their tab. -#}
+{%- set active = block('active_tab') is defined ? block('active_tab')|trim : '' -%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#052308">
+    {% block head %}{% endblock %}
+    <title>{% block title %}PipBoy{% endblock %}</title>
+    <link rel="preload" href="{{ asset('fonts/vt323-regular.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{{ asset('css/pipboy.css') }}">
+</head>
+<body>
+<div class="terminal">
+    <nav class="tabs" aria-label="Sections">
+        {% if app.user %}
+            <a class="tab{{ active == 'larps' ? ' tab--active' }}" href="{{ path('app_pipboy') }}"{{ active == 'larps' ? ' aria-current="page"' }}>LARPs</a>
+            <a class="tab tab--end" href="{{ path('app_logout') }}">Sign out</a>
+        {% else %}
+            <a class="tab{{ active == 'login' ? ' tab--active' }}" href="{{ path('app_login') }}"{{ active == 'login' ? ' aria-current="page"' }}>Sign in</a>
+            <a class="tab{{ active == 'register' ? ' tab--active' }}" href="{{ path('app_register') }}"{{ active == 'register' ? ' aria-current="page"' }}>Register</a>
+        {% endif %}
+    </nav>
+
+    <main class="screen">
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <p class="notice notice--{{ type }}" role="{{ type == 'error' ? 'alert' : 'status' }}">{{ message }}</p>
+            {% endfor %}
+        {% endfor %}
+        {% block body %}{% endblock %}
+    </main>
+
+    <footer class="status-bar">
+        <span class="status-bar__cell">PipBoy</span>
+        <span class="status-bar__cell status-bar__cell--wide">{% block status %}Personal terminal{% endblock %}<span class="cursor" aria-hidden="true"></span></span>
+        <span class="status-bar__cell"><time datetime="{{ 'now'|date('Y-m-d') }}">{{ 'now'|date('d.m.Y') }}</time></span>
+    </footer>
+</div>
+</body>
+</html>
