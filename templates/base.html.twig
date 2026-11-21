@@ -18,10 +18,13 @@
     <nav class="tabs" aria-label="Sections">
         {% if app.user %}
             <a class="tab{{ active == 'larps' ? ' tab--active' }}" href="{{ path('app_pipboy') }}"{{ active == 'larps' ? ' aria-current="page"' }}>LARPs</a>
+            {% if is_granted('ROLE_ORGANIZER') %}<a class="tab" href="{{ path('admin') }}">Admin</a>{% endif %}
             <a class="tab tab--end" href="{{ path('app_logout') }}">Sign out</a>
         {% else %}
             <a class="tab{{ active == 'login' ? ' tab--active' }}" href="{{ path('app_login') }}"{{ active == 'login' ? ' aria-current="page"' }}>Sign in</a>
             <a class="tab{{ active == 'register' ? ' tab--active' }}" href="{{ path('app_register') }}"{{ active == 'register' ? ' aria-current="page"' }}>Register</a>
+            {# Organizers sign in here too; /admin sends anonymous visitors to the sign-in form and back. #}
+            <a class="tab tab--end" href="{{ path('admin') }}">Admin</a>
         {% endif %}
     </nav>
 
