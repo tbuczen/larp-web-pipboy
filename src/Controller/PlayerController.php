@@ -14,10 +14,7 @@ final class PlayerController extends AbstractController
     #[Route('/pipboy', name: 'app_pipboy', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager): Response
     {
-        if ($this->isGranted('ROLE_ORGANIZER')) {
-            return $this->redirectToRoute('admin');
-        }
-
+        // Organizers can also play: they reach the panel through the Admin tab.
         return $this->render('player/index.html.twig', [
             'players' => $entityManager->getRepository(Player::class)->findBy(['user' => $this->getUser()]),
         ]);

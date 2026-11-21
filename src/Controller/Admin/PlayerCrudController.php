@@ -7,6 +7,7 @@ use App\Entity\Player;
 use App\Enum\RegistrationStatus;
 use EasyCorp\Bundle\EasyAdminBundle\Field\{AssociationField, ChoiceField, TextField};
 use EasyCorp\Bundle\EasyAdminBundle\Config\{Action, Actions, Crud};
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
 final class PlayerCrudController extends ScopedCrudController
 {
@@ -30,6 +31,17 @@ final class PlayerCrudController extends ScopedCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-        return parent::configureActions($actions)->setPermission(Action::NEW, 'ROLE_SUPER_ADMIN');
+        $grantFeature = Action::new('grantFeature', 'Grant feature')
+            ->linkToUrl(fn (Player $player): string => $this->container->get(AdminUrlGenerator::class)
+                ->unsetAll()
+                ->setController(PlayerFeatureAccessCrudController::class)
+                ->setAction(Action::NEW)
+                ->set(PlayerFeatureAccessCrudController::PLAYER_PARAMETER, $player->getId())
+                ->generateUrl())
+            ->displayIf(static fn (Player $player): bool => $player->missingFeatures() !== []);
+
+        return parent::configureActions($actions)
+            ->add(Crud::PAGE_INDEX, $grantFeature)
+            ->setPermission(Action::NEW, 'ROLE_SUPER_ADMIN');
     }
 }

@@ -131,6 +131,19 @@ class Player
         );
     }
 
+    /**
+     * Features this player has not been granted yet, in declaration order.
+     *
+     * @return list<Feature>
+     */
+    public function missingFeatures(): array
+    {
+        return array_values(array_filter(
+            Feature::cases(),
+            fn (Feature $feature): bool => !$this->hasFeatureGrant($feature),
+        ));
+    }
+
     public function grantFeature(Feature $feature): self
     {
         if (!$this->hasFeatureGrant($feature)) {

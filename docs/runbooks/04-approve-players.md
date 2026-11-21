@@ -28,8 +28,10 @@ Never share a player's account email or real name with other players: in the gam
 
 ## 2. Grant features
 
-1. Open **Feature access** and choose **Add PlayerFeatureAccess**.
+1. In **Players**, open the row's **⋯** menu and choose **Grant feature**, or open **Feature access** and choose **Add PlayerFeatureAccess**.
 2. Pick the **Player** (shown as `PipBoy number - character name`) and the **Feature**, then choose **Create**. Repeat for each feature.
+
+   The form only offers grants that do not exist yet: players who already have every feature are not listed, and once a player is chosen the form reloads to show only the features they still lack.
 
    ![Grant a feature form](images/13-grant-feature.png)
 

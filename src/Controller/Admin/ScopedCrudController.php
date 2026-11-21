@@ -50,7 +50,8 @@ abstract class ScopedCrudController extends AbstractCrudController
         );
     }
 
-    protected function scopedAssociationField(string $property): AssociationField
+    /** @param (callable(QueryBuilder): QueryBuilder)|null $refine extra conditions applied after the event scope */
+    protected function scopedAssociationField(string $property, ?callable $refine = null): AssociationField
     {
         $class = match ($property) {
             'larp' => Larp::class,
@@ -59,9 +60,11 @@ abstract class ScopedCrudController extends AbstractCrudController
             default => throw new \InvalidArgumentException('Unsupported event association: '.$property),
         };
 
-        return AssociationField::new($property)->setQueryBuilder(
-            fn (QueryBuilder $query): QueryBuilder => $this->restrictToAssignedEvents($query, $class),
-        );
+        return AssociationField::new($property)->setQueryBuilder(function (QueryBuilder $query) use ($class, $refine): QueryBuilder {
+            $query = $this->restrictToAssignedEvents($query, $class);
+
+            return $refine !== null ? $refine($query) : $query;
+        });
     }
 
     public function persistEntity(EntityManagerInterface $entityManager, object $entityInstance): void
@@ -87,7 +90,7 @@ abstract class ScopedCrudController extends AbstractCrudController
     }
 
     /** @param class-string $class */
-    private function restrictToAssignedEvents(QueryBuilder $query, string $class): QueryBuilder
+    protected function restrictToAssignedEvents(QueryBuilder $query, string $class): QueryBuilder
     {
         $user = $this->currentUser();
 
