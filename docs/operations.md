@@ -68,6 +68,10 @@ The names of the secrets and variables already added to `prod` were not readable
 - Redact `/invite/<token>` paths in the web server's access logs.
 - Register the production callback ending in `/connect/discord/check` on the Discord OAuth application.
 
+### Uploaded holodisk media
+
+Holodisk images and recordings are stored in `PROJECT_DIR/var/storage/holodisks` under random file names, outside the web root. The deploy never touches this directory, so files survive deploys. Include it in backups together with the database: a database restore without the matching files leaves holodisks pointing at missing media. Uploads are limited to 15 MB; `public/.user.ini` raises PHP's upload limits on hosts that honour it, and the hosting panel's PHP settings may need the same values.
+
 ### Limitations
 
 The deploy updates the live checkout in place, like LARPilot: requests during the build may fail, and there is no automatic rollback. Roll back by reverting on `main`; migrations are not reversed automatically. Take a database backup before deploying destructive migrations. Persistent upload storage, release switching and a backup/restore plan remain to be designed. Live deployment, OAuth and the production PHP runtime have not been tested from this repository.

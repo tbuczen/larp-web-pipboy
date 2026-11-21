@@ -6,3 +6,4 @@ modules:
               url: http://127.0.0.1:8001
         - Asserts
         - App\Tests\Support\Helper\InvitationBrowser
+        - App\Tests\Support\Helper\HttpHeaders

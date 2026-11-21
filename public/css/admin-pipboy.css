@@ -111,3 +111,39 @@ body.ea.ea-dark-scheme::after,
         display: none;
     }
 }
+
+/* Holodisk media preview, tinted like the player view (stored files are unchanged). */
+.holodisk-media--image {
+    position: relative;
+    display: inline-block;
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid #1cfa80;
+    background: #1cfa80;
+    line-height: 0;
+}
+
+.holodisk-media--image img {
+    display: block;
+    max-width: 100%;
+    filter: grayscale(1) contrast(1.15) brightness(.95);
+    mix-blend-mode: multiply;
+}
+
+.holodisk-media--image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(to bottom, transparent 0, transparent 2px, rgb(0 0 0 / 30%) 3px, transparent 4px);
+}
+
+.holodisk-media--thumb img {
+    max-height: 4.5rem;
+    width: auto;
+}
+
+audio.holodisk-media--audio {
+    max-width: 18rem;
+    filter: invert(1) sepia(1) hue-rotate(70deg) saturate(3) brightness(.9);
+}

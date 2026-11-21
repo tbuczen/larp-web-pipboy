@@ -17,6 +17,8 @@ final class TestFixture
     public const GET_ONLY_EMAIL = 'get-only@pipboy.test';
     public const ADMIN_INVITED_EMAIL = 'admin-invited@pipboy.test';
     public const UNRELATED_INVITATION_EMAIL = 'unrelated-invitation@pipboy.test';
+    public const HOLODISK_READER_EMAIL = 'holodisk-reader@pipboy.test';
+    public const HOLODISK_TITLE = 'Codeception holodisk';
     public const ORGANIZER_INVITED_EMAIL = 'organizer-invited@pipboy.test';
     public const PASSWORD = 'LocalTestPassword-42';
     public const LARP_NAME = 'Codeception fixtures event';
@@ -28,6 +30,7 @@ final class TestFixture
 
     public static int $larpId;
     public static int $playerId;
+    public static int $holodiskId;
     public static int $otherLarpId;
     /** @var array<string, string> */
     public static array $invitationTokens = [];
