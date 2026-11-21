@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
-use App\Entity\{EventInvitation, Larp};
+use App\Entity\{EventInvitation, Larp, User};
+use App\Enum\InvitationRole;
 use App\Security\EventVoter;
 use App\Service\EventInvitationManager;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\{EmailType, IntegerType};
+use Symfony\Component\Form\Extension\Core\Type\{EmailType, EnumType, IntegerType};
 use Symfony\Component\HttpFoundation\{Request, Response};
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -25,13 +26,29 @@ final class InvitationAdminController extends AbstractController
     {
         $larp = $entityManager->find(Larp::class, $id) ?? throw $this->createNotFoundException();
         $this->denyAccessUnlessGranted(EventVoter::MANAGE_EVENT, $larp);
-        $form = $this->createFormBuilder(['days' => 7], ['csrf_token_id' => 'invite_'.$id])
-            ->add('email', EmailType::class, ['label' => 'Player account email', 'constraints' => [new NotBlank(), new Email(), new Length(max: 180)]])
-            ->add('days', IntegerType::class, ['label' => 'Expires in days', 'constraints' => [new NotBlank(), new Range(min: 1, max: 30)]])
-            ->getForm()->handleRequest($request);
+        $builder = $this->createFormBuilder(['days' => 7, 'role' => InvitationRole::PLAYER], ['csrf_token_id' => 'invite_'.$id])
+            ->add('email', EmailType::class, ['label' => 'Account email', 'constraints' => [new NotBlank(), new Email(), new Length(max: 180)]])
+            ->add('days', IntegerType::class, ['label' => 'Expires in days', 'constraints' => [new NotBlank(), new Range(min: 1, max: 30)]]);
+        // Only superadministrators may invite organizers or other superadministrators.
+        if ($this->isGranted('ROLE_SUPER_ADMIN')) {
+            $builder->add('role', EnumType::class, [
+                'class' => InvitationRole::class,
+                'label' => 'Invite as',
+                'choice_label' => static fn (InvitationRole $role): string => $role->label(),
+                'help' => 'Organizers are assigned to this LARP. Superadministrators manage every LARP and account.',
+            ]);
+        }
+        $form = $builder->getForm()->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $details = $form->getData();
-            $generated = $manager->createInvite($larp, $details['email'], new DateTimeImmutable('+'.$details['days'].' days'));
+            $user = $this->getUser();
+            $generated = $manager->createInvite(
+                $larp,
+                $details['email'],
+                new DateTimeImmutable('+'.$details['days'].' days'),
+                $details['role'] ?? InvitationRole::PLAYER,
+                $user instanceof User ? $user : null,
+            );
             $link = $this->generateUrl('app_invitation', ['token' => $generated->token], UrlGeneratorInterface::ABSOLUTE_URL);
             return $this->privateResponse('invitation/created.html.twig', ['link' => $link, 'invitation' => $generated->invitation]);
         }

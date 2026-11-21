@@ -6,7 +6,8 @@ namespace App\Controller\Admin;
 
 use App\Entity\EventInvitation;
 use EasyCorp\Bundle\EasyAdminBundle\Config\{Action, Actions, Crud};
-use EasyCorp\Bundle\EasyAdminBundle\Field\{DateTimeField, EmailField};
+use App\Enum\InvitationRole;
+use EasyCorp\Bundle\EasyAdminBundle\Field\{ChoiceField, DateTimeField, EmailField};
 
 final class EventInvitationCrudController extends ScopedCrudController
 {
@@ -19,6 +20,10 @@ final class EventInvitationCrudController extends ScopedCrudController
     {
         yield $this->scopedAssociationField('larp');
         yield EmailField::new('email', 'Invited account');
+        yield ChoiceField::new('role', 'Invited as')->setChoices(array_combine(
+            array_map(static fn (InvitationRole $role): string => $role->label(), InvitationRole::cases()),
+            InvitationRole::cases(),
+        ));
         yield DateTimeField::new('expiresAt');
         yield DateTimeField::new('acceptedAt');
         yield DateTimeField::new('revokedAt');

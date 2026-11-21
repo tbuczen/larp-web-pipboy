@@ -7,6 +7,7 @@
     <h1>Invitation created</h1>
     <dl class="data-row"><dt>For</dt><dd>{{ invitation.email }}</dd></dl>
     <dl class="data-row"><dt>LARP</dt><dd>{{ invitation.larp.name }}</dd></dl>
+    <dl class="data-row"><dt>Invited as</dt><dd>{{ invitation.role.label }}</dd></dl>
     <dl class="data-row"><dt>Expires</dt><dd>{{ invitation.expiresAt|date('Y-m-d H:i T') }}</dd></dl>
     <div class="field">
         <label for="invitation-link">Send this personal link to the player:</label>

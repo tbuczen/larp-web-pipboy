@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Invitation accepted{% endblock %}
+{% block status %}Access granted{% endblock %}
+
+{% block body %}
+    <h1>Invitation accepted</h1>
+    {% if role.value == 'super_admin' %}
+        <p>Your account is now a superadministrator.</p>
+    {% else %}
+        <p>You are now an organizer of {{ event_name }}.</p>
+    {% endif %}
+    <p class="notice" role="status">Sign in again to open the admin panel: new access takes effect at your next sign-in.</p>
+    <a class="button" href="{{ path('app_login') }}">Sign in</a>
+{% endblock %}

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\InvitationRole;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -26,6 +27,9 @@ class EventInvitation
     #[Assert\Email]
     #[Assert\Length(max: 180)]
     private string $email = '';
+
+    #[ORM\Column(length: 20, enumType: InvitationRole::class, options: ['default' => 'player'])]
+    private InvitationRole $role = InvitationRole::PLAYER;
 
     #[ORM\Column(length: 64, unique: true)]
     #[Assert\Regex('/^[a-f0-9]{64}$/D')]
@@ -74,6 +78,18 @@ class EventInvitation
     public function setEmail(string $email): self
     {
         $this->email = mb_strtolower(trim($email));
+
+        return $this;
+    }
+
+    public function getRole(): InvitationRole
+    {
+        return $this->role;
+    }
+
+    public function setRole(InvitationRole $role): self
+    {
+        $this->role = $role;
 
         return $this;
     }
