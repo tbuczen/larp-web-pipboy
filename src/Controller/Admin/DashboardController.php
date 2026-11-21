@@ -25,6 +25,7 @@ final class DashboardController extends AbstractDashboardController
     {
         return Dashboard::new()
             ->setTitle('PipBoy · Organizer')
+            ->setFaviconPath('favicon.svg')
             ->setDefaultColorScheme(ColorScheme::DARK);
     }
 

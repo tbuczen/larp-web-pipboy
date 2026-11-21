@@ -10,6 +10,9 @@
     <meta name="theme-color" content="#052308">
     {% block head %}{% endblock %}
     <title>{% block title %}PipBoy{% endblock %}</title>
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="16x16 32x32 48x48">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="preload" href="{{ asset('fonts/vt323-regular.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ asset('css/pipboy.css') }}">
 </head>

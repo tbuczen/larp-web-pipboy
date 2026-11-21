@@ -45,6 +45,8 @@
 html {
     background: var(--backdrop);
     -webkit-text-size-adjust: 100%;
+    /* Reserve the scrollbar's space so short and long pages line up. */
+    scrollbar-gutter: stable;
 }
 
 body {
@@ -55,8 +57,11 @@ body {
     /* minmax(0, ...) keeps long unbreakable text from widening the page. */
     grid-template-columns: minmax(0, 36rem);
     justify-content: center;
-    align-content: center;
-    padding: .75rem;
+    /* Anchor the terminal near the top instead of centring it vertically, so
+       switching between pages of different length (sign in / register) keeps
+       the tab bar in place. */
+    align-content: start;
+    padding: clamp(.75rem, 5vh, 3rem) .75rem .75rem;
     background: radial-gradient(ellipse at center, #0a2e12 0%, #031406 60%, var(--backdrop) 100%);
     color: var(--green);
     font: 1.35rem/1.35 var(--font);
@@ -568,7 +573,7 @@ button:active,
 
 @media (min-width: 40rem) {
     body {
-        padding: 2rem;
+        padding: clamp(2rem, 8vh, 5rem) 2rem 2rem;
     }
 
     .tabs {

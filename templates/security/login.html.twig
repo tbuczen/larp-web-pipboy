@@ -3,19 +3,19 @@
 {% block active_tab %}login{% endblock %}
 
 {% block title %}PipBoy — Sign in{% endblock %}
-{% block status %}Authentication required{% endblock %}
+{% block status %}Access terminal{% endblock %}
 
 {% block body %}
     <h1>Sign in</h1>
-    <p class="muted">Enter your account credentials to access your terminal.</p>
+    <p class="muted">Sign in to your account to open your PipBoy.</p>
     {% if error %}<p class="error" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</p>{% endif %}
     <form method="post" action="{{ path('app_login') }}">
         <div class="field">
-            <label for="email">Email</label>
+            <label for="email" class="required">Email</label>
             <input id="email" type="email" name="_username" value="{{ last_username }}" autocomplete="username" required autofocus>
         </div>
         <div class="field">
-            <label for="password">Password</label>
+            <label for="password" class="required">Password</label>
             <input id="password" type="password" name="_password" autocomplete="current-password" required>
         </div>
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
