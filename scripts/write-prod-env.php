@@ -53,10 +53,81 @@ function databaseUrl(): array
     }
 
     if ('' !== env('DATABASE_URL')) {
-        return [env('DATABASE_URL'), 'the DATABASE_URL secret'];
+        return [normalizeDatabaseUrl(env('DATABASE_URL')), 'the DATABASE_URL secret'];
     }
 
     fail('Set DATABASE_URL, or all of '.implode(', ', $missing).', as secrets on the GitHub "prod" environment.');
+}
+
+/**
+ * Accepts the forms a URL commonly takes when pasted into a GitHub secret:
+ * a whole `DATABASE_URL=...` line, surrounding quotes, or a password with
+ * unencoded "@", "/", "#", "?" or ":" characters. Reports what it changed,
+ * never the value itself.
+ */
+function normalizeDatabaseUrl(string $raw): string
+{
+    $url = $raw;
+    $changes = [];
+
+    if (1 === preg_match('/^(?:export\s+)?DATABASE_URL\s*=\s*/', $url)) {
+        $url = (string) preg_replace('/^(?:export\s+)?DATABASE_URL\s*=\s*/', '', $url);
+        $changes[] = 'removed a leading "DATABASE_URL="';
+    }
+
+    if (strlen($url) >= 2 && in_array($url[0], ['"', "'"], true) && $url[-1] === $url[0]) {
+        $url = substr($url, 1, -1);
+        $changes[] = 'removed surrounding quotes';
+    }
+
+    $pattern = '~^(?<scheme>[a-z][a-z0-9+.-]*)://(?:(?<user>[^:@/]*)(?::(?<pass>.*))?@)?(?<host>[^@/:?#]+)(?::(?<port>\d+))?(?:/(?<db>[^?#]*))?(?:\?(?<query>[^#]*))?$~i';
+    if (1 !== preg_match($pattern, $url, $match)) {
+        $shape = str_contains($url, '://')
+            ? 'it contains "://" but does not match scheme://user:password@host:port/database'
+            : 'it has no "scheme://" prefix, so it is not a URL';
+        fail(sprintf(
+            'The DATABASE_URL secret could not be read as a database URL (%d characters; %s). Set it to postgresql://USER:PASSWORD@HOST:5432/DATABASE?serverVersion=17&charset=utf8, or delete it and set %s on the GitHub "prod" environment.',
+            strlen($raw),
+            $shape,
+            implode(', ', DATABASE_PARTS),
+        ));
+    }
+
+    $credentials = '';
+    if ('' !== ($match['user'] ?? '')) {
+        $credentials = encodeUrlPart($match['user']);
+        if (isset($match['pass']) && '' !== $match['pass']) {
+            $credentials .= ':'.encodeUrlPart($match['pass']);
+        }
+        $credentials .= '@';
+    }
+
+    $normalized = sprintf(
+        '%s://%s%s%s/%s%s',
+        strtolower($match['scheme']),
+        $credentials,
+        $match['host'],
+        '' !== ($match['port'] ?? '') ? ':'.$match['port'] : '',
+        encodeUrlPart($match['db'] ?? ''),
+        '' !== ($match['query'] ?? '') ? '?'.$match['query'] : '',
+    );
+
+    $urlWithLowercaseScheme = strtolower($match['scheme']).substr($url, strlen($match['scheme']));
+    if ($normalized !== $urlWithLowercaseScheme) {
+        $changes[] = 'URL-encoded special characters in the credentials or database name';
+    }
+
+    if ([] !== $changes) {
+        echo 'Normalized the DATABASE_URL secret: '.implode('; ', $changes).'.'.PHP_EOL;
+    }
+
+    return $normalized;
+}
+
+/** Encodes a URL component once, leaving already percent-encoded text as it is. */
+function encodeUrlPart(string $value): string
+{
+    return rawurlencode(rawurldecode($value));
 }
 
 /**
