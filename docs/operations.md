@@ -32,7 +32,7 @@ On the server the workflow:
 
 1. refuses to continue if `PROJECT_DIR` is not a git checkout or has local changes to tracked files;
 2. fetches `main` over HTTPS from `REPOSITORY_URL` (default: this public repository), regardless of the checkout's own `origin`, and checks out the tested commit (detached). If the fetch fails, it prints the checkout's remote and any `url.*.insteadOf` rewrite rules;
-3. runs [`scripts/write-prod-env.php`](../scripts/write-prod-env.php), which refuses a non-PostgreSQL database URL, connects to the database once and reports its version, then writes `.env.local.php` (mode 640, git-ignored) from the injected secrets, then removes those values from the shell so Symfony reads the file;
+3. runs [`scripts/write-prod-env.php`](../scripts/write-prod-env.php), which accepts a `DATABASE_URL` pasted with quotes, a leading `DATABASE_URL=` or an unencoded password (and reports what it normalized), refuses a non-PostgreSQL database URL, connects to the database once and reports its version, then writes `.env.local.php` (mode 640, git-ignored) from the injected secrets, then removes those values from the shell so Symfony reads the file;
 4. runs [`scripts/deploy`](../scripts/deploy): PHP 8.4 check, `composer install --no-dev`, cache clear, `doctrine:migrations:migrate`, `assets:install public`, cache warmup.
 
 A final step requests `HEALTHCHECK_URL` and fails the run unless it answers 2xx/3xx. CI's last step runs both scripts in production mode on PHP 8.4 and checks that `/login` returns HTTP 200, so a build that cannot boot without development dependencies fails before it reaches `main`.
