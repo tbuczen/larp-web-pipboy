@@ -49,8 +49,8 @@ body.ea.ea-dark-scheme,
 }
 
 /* VT323 is narrow: lift EasyAdmin's compact control sizes so they stay legible. */
-.ea.ea-dark-scheme :is(.btn, label, .form-control, .form-select, .form-label, .col-form-label, .form-help, .form-text, .ts-control, .ts-dropdown, .dropdown-item, .badge, .page-link, table, .content-search input, .ea-sidebar-item-label),
-.ea-dark-scheme .ea :is(.btn, label, .form-control, .form-select, .form-label, .col-form-label, .form-help, .form-text, .ts-control, .ts-dropdown, .dropdown-item, .badge, .page-link, table, .content-search input, .ea-sidebar-item-label) {
+.ea.ea-dark-scheme :is(.btn, label, input, textarea, .form-control, .form-select, .form-label, .col-form-label, .form-help, .form-text, .ts-control, .ts-dropdown, .dropdown-item, .badge, .page-link, table, .content-search input, .ea-sidebar-item-label),
+.ea-dark-scheme .ea :is(.btn, label, input, textarea, .form-control, .form-select, .form-label, .col-form-label, .form-help, .form-text, .ts-control, .ts-dropdown, .dropdown-item, .badge, .page-link, table, .content-search input, .ea-sidebar-item-label) {
     font-size: 1.2rem;
 }
 
