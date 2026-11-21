@@ -42,6 +42,12 @@ body.ea.ea-dark-scheme,
     --font-family-sans-serif: "VT323", ui-monospace, "DejaVu Sans Mono", "Courier New", monospace;
     --font-family-monospace: "VT323", ui-monospace, "DejaVu Sans Mono", "Courier New", monospace;
     --bs-body-font-family: var(--font-family-sans-serif);
+    /* VT323 is narrow and short: scale EasyAdmin's type ramp up by about 30%. */
+    --font-size-xs: 16px;
+    --font-size-sm: 17px;
+    --font-size-base: 19px;
+    --font-size-lg: 21px;
+    --font-size-xl: 24px;
 
     font-size: 1.2rem;
     letter-spacing: .03em;
