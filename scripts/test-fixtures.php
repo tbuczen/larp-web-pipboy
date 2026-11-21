@@ -68,6 +68,7 @@ try {
         TestFixture::INVITED_EMAIL => [],
         TestFixture::GET_ONLY_EMAIL => [],
         TestFixture::ADMIN_INVITED_EMAIL => [],
+        TestFixture::ORGANIZER_INVITED_EMAIL => [],
     ] as $email => $roles) {
         $user = $userRepository->findOneBy(['email' => $email]) ?? new User();
         $user->setEmail($email)->setRoles($roles)->setFirstName('Test')->setLastName('Account');
@@ -79,6 +80,8 @@ try {
     $larp = $larpRepository->findOneBy(['name' => TestFixture::LARP_NAME]) ?? new Larp();
     $larp->setName(TestFixture::LARP_NAME);
     $larp->addOrganizer($users[TestFixture::ORGANIZER_EMAIL]);
+    // Becomes an organizer only by accepting an invitation during the tests.
+    $larp->removeOrganizer($users[TestFixture::ORGANIZER_INVITED_EMAIL]);
     $entityManager->persist($larp);
     $otherLarp = $larpRepository->findOneBy(['name' => TestFixture::OTHER_LARP_NAME]) ?? new Larp();
     $otherLarp->setName(TestFixture::OTHER_LARP_NAME);

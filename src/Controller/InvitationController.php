@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\EventInvitation;
 use App\Entity\User;
+use App\Enum\InvitationRole;
 use App\Service\EventInvitationManager;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -47,6 +49,10 @@ final class InvitationController extends AbstractController
             return $this->privateResponse($this->render('invitation/wrong_account.html.twig', [], new Response(status: Response::HTTP_FORBIDDEN)));
         }
 
+        if ($invitation->getRole() !== InvitationRole::PLAYER) {
+            return $this->acceptStaffRole($token, $invitation, $user, $request, $invitations, $limiter);
+        }
+
         $eventName = $invitation->getLarp()->getName();
         $form = $this->createFormBuilder(null, ['csrf_token_id' => 'invitation_'.$invitation->getId()])
             ->add('characterName', TextType::class, ['label' => 'Character name', 'constraints' => [new NotBlank(), new Length(max: 180)]])
@@ -69,6 +75,35 @@ final class InvitationController extends AbstractController
         }
 
         return $this->privateResponse($this->render('invitation/accept.html.twig', ['form' => $form, 'event_name' => $eventName]));
+    }
+
+    /** Organizer and superadministrator invitations only need a CSRF-protected confirmation. */
+    private function acceptStaffRole(
+        string $token,
+        EventInvitation $invitation,
+        User $user,
+        Request $request,
+        EventInvitationManager $invitations,
+        RateLimiterFactory $limiter,
+    ): Response {
+        $form = $this->createFormBuilder(null, ['csrf_token_id' => 'invitation_'.$invitation->getId()])->getForm()->handleRequest($request);
+        $context = ['form' => $form, 'event_name' => $invitation->getLarp()->getName(), 'role' => $invitation->getRole()];
+
+        if ($form->isSubmitted() && !$limiter->create((string) $user->getId())->consume()->isAccepted()) {
+            return $this->privateResponse(new Response('Too many attempts. Please try again later.', Response::HTTP_TOO_MANY_REQUESTS));
+        }
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                $invitations->acceptStaffRole($token, $user);
+
+                return $this->privateResponse($this->render('invitation/staff_success.html.twig', $context));
+            } catch (DomainException $exception) {
+                $form->addError(new FormError($exception->getMessage()));
+            }
+        }
+
+        return $this->privateResponse($this->render('invitation/accept_staff.html.twig', $context));
     }
 
     private function privateResponse(Response $response): Response
