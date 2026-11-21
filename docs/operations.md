@@ -64,7 +64,8 @@ The names of the secrets and variables already added to `prod` were not readable
 - Clone this repository to `PROJECT_DIR` as the deploy account. No GitHub SSH key or `known_hosts` entry is needed: the deploy fetches over HTTPS. Do not add a global `url.*.insteadOf` rule that rewrites `https://github.com/` to SSH.
 - Provide PHP 8.4 (CLI and web), the `pdo_pgsql`, `intl`, `mbstring`, `xml`, `ctype` and `iconv` extensions, and Composer.
 - Create the PostgreSQL 17 database and user.
-- Serve `PROJECT_DIR/public` as the document root and route requests to `index.php`. Redact `/invite/<token>` paths in the web server's access logs.
+- Serve `PROJECT_DIR/public` as the document root where the hosting allows it. On the current hosting the document root is fixed to `PROJECT_DIR` itself, so the committed [root `.htaccess`](../.htaccess) routes every request into `public/` (and selects the PHP 8.4 handler), and [`public/.htaccess`](../public/.htaccess) serves existing files and sends everything else to `index.php`. Requests for `.git`, `.env*`, `config/`, `var/` or `vendor/` therefore reach Symfony and get a 404, never the files. Without `mod_rewrite` the root file denies all requests. A hand-made `.htaccess` that is not yet in the repository is moved to `*.before-deploy` during the checkout.
+- Redact `/invite/<token>` paths in the web server's access logs.
 - Register the production callback ending in `/connect/discord/check` on the Discord OAuth application.
 
 ### Limitations
