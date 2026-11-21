@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block head %}<meta name="referrer" content="no-referrer">{% endblock %}
+{% block title %}Join {{ event_name }} as {{ role.label|lower }}{% endblock %}
+{% block status %}Incoming invitation{% endblock %}
+
+{% block body %}
+    <h1>{{ role.label }} invitation</h1>
+    {% if role.value == 'super_admin' %}
+        <p class="muted">Accepting makes your account a superadministrator: you can manage every LARP and every account in the admin panel.</p>
+    {% else %}
+        <p class="muted">Accepting makes you an organizer of <strong>{{ event_name }}</strong>: you can invite and approve its players and manage its content in the admin panel.</p>
+    {% endif %}
+    {{ form_start(form) }}
+        {{ form_errors(form) }}
+        {{ form_widget(form) }}
+        <button type="submit">Accept invitation</button>
+    {{ form_end(form) }}
+    <ul class="links"><li><a href="{{ path('app_pipboy') }}">Your LARPs</a></li></ul>
+{% endblock %}

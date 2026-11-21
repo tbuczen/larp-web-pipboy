@@ -20,12 +20,21 @@ Each LARP keeps its own players, invitations, holodisks and other game content. 
 
 ## 3. Make someone an organizer
 
-Organizers need **both** the Organizer role and an assignment to the LARP.
+Organizers need **both** the Organizer role and an assignment to the LARP. An invitation does both at once.
+
+**By invitation (recommended):**
 
 1. The person registers an account at `/register` (or with Discord).
-2. Open **Accounts**, edit their account and add **Organizer** under **Roles**. Save.
-3. Open **LARPs**, edit the LARP and add them under **Organizers**. Save.
-4. They sign out and in again. They now see only the LARPs they are assigned to.
+2. Open **LARPs**, use the row's **⋯** menu, choose **Invite player** and set **Invite as** to **Organizer**. Send them the link as in [runbook 3](03-invite-players.md).
+3. They open the link while signed in and choose **Accept invitation**, then sign in again. They now see only the LARPs they are assigned to.
+
+Choose **Superadministrator** instead to give someone full access to every LARP and account.
+
+**By hand:**
+
+1. Open **Accounts**, edit their account and add **Organizer** under **Roles**. Save.
+2. Open **LARPs**, edit the LARP and add them under **Organizers**. Save.
+3. They sign out and in again.
 
 A superadministrator sees every LARP and does not need to be assigned.
 

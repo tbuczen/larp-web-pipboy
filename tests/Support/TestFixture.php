@@ -19,6 +19,7 @@ final class TestFixture
     public const UNRELATED_INVITATION_EMAIL = 'unrelated-invitation@pipboy.test';
     public const HOLODISK_READER_EMAIL = 'holodisk-reader@pipboy.test';
     public const HOLODISK_TITLE = 'Codeception holodisk';
+    public const ORGANIZER_INVITED_EMAIL = 'organizer-invited@pipboy.test';
     public const PASSWORD = 'LocalTestPassword-42';
     public const LARP_NAME = 'Codeception fixtures event';
     public const OTHER_LARP_NAME = 'Codeception unrelated event';

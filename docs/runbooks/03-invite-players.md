@@ -16,6 +16,8 @@ Ask the player to **register first** at https://pipboy.larpilot.com/register and
 
 2. Enter the player's **account email** and how many days the link stays valid (1–30). Choose **Generate invitation**.
 
+   Superadministrators also see **Invite as**: keep **Player** here, or choose **Organizer** or **Superadministrator** to invite staff ([runbook 2](02-create-larp.md#3-make-someone-an-organizer)). Organizers can invite players only.
+
    ![Invite a player form](images/06-invite-player.png)
 
 3. Copy the link and send it to the player through a channel you trust (direct message, personal email).

@@ -8,6 +8,7 @@ use App\Entity\EventInvitation;
 use App\Entity\Larp;
 use App\Entity\Player;
 use App\Entity\User;
+use App\Enum\InvitationRole;
 use App\Service\EventInvitationManager;
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
@@ -15,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use DomainException;
 use InvalidArgumentException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 
@@ -135,7 +137,90 @@ final class EventInvitationManagerTest extends TestCase
         (new EventInvitationManager($entityManager))->accept(self::TOKEN, $this->user(), '   ');
     }
 
-    private function invitationEntityManager(EventInvitation $invitation): EntityManagerInterface
+    public function testOrganizersCannotIssueStaffInvitations(): void
+    {
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager->expects(self::never())->method('persist');
+        $organizer = $this->user('organizer@example.com')->setRoles(['ROLE_ORGANIZER']);
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Only superadministrators');
+
+        (new EventInvitationManager($entityManager))
+            ->createInvite(new Larp(), 'new-organizer@example.com', new DateTimeImmutable('+1 day'), InvitationRole::ORGANIZER, $organizer);
+    }
+
+    public function testSuperAdministratorsCanIssueOrganizerInvitations(): void
+    {
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager->expects(self::once())->method('persist');
+        $admin = $this->user('admin@example.com')->setRoles(['ROLE_SUPER_ADMIN']);
+
+        $generated = (new EventInvitationManager($entityManager))
+            ->createInvite(new Larp(), 'new-organizer@example.com', new DateTimeImmutable('+1 day'), InvitationRole::ORGANIZER, $admin);
+
+        self::assertSame(InvitationRole::ORGANIZER, $generated->invitation->getRole());
+    }
+
+    public function testOrganizerInvitationGrantsRoleAndAssignsTheLarp(): void
+    {
+        $larp = new Larp();
+        $invitation = (new EventInvitation())->setEmail('player@example.com')->setLarp($larp)->setRole(InvitationRole::ORGANIZER);
+        $entityManager = $this->claimingEntityManager($invitation);
+        $user = $this->user();
+
+        $role = (new EventInvitationManager($entityManager))->acceptStaffRole(self::TOKEN, $user);
+
+        self::assertSame(InvitationRole::ORGANIZER, $role);
+        self::assertContains('ROLE_ORGANIZER', $user->getRoles());
+        self::assertTrue($larp->getOrganizers()->contains($user));
+    }
+
+    public function testSuperAdministratorInvitationGrantsTheGlobalRole(): void
+    {
+        $larp = new Larp();
+        $invitation = (new EventInvitation())->setEmail('player@example.com')->setLarp($larp)->setRole(InvitationRole::SUPER_ADMIN);
+        $user = $this->user();
+
+        (new EventInvitationManager($this->claimingEntityManager($invitation)))->acceptStaffRole(self::TOKEN, $user);
+
+        self::assertContains('ROLE_SUPER_ADMIN', $user->getRoles());
+        self::assertFalse($larp->getOrganizers()->contains($user));
+    }
+
+    public function testPlayerAndStaffInvitationsCannotBeAcceptedThroughTheOtherFlow(): void
+    {
+        $staff = (new EventInvitation())->setEmail('player@example.com')->setLarp(new Larp())->setRole(InvitationRole::ORGANIZER);
+        $player = (new EventInvitation())->setEmail('player@example.com')->setLarp(new Larp());
+
+        $staffEntityManager = $this->invitationEntityManager($staff);
+        $staffEntityManager->expects(self::never())->method('wrapInTransaction');
+        $playerEntityManager = $this->invitationEntityManager($player);
+        $playerEntityManager->expects(self::never())->method('wrapInTransaction');
+
+        try {
+            (new EventInvitationManager($staffEntityManager))->accept(self::TOKEN, $this->user(), 'Character');
+            self::fail('A staff invitation must not create a player.');
+        } catch (DomainException) {
+        }
+
+        $this->expectException(DomainException::class);
+        (new EventInvitationManager($playerEntityManager))->acceptStaffRole(self::TOKEN, $this->user());
+    }
+
+    private function claimingEntityManager(EventInvitation $invitation): EntityManagerInterface&MockObject
+    {
+        $entityManager = $this->invitationEntityManager($invitation);
+        $entityManager->expects(self::once())->method('wrapInTransaction')
+            ->willReturnCallback(static fn (callable $transaction): mixed => $transaction());
+        $connection = $this->createStub(Connection::class);
+        $connection->method('executeStatement')->willReturn(1);
+        $entityManager->method('getConnection')->willReturn($connection);
+
+        return $entityManager;
+    }
+
+    private function invitationEntityManager(EventInvitation $invitation): EntityManagerInterface&MockObject
     {
         $repository = $this->createStub(EntityRepository::class);
         $repository->method('findOneBy')->willReturn($invitation);

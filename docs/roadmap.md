@@ -15,6 +15,7 @@ This file is the business source of truth for future work. Later explicit user d
 - Real names are organizer-only. Direct messages initially identify players by PipBoy number; character names are revealed only after mutual consent.
 - Scanning itself unlocks holodisk content; organizers may revoke a grant in an exceptional case. Rotating a discovery code should not silently remove previously obtained content unless explicitly requested.
 - Invitation magic links allow membership application after account authentication. They do not provide passwordless login.
+- Superadministrators can also invite organizers (assigned to the invitation's LARP) and superadministrators with the same email-bound, single-use links. Organizers invite players only. New roles take effect at the next sign-in.
 - The map is an uploaded image aligned to real GPS coordinates.
 - Plan for 100 simultaneous PipBoy users in a LARP of up to 200 players. This is a capacity target requiring measurement.
 - Reuse the existing Discord OAuth application. Production secrets belong to this repository's GitHub environment `prod`; the hosting target remains to be confirmed.

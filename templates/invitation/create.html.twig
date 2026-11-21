@@ -4,8 +4,8 @@
 {% block status %}Organizer console{% endblock %}
 
 {% block body %}
-    <h1>Invite a player to {{ larp.name }}</h1>
-    <p class="muted">The link can be accepted once by an account with this email. Your approval will still be required.</p>
+    <h1>Invite to {{ larp.name }}</h1>
+    <p class="muted">The link can be accepted once, by the account registered with this email. Invited players still need your approval.</p>
     {{ form_start(form) }}{{ form_widget(form) }}<button type="submit">Generate invitation</button>{{ form_end(form) }}
     <ul class="links"><li><a href="{{ path('admin') }}">Back to admin</a></li></ul>
 {% endblock %}
