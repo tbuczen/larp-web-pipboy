@@ -1,0 +1,101 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controller;
+
+use App\Entity\Condition;
+use App\Entity\Holodisk;
+use App\Entity\HolodiskAccess;
+use App\Entity\Note;
+use App\Entity\Player;
+use App\PipBoy\Navigation;
+use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+
+/**
+ * The player's PipBoy for one LARP: main tabs, screens and an optional selected
+ * entry. Only the account that owns the player may open it, and every screen
+ * is resolved through Navigation, which enforces approval and feature grants.
+ */
+#[IsGranted('ROLE_USER')]
+final class PipBoyController extends AbstractController
+{
+    public function __construct(
+        private readonly Navigation $navigation,
+        private readonly EntityManagerInterface $entityManager,
+    ) {
+    }
+
+    #[Route(
+        '/pipboy/{player}/{tab}/{screen}/{item}',
+        name: 'app_pipboy_screen',
+        requirements: ['player' => '\d+', 'tab' => '[a-z]+', 'screen' => '[a-z]+', 'item' => '\d+'],
+        defaults: ['tab' => 'stat', 'screen' => null, 'item' => null],
+        methods: ['GET'],
+    )]
+    public function screen(Player $player, string $tab, ?string $screen, ?int $item): Response
+    {
+        // Another account's player is reported as missing rather than forbidden.
+        if ($player->getUser() !== $this->getUser()) {
+            throw $this->createNotFoundException();
+        }
+
+        $currentTab = $this->navigation->tab($player, $tab) ?? throw $this->createNotFoundException();
+        $currentScreen = $currentTab->screen($screen) ?? throw $this->createNotFoundException();
+        $entries = $this->entries($player, $currentScreen->key);
+        $selected = $item === null ? null : ($entries[$item] ?? throw $this->createNotFoundException());
+
+        $response = $this->render('pipboy/screen.html.twig', [
+            'player' => $player,
+            'tabs' => $this->navigation->tabsFor($player),
+            'tab' => $currentTab,
+            'screen' => $currentScreen,
+            'entries' => $entries,
+            'selected' => $selected,
+            'now' => new DateTimeImmutable(),
+        ]);
+        $response->headers->set('Cache-Control', 'no-store, private');
+
+        return $response;
+    }
+
+    /**
+     * The player's own records listed on a screen, keyed by id.
+     *
+     * @return array<int, Condition|Holodisk|Note>
+     */
+    private function entries(Player $player, string $screen): array
+    {
+        $records = match ($screen) {
+            'conditions' => $this->entityManager->getRepository(Condition::class)->findBy(['player' => $player], ['startsAt' => 'DESC']),
+            'notes' => $this->entityManager->getRepository(Note::class)->findBy(['player' => $player], ['title' => 'ASC']),
+            'holodisks' => $this->unlockedHolodisks($player),
+            default => [],
+        };
+
+        $entries = [];
+        foreach ($records as $record) {
+            $entries[$record->getId()] = $record;
+        }
+
+        return $entries;
+    }
+
+    /** @return list<Holodisk> */
+    private function unlockedHolodisks(Player $player): array
+    {
+        $accesses = $this->entityManager->getRepository(HolodiskAccess::class)->findBy(['player' => $player, 'revokedAt' => null]);
+        $holodisks = array_map(
+            static fn (HolodiskAccess $access): Holodisk => $access->getHolodisk(),
+            array_filter($accesses, static fn (HolodiskAccess $access): bool => $access->isActive()),
+        );
+        usort($holodisks, static fn (Holodisk $a, Holodisk $b): int => strcasecmp($a->getTitle(), $b->getTitle()));
+
+        return $holodisks;
+    }
+}

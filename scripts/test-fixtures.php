@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use App\Entity\Holodisk;
 use App\Entity\HolodiskAccess;
+use App\Entity\Condition;
 use App\Entity\Larp;
+use App\Entity\Note;
 use App\Entity\Player;
 use App\Entity\User;
 use App\Entity\EventInvitation;
@@ -71,6 +73,7 @@ try {
         TestFixture::GET_ONLY_EMAIL => [],
         TestFixture::ADMIN_INVITED_EMAIL => [],
         TestFixture::HOLODISK_READER_EMAIL => [],
+        TestFixture::STAYS_PENDING_EMAIL => [],
         TestFixture::ORGANIZER_INVITED_EMAIL => [],
     ] as $email => $roles) {
         $user = $userRepository->findOneBy(['email' => $email]) ?? new User();
@@ -116,8 +119,19 @@ try {
     $reader = $entityManager->getRepository(Player::class)->findOneBy(['user' => $readerUser, 'larp' => $larp]) ?? new Player();
     $reader->setUser($readerUser)->setLarp($larp)->setPipboyNumber('TEST-READER')->setName('Holodisk reader')->approve();
     $reader->grantFeature(Feature::HOLODISKS);
+    $reader->grantFeature(Feature::NOTES);
+    $reader->grantFeature(Feature::CONDITIONS);
     $entityManager->persist($reader);
     $entityManager->flush();
+    foreach ($entityManager->getRepository(Note::class)->findBy(['player' => $reader]) as $previousNote) {
+        $entityManager->remove($previousNote);
+    }
+    foreach ($entityManager->getRepository(Condition::class)->findBy(['player' => $reader]) as $previousCondition) {
+        $entityManager->remove($previousCondition);
+    }
+    $entityManager->persist((new Note())->setPlayer($reader)->setTitle(TestFixture::NOTE_TITLE)->setContent('Meet the courier at dawn.'));
+    $entityManager->persist((new Condition())->setPlayer($reader)->setName(TestFixture::CONDITION_NAME)
+        ->setDescription('Rest before running.')->setStartsAt(new DateTimeImmutable('-1 hour')));
     // The pending player also holds a grant, to prove approval is still required.
     foreach ([$reader, $pendingPlayer] as $grantee) {
         if ($entityManager->getRepository(HolodiskAccess::class)->findOneBy(['player' => $grantee, 'holodisk' => $holodisk]) === null) {
@@ -126,6 +140,23 @@ try {
     }
     $entityManager->flush();
     TestFixture::$holodiskId = $holodisk->getId();
+    TestFixture::$readerPlayerId = $reader->getId();
+    // Never approved by any test: proves gameplay screens stay closed before approval.
+    $staysPendingUser = $users[TestFixture::STAYS_PENDING_EMAIL];
+    $staysPending = $entityManager->getRepository(Player::class)->findOneBy(['user' => $staysPendingUser, 'larp' => $larp]) ?? new Player();
+    $staysPending->setUser($staysPendingUser)->setLarp($larp)->setPipboyNumber('TEST-STAYS-PENDING')->setName('Still waiting')
+        ->setStatus(RegistrationStatus::PENDING);
+    foreach (Feature::cases() as $feature) {
+        $staysPending->grantFeature($feature);
+    }
+    $entityManager->persist($staysPending);
+    $entityManager->flush();
+    if ($entityManager->getRepository(HolodiskAccess::class)->findOneBy(['player' => $staysPending, 'holodisk' => $holodisk]) === null) {
+        $entityManager->persist((new HolodiskAccess())->setPlayer($staysPending)->setHolodisk($holodisk));
+        $entityManager->flush();
+    }
+    TestFixture::$staysPendingPlayerId = $staysPending->getId();
+    TestFixture::$pendingPlayerId = $pendingPlayer->getId();
     TestFixture::$playerId = $player->getId();
 
     foreach ($entityManager->getRepository(EventInvitation::class)->findBy(['larp' => [$larp, $otherLarp]]) as $previousInvitation) {

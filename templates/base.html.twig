@@ -15,9 +15,13 @@
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="preload" href="{{ asset('fonts/vt323-regular.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ asset('css/pipboy.css') }}">
+    {# Applied before the first paint so switching effects off never flashes them. #}
+    <script>try { if (localStorage.getItem('pipboy-fx') === 'off') document.documentElement.dataset.fx = 'off'; } catch (e) {}</script>
+    <script src="{{ asset('js/pipboy.js') }}" defer></script>
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
 <div class="terminal">
+    {% block nav %}
     <nav class="tabs" aria-label="Sections">
         {% if app.user %}
             <a class="tab{{ active == 'larps' ? ' tab--active' }}" href="{{ path('app_pipboy') }}"{{ active == 'larps' ? ' aria-current="page"' }}>LARPs</a>
@@ -30,8 +34,9 @@
             <a class="tab tab--end" href="{{ path('admin') }}">Admin</a>
         {% endif %}
     </nav>
+    {% endblock %}
 
-    <main class="screen">
+    <main class="screen" id="screen">
         {% for type, messages in app.flashes %}
             {% for message in messages %}
                 <p class="notice notice--{{ type }}" role="{{ type == 'error' ? 'alert' : 'status' }}">{{ message }}</p>
@@ -40,11 +45,13 @@
         {% block body %}{% endblock %}
     </main>
 
+    {% block footer %}
     <footer class="status-bar">
         <span class="status-bar__cell">PipBoy</span>
         <span class="status-bar__cell status-bar__cell--wide">{% block status %}Personal terminal{% endblock %}<span class="cursor" aria-hidden="true"></span></span>
         <span class="status-bar__cell"><time datetime="{{ 'now'|date('Y-m-d') }}">{{ 'now'|date('d.m.Y') }}</time></span>
     </footer>
+    {% endblock %}
 </div>
 </body>
 </html>

@@ -662,3 +662,488 @@ button:active,
     background: rgb(0 0 0 / 18%);
     white-space: normal;
 }
+
+/* ==========================================================================
+   PipBoy player interface (templates/pipboy): main tabs, fading sub-tabs,
+   selectable lists with a detail pane, segmented status bar, and old-display
+   effects (power-on/off screen switches, static, noise, boot log).
+   Full screen on phones; a framed, slightly curved monitor on wider screens.
+   ========================================================================== */
+
+body.is-pipboy {
+    display: block;
+    padding: 0;
+}
+
+.is-pipboy .terminal {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    border: 0;
+    box-shadow: inset 0 0 70px rgb(0 0 0 / 40%);
+}
+
+/* Lighter vignette than the sign-in pages so the tab and status bars at the
+   screen edges stay readable. */
+body.is-pipboy::after {
+    background: radial-gradient(ellipse at center, transparent 70%, rgb(0 0 0 / 35%) 100%);
+}
+
+/* Static noise drawn over the whole display. */
+.is-pipboy .terminal::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    opacity: .06;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: noise .5s steps(4) infinite;
+}
+
+@media (min-width: 48rem) {
+    body.is-pipboy {
+        display: grid;
+        grid-template-columns: minmax(0, 60rem);
+        justify-content: center;
+        align-content: start;
+        padding: clamp(1rem, 5vh, 3rem) 1.5rem 1.5rem;
+    }
+
+    .is-pipboy .terminal {
+        min-height: min(52rem, calc(100dvh - 8vh));
+        overflow: hidden;
+        border: 1px solid var(--green-faint);
+        border-radius: 22px / 18px;
+        box-shadow:
+            0 0 0 6px #020d04,
+            0 0 0 8px #0a2a12,
+            0 0 50px rgb(28 250 128 / 16%),
+            inset 0 0 90px rgb(0 0 0 / 45%);
+    }
+}
+
+/* Main tabs */
+
+.pip-nav {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding: .75rem .75rem 0;
+    background: linear-gradient(to bottom, var(--screen) 85%, transparent);
+    view-transition-name: pip-nav;
+}
+
+.pip-tabs {
+    display: flex;
+    align-items: flex-end;
+    gap: .15rem;
+    border-bottom: var(--rule);
+    box-shadow: 0 6px 6px -6px rgb(28 250 128 / 45%);
+}
+
+.pip-tab {
+    position: relative;
+    bottom: -2px;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: .15rem .25rem 0;
+    border: 2px solid transparent;
+    border-bottom: 0;
+    color: var(--green-dim);
+    font-size: clamp(1.3rem, 5.6vw, 1.9rem);
+    letter-spacing: .14em;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: none;
+    text-transform: uppercase;
+    transition: color .15s;
+}
+
+.pip-tab:hover,
+.pip-tab:focus-visible {
+    color: var(--green);
+    text-shadow: var(--glow);
+    outline: 0;
+}
+
+.pip-tab.is-active {
+    border-color: var(--green);
+    background: var(--screen);
+    color: var(--green);
+    text-shadow: var(--glow);
+}
+
+.pip-tab.is-active::before,
+.pip-tab.is-active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    width: .45rem;
+    height: 2px;
+    background: var(--screen);
+}
+
+.pip-tab.is-active::before { left: -2px; }
+.pip-tab.is-active::after { right: -2px; }
+
+.pip-exit {
+    flex: 0 0 auto;
+    padding: 0 .35rem .1rem;
+    color: var(--green-dim);
+    font-size: 1.5rem;
+    text-decoration: none;
+    text-shadow: none;
+}
+
+.pip-exit:hover,
+.pip-exit:focus-visible {
+    color: var(--green);
+    text-shadow: var(--glow);
+}
+
+/* Sub-tabs: the active one centred and bright, neighbours fading away. */
+
+.pip-subtabs {
+    display: flex;
+    justify-content: safe center;
+    gap: 1.6rem;
+    overflow-x: auto;
+    padding: .45rem 30% .3rem;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
+}
+
+.pip-subtabs::-webkit-scrollbar {
+    display: none;
+}
+
+.pip-subtab {
+    flex: 0 0 auto;
+    scroll-snap-align: center;
+    color: var(--green);
+    font-size: 1.3rem;
+    letter-spacing: .12em;
+    text-decoration: none;
+    text-shadow: none;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: opacity .2s;
+}
+
+.pip-subtab--d1 { opacity: .55; }
+.pip-subtab--d2 { opacity: .32; }
+.pip-subtab--d3 { opacity: .18; }
+
+.pip-subtab.is-active {
+    text-shadow: var(--glow);
+}
+
+.pip-subtab:hover,
+.pip-subtab:focus-visible {
+    opacity: 1;
+    outline: 0;
+}
+
+/* Screen area */
+
+.is-pipboy .screen {
+    position: relative;
+    flex: 1;
+    padding: 1rem .9rem 1.25rem;
+    view-transition-name: pip-screen;
+}
+
+/* A burst of static each time a screen comes on. */
+.is-pipboy .screen::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E");
+    mix-blend-mode: screen;
+    opacity: 0;
+    animation: static-burst .38s steps(5) 1;
+}
+
+@media (min-width: 48rem) {
+    .is-pipboy .screen {
+        padding: 1.4rem 1.6rem 1.75rem;
+    }
+}
+
+.pip-stat__eyebrow {
+    margin: 0 0 .2rem;
+    color: var(--green-dim);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    text-shadow: none;
+}
+
+.pip-modules {
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+}
+
+.pip-modules a,
+.pip-list__item {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .2rem .6rem;
+    border: 2px solid transparent;
+    color: var(--green);
+    letter-spacing: .06em;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.pip-modules a:hover,
+.pip-modules a:focus-visible,
+.pip-list__item:hover,
+.pip-list__item:focus-visible {
+    border-color: var(--green-dim);
+    outline: 0;
+}
+
+.pip-modules__state,
+.pip-list__meta {
+    color: var(--green-dim);
+    text-shadow: none;
+}
+
+.pip-list__item.is-selected {
+    background: var(--green);
+    color: var(--screen);
+    text-shadow: none;
+}
+
+.pip-list__item.is-selected .pip-list__meta {
+    color: var(--screen);
+}
+
+/* Entries list with the selected entry's details beside it. */
+
+.pip-split {
+    display: grid;
+    gap: 1rem;
+}
+
+.pip-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pip-list__empty {
+    padding: .2rem .6rem;
+}
+
+.pip-detail h2 {
+    margin-top: 0;
+}
+
+.pip-detail__back {
+    display: inline-block;
+    margin-bottom: .6rem;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+@media (max-width: 47.99rem) {
+    .pip-split.has-selection .pip-list,
+    .pip-split:not(.has-selection) .pip-detail {
+        display: none;
+    }
+}
+
+@media (min-width: 48rem) {
+    .pip-split {
+        grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+        align-items: start;
+    }
+
+    .pip-detail {
+        min-height: 12rem;
+        padding-left: 1rem;
+        border-left: 2px solid var(--green-faint);
+    }
+
+    .pip-detail__back {
+        display: none;
+    }
+}
+
+/* Offline module */
+
+.pip-offline {
+    padding: 2rem .5rem;
+    text-align: center;
+}
+
+.pip-offline h1 {
+    justify-content: center;
+}
+
+.pip-offline h1::after {
+    display: none;
+}
+
+.pip-offline__signal {
+    margin: 0 0 1rem;
+    font-size: 2rem;
+    letter-spacing: .2em;
+    animation: blink 1.6s steps(1) infinite;
+}
+
+/* Status bar */
+
+.pip-status {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    background: var(--screen);
+    view-transition-name: pip-status;
+}
+
+.pip-status .status-bar__cell {
+    background: rgb(28 250 128 / 18%);
+    text-shadow: var(--glow);
+}
+
+.fx-toggle {
+    width: auto;
+    min-height: 0;
+    margin: 0;
+    padding: .05rem .55rem;
+    border: 0;
+    background: rgb(28 250 128 / 14%);
+    font-size: 1.1rem;
+    box-shadow: none;
+}
+
+.fx-toggle::before,
+.fx-toggle::after {
+    content: none;
+}
+
+.fx-toggle[aria-pressed="false"] {
+    color: var(--green-dim);
+    text-decoration: line-through;
+}
+
+/* Boot log shown once per session */
+
+.pip-boot {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    padding: 2.5rem 1.5rem;
+    background: var(--screen-deep);
+    color: var(--green);
+    font-size: 1.4rem;
+    letter-spacing: .08em;
+    cursor: pointer;
+}
+
+.pip-boot p {
+    margin: 0 0 .3rem;
+    animation: boot-line .12s steps(2) 1;
+}
+
+.pip-boot.is-closing {
+    animation: crt-off .3s ease-in forwards;
+}
+
+/* Screen switches: the old screen collapses to a bright line and the new one
+   powers on, like a cathode-ray display (cross-document View Transitions). */
+
+@view-transition {
+    navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-group(pip-nav),
+::view-transition-group(pip-status) {
+    animation: none;
+}
+
+::view-transition-old(pip-screen) {
+    animation: crt-off .17s ease-in both;
+}
+
+::view-transition-new(pip-screen) {
+    animation: crt-on .34s ease-out both;
+}
+
+/* Browsers without View Transitions still get the power-on effect. */
+@supports not (view-transition-name: none) {
+    .is-pipboy .screen {
+        animation: crt-on .34s ease-out both;
+    }
+}
+
+@keyframes crt-off {
+    0% { transform: scale(1, 1); filter: brightness(1); opacity: 1; }
+    60% { transform: scale(1, .015); filter: brightness(3); opacity: 1; }
+    100% { transform: scale(0, .015); filter: brightness(4); opacity: 0; }
+}
+
+@keyframes crt-on {
+    0% { transform: scale(.2, .012); filter: brightness(4); opacity: .4; }
+    35% { transform: scale(1, .02); filter: brightness(3); opacity: 1; }
+    70% { transform: scale(1, 1.02); filter: brightness(1.5); }
+    100% { transform: none; filter: none; opacity: 1; }
+}
+
+@keyframes static-burst {
+    0% { opacity: .55; background-position: 0 0; }
+    40% { opacity: .35; background-position: 30px -20px; }
+    100% { opacity: 0; background-position: -20px 40px; }
+}
+
+@keyframes noise {
+    0% { background-position: 0 0; }
+    25% { background-position: -40px 20px; }
+    50% { background-position: 30px -30px; }
+    75% { background-position: -10px 40px; }
+}
+
+@keyframes boot-line {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* Effects off: chosen with the FX button, or the system reduce-motion setting. */
+[data-fx="off"] body::before,
+[data-fx="off"] body::after,
+[data-fx="off"] .is-pipboy .terminal::after,
+[data-fx="off"] .is-pipboy .screen::before {
+    display: none;
+}
+
+[data-fx="off"] *,
+[data-fx="off"] ::view-transition-group(*),
+[data-fx="off"] ::view-transition-old(*),
+[data-fx="off"] ::view-transition-new(*) {
+    animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .is-pipboy .terminal::after,
+    .is-pipboy .screen::before,
+    .is-pipboy .screen,
+    .pip-offline__signal,
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation: none !important;
+    }
+}

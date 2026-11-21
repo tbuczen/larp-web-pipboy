@@ -47,6 +47,12 @@ Transient plaintext passwords must not enter the serialized security session. Pr
 - `Note` and `Condition` belong to a player. Conditions are fictional game state, with UTC timestamps and a database check preventing an end before the start. Player-note visibility still needs a product decision.
 - Chat, map calibration/location, QR assignments, uploads, and offline storage have no complete implementation yet. Add their models with the feature's acceptance criteria rather than implying the initial dataset completes those milestones.
 
+## Player interface
+
+`/pipboy` lists the account's memberships; each opens `/pipboy/{player}/{tab}/{screen}/{item}` (`PipBoyController`). `App\PipBoy\Navigation` decides which tabs and screens exist: until approval only STAT › Status, afterwards one screen per granted feature. The controller returns 404 for another account's player, unknown or ungranted screens, and entries that are not the player's own. Add a new player module by adding its screen to `Navigation`, its records to `PipBoyController::entries()` and a partial under `templates/pipboy/screens/`.
+
+Visual effects are CSS (`public/css/pipboy.css`): cross-document View Transitions for screen switches with a power-on fallback, scanlines, noise and a boot log. `public/js/pipboy.js` is optional enhancement (clock, FX toggle, boot log, swipe/arrow-key tab switching). Effects stop with the FX toggle or `prefers-reduced-motion`.
+
 ## Extension guidance
 
 For chat, use event-scoped participants and authorize conversation membership on every read/write. Direct messages come first. Store character-name disclosure as explicit mutual consent; never substitute personal names. Incremental polling is a proposed initial transport; measure against the 100-user target before choosing long polling or additional infrastructure.

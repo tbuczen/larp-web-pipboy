@@ -22,11 +22,11 @@ final class HolodiskMediaCest
 
         // Approved, holodisk feature, active grant: the player sees the disk and its tinted image.
         $I->signInAs(TestFixture::HOLODISK_READER_EMAIL);
-        $I->amOnPage('/pipboy');
-        $I->click(TestFixture::HOLODISK_TITLE);
+        $I->amOnPage('/pipboy/'.TestFixture::$readerPlayerId.'/data/holodisks');
+        $I->click(TestFixture::HOLODISK_TITLE, '.pip-list');
         $I->seeResponseCodeIs(200);
         $I->see('Recovered transmission.');
-        $I->seeElement('figure.holodisk-media--image img[src="'.$this->mediaUrl().'"]');
+        $I->seeElement('.pip-detail figure.holodisk-media--image img[src="'.$this->mediaUrl().'"]');
         $I->amOnPage($this->mediaUrl());
         $I->seeResponseCodeIs(200);
     }
@@ -44,12 +44,12 @@ final class HolodiskMediaCest
         $I->seeResponseCodeIs(403);
         $I->amOnPage('/logout');
 
-        // Every feature and a grant, but not yet approved.
-        $I->signInAs(TestFixture::PENDING_PLAYER_EMAIL);
+        // Every feature and a grant, but not yet approved (a player no test approves).
+        $I->signInAs(TestFixture::STAYS_PENDING_EMAIL);
         $I->amOnPage($this->mediaUrl());
         $I->seeResponseCodeIs(403);
-        $I->amOnPage('/pipboy');
-        $I->dontSee(TestFixture::HOLODISK_TITLE);
+        $I->amOnPage('/pipboy/'.TestFixture::$staysPendingPlayerId.'/data/holodisks');
+        $I->seeResponseCodeIs(404);
     }
 
     public function anonymousVisitorsCannotFetchMedia(FunctionalTester $I): void

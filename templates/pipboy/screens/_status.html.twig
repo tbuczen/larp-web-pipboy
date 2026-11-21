@@ -1,0 +1,24 @@
+<section class="pip-stat">
+    <p class="pip-stat__eyebrow">{{ player.larp.name }}</p>
+    <h1>{{ player.name }}</h1>
+    <dl class="data-row"><dt>PipBoy number</dt><dd>{{ player.pipboyNumber }}</dd></dl>
+    <dl class="data-row"><dt>Status</dt><dd><span class="badge badge--{{ player.status.value }}">{{ player.status.value }}</span></dd></dl>
+
+    {% if player.status.value == 'pending' %}
+        <p class="notice" role="status">Waiting for organizer approval. Your modules come online once you are approved.</p>
+    {% elseif player.status.value == 'rejected' %}
+        <p class="error" role="status">This registration was not approved. Contact the organizers if you think this is a mistake.</p>
+    {% else %}
+        <h2>Modules</h2>
+        <ul class="pip-modules">
+            {% for t in tabs %}
+                {% for s in t.screens|filter(s => s.key != 'status') %}
+                    <li><a href="{{ path('app_pipboy_screen', {player: player.id, tab: t.key, screen: s.key}) }}"><span>{{ t.label }} › {{ s.label }}</span><span class="pip-modules__state">Online</span></a></li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+        {% if tabs|length == 1 and tabs[0].screens|length == 1 %}
+            <p class="muted">No modules installed yet. Organizers enable them during the event.</p>
+        {% endif %}
+    {% endif %}
+</section>
