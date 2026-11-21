@@ -1,0 +1,107 @@
+/*
+ * PipBoy theme for the EasyAdmin organizer panel. Loaded after EasyAdmin's
+ * own stylesheet; the dashboard opens in dark mode, whose grey scale is
+ * remapped to the same phosphor greens as the player interface
+ * (public/css/pipboy.css). The light scheme stays available unchanged.
+ * Font: VT323 (SIL Open Font License 1.1, see /fonts/VT323-OFL.txt).
+ */
+
+@font-face {
+    font-family: "VT323";
+    src: url("../fonts/vt323-regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+body.ea.ea-dark-scheme,
+.ea-dark-scheme body.ea {
+    /* Grey scale remapped to greens: 950 = darkest panel, 50 = brightest text. */
+    --gray-950: #001100;
+    --gray-900: #03190a;
+    --gray-800: #062a0f;
+    --gray-700: #0a3e18;
+    --gray-600: #0e5a23;
+    --gray-500: #12803a;
+    --gray-400: #16a84b;
+    --gray-300: #19d164;
+    --gray-200: #1cfa80;
+    --gray-100: #8dffbe;
+    --gray-50: #d2ffe4;
+    --white: #d2ffe4;
+    --black: #000500;
+
+    --ea-primary: #1cfa80;
+    --ea-primary-foreground: #001100;
+    --text-color-rgb: 28, 250, 128;
+    --link-color: var(--gray-200);
+    --link-hover-color: var(--gray-50);
+    --body-bg: var(--gray-900);
+    --sidebar-bg: var(--gray-950);
+
+    --font-family-sans-serif: "VT323", ui-monospace, "DejaVu Sans Mono", "Courier New", monospace;
+    --font-family-monospace: "VT323", ui-monospace, "DejaVu Sans Mono", "Courier New", monospace;
+    --bs-body-font-family: var(--font-family-sans-serif);
+
+    font-size: 1.2rem;
+    letter-spacing: .03em;
+    text-shadow: 0 0 4px rgb(28 250 128 / 35%);
+}
+
+/* VT323 is narrow: lift EasyAdmin's compact control sizes so they stay legible. */
+.ea.ea-dark-scheme :is(.btn, label, .form-control, .form-select, .form-label, .col-form-label, .form-help, .form-text, .ts-control, .ts-dropdown, .dropdown-item, .badge, .page-link, table, .content-search input, .ea-sidebar-item-label),
+.ea-dark-scheme .ea :is(.btn, label, .form-control, .form-select, .form-label, .col-form-label, .form-help, .form-text, .ts-control, .ts-dropdown, .dropdown-item, .badge, .page-link, table, .content-search input, .ea-sidebar-item-label) {
+    font-size: 1.2rem;
+}
+
+/* Square terminal corners everywhere in the panel. */
+.ea-dark-scheme .ea *,
+.ea.ea-dark-scheme * {
+    border-radius: 0 !important;
+}
+
+/* Headings and the sidebar title in the terminal's uppercase style. */
+.ea-dark-scheme .ea :is(.title, .content-header-title, .ea-sidebar-group-label-text, .responsive-logo),
+.ea.ea-dark-scheme :is(.title, .content-header-title, .ea-sidebar-group-label-text, .responsive-logo) {
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+/* The selected menu entry inverts like the device's lists. */
+.ea.ea-dark-scheme .ea-sidebar-item-link[aria-current="page"],
+.ea-dark-scheme .ea .ea-sidebar-item-link[aria-current="page"] {
+    background: var(--gray-200);
+    color: var(--gray-950);
+    text-shadow: none;
+}
+
+.ea.ea-dark-scheme .ea-sidebar-item-link[aria-current="page"] .ea-sidebar-item-icon,
+.ea-dark-scheme .ea .ea-sidebar-item-link[aria-current="page"] .ea-sidebar-item-icon {
+    color: var(--gray-950);
+}
+
+.ea.ea-dark-scheme .btn-primary,
+.ea-dark-scheme .ea .btn-primary,
+.ea.ea-dark-scheme .badge,
+.ea-dark-scheme .ea .badge {
+    text-shadow: none;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+/* Scanlines over the whole panel; purely decorative. */
+body.ea.ea-dark-scheme::after,
+.ea-dark-scheme body.ea::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    pointer-events: none;
+    background: repeating-linear-gradient(to bottom, transparent 0, transparent 2px, rgb(0 0 0 / 20%) 3px, transparent 4px);
+}
+
+@media (forced-colors: active) {
+    body.ea::after {
+        display: none;
+    }
+}

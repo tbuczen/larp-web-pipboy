@@ -4,7 +4,8 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
-use EasyCorp\Bundle\EasyAdminBundle\Config\{Dashboard, MenuItem};
+use EasyCorp\Bundle\EasyAdminBundle\Config\{Assets, Dashboard, MenuItem};
+use EasyCorp\Bundle\EasyAdminBundle\Config\Option\ColorScheme;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,7 +23,14 @@ final class DashboardController extends AbstractDashboardController
 
     public function configureDashboard(): Dashboard
     {
-        return Dashboard::new()->setTitle('PipBoy · Organizer');
+        return Dashboard::new()
+            ->setTitle('PipBoy · Organizer')
+            ->setDefaultColorScheme(ColorScheme::DARK);
+    }
+
+    public function configureAssets(): Assets
+    {
+        return Assets::new()->addCssFile('css/admin-pipboy.css');
     }
 
     public function configureMenuItems(): iterable
