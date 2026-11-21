@@ -41,7 +41,7 @@ final class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(PlayerCrudController::class, 'Players', 'fa fa-users');
         yield MenuItem::linkTo(EventInvitationCrudController::class, 'Invitations', 'fa fa-envelope');
         yield MenuItem::linkTo(PlayerFeatureAccessCrudController::class, 'Feature access', 'fa fa-key');
-        yield MenuItem::linkTo(HolodiskCrudController::class, 'Holodisks', 'fa fa-disc');
+        yield MenuItem::linkTo(HolodiskCrudController::class, 'Holodisks', 'fa fa-compact-disc');
         yield MenuItem::linkTo(HolodiskAccessCrudController::class, 'Holodisk access', 'fa fa-unlock');
         yield MenuItem::linkTo(NoteCrudController::class, 'Notes', 'fa fa-note-sticky');
         yield MenuItem::linkTo(ConditionCrudController::class, 'Conditions', 'fa fa-heart');

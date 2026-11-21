@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Entity\Holodisk;
+use App\Entity\HolodiskAccess;
 use App\Entity\Larp;
 use App\Entity\Player;
 use App\Entity\User;
@@ -68,6 +70,7 @@ try {
         TestFixture::INVITED_EMAIL => [],
         TestFixture::GET_ONLY_EMAIL => [],
         TestFixture::ADMIN_INVITED_EMAIL => [],
+        TestFixture::HOLODISK_READER_EMAIL => [],
     ] as $email => $roles) {
         $user = $userRepository->findOneBy(['email' => $email]) ?? new User();
         $user->setEmail($email)->setRoles($roles)->setFirstName('Test')->setLastName('Account');
@@ -101,7 +104,25 @@ try {
         $pendingPlayer->grantFeature($feature);
     }
     $entityManager->persist($pendingPlayer);
+
+    // An approved player with the holodisk feature and a grant for the fixture holodisk.
+    $holodisk = $entityManager->getRepository(Holodisk::class)->findOneBy(['title' => TestFixture::HOLODISK_TITLE]) ?? new Holodisk();
+    $holodisk->setLarp($larp)->setTitle(TestFixture::HOLODISK_TITLE)->setContent('Recovered transmission.')->detachMedia();
+    $entityManager->persist($holodisk);
+    $readerUser = $users[TestFixture::HOLODISK_READER_EMAIL];
+    $reader = $entityManager->getRepository(Player::class)->findOneBy(['user' => $readerUser, 'larp' => $larp]) ?? new Player();
+    $reader->setUser($readerUser)->setLarp($larp)->setPipboyNumber('TEST-READER')->setName('Holodisk reader')->approve();
+    $reader->grantFeature(Feature::HOLODISKS);
+    $entityManager->persist($reader);
     $entityManager->flush();
+    // The pending player also holds a grant, to prove approval is still required.
+    foreach ([$reader, $pendingPlayer] as $grantee) {
+        if ($entityManager->getRepository(HolodiskAccess::class)->findOneBy(['player' => $grantee, 'holodisk' => $holodisk]) === null) {
+            $entityManager->persist((new HolodiskAccess())->setPlayer($grantee)->setHolodisk($holodisk));
+        }
+    }
+    $entityManager->flush();
+    TestFixture::$holodiskId = $holodisk->getId();
     TestFixture::$playerId = $player->getId();
 
     foreach ($entityManager->getRepository(EventInvitation::class)->findBy(['larp' => [$larp, $otherLarp]]) as $previousInvitation) {

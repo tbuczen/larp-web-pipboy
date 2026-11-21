@@ -16,6 +16,14 @@
                     <dl class="data-row"><dt>PipBoy</dt><dd>{{ player.pipboyNumber }}</dd></dl>
                     <dl class="data-row"><dt>Status</dt><dd><span class="badge badge--{{ player.status.value }}">{{ player.status.value }}</span></dd></dl>
                     {% if player.status.value == 'pending' %}<p class="muted">Waiting for organizer approval.</p>{% endif %}
+                    {% if holodisks[player.id] is defined %}
+                        <h3 class="card-subtitle">Holodisks</h3>
+                        <ul class="links">
+                            {% for holodisk in holodisks[player.id] %}
+                                <li><a href="{{ path('app_holodisk', {id: holodisk.id}) }}">{{ holodisk.title }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
                 </li>
             {% endfor %}
         </ul>

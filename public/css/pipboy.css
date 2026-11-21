@@ -600,3 +600,65 @@ button:active,
         display: none;
     }
 }
+
+/* Holodisks: uploaded images get the green screen look on display only. The
+   greyscale image is multiplied over phosphor green, then scanlines and a
+   glow are drawn on top; the stored file is never altered. */
+
+.card-subtitle {
+    margin: 1rem 0 .25rem;
+    color: var(--green-dim);
+    font-size: 1.2rem;
+    font-weight: 400;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.card-subtitle + .links {
+    margin-top: 0;
+}
+
+.holodisk-media {
+    margin: 0 0 1.1rem;
+}
+
+.holodisk-media--image {
+    position: relative;
+    overflow: hidden;
+    border: 2px solid var(--green-dim);
+    background: var(--green);
+    line-height: 0;
+    box-shadow: 0 0 18px rgb(28 250 128 / 25%);
+}
+
+.holodisk-media--image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: grayscale(1) contrast(1.15) brightness(.95);
+    mix-blend-mode: multiply;
+}
+
+.holodisk-media--image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(to bottom, transparent 0, transparent 2px, rgb(0 0 0 / 30%) 3px, transparent 4px),
+        radial-gradient(ellipse at center, transparent 55%, rgb(0 0 0 / 55%) 100%);
+}
+
+.holodisk-media--audio audio {
+    display: block;
+    width: 100%;
+    /* Tint the browser's native player towards the terminal green. */
+    filter: invert(1) sepia(1) hue-rotate(70deg) saturate(3) brightness(.9);
+}
+
+.holodisk-text {
+    padding: .7rem .9rem;
+    border: 2px solid var(--green-faint);
+    background: rgb(0 0 0 / 18%);
+    white-space: normal;
+}

@@ -1,0 +1,14 @@
+{# Shared by the player page and the admin preview. The green tint is a CSS
+   effect on display; the stored image itself is not altered. #}
+{% if holodisk.hasMedia %}
+    {% set src = path('app_holodisk_media', {id: holodisk.id}) %}
+    {% if holodisk.mediaType.value == 'image' %}
+        <figure class="holodisk-media holodisk-media--image">
+            <img src="{{ src }}" alt="{{ holodisk.title }}" loading="lazy">
+        </figure>
+    {% else %}
+        <div class="holodisk-media holodisk-media--audio">
+            <audio controls preload="metadata" src="{{ src }}">Your browser cannot play this recording.</audio>
+        </div>
+    {% endif %}
+{% endif %}
