@@ -1,0 +1,22 @@
+# Production hosting (CyberFolks/DirectAdmin): the domain's document root is
+# fixed to the repository root and cannot point at public/. Every request is
+# therefore routed into public/, where public/.htaccess hands anything that
+# is not a real file to Symfony. Nothing outside public/ (.git, .env*,
+# config, src, var, vendor, ...) is ever served directly.
+
+# PHP version for the web process on this hosting.
+AddHandler application/x-httpd-php84 .php
+
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Requests already inside public/ are handled by public/.htaccess.
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Without mod_rewrite the routing above cannot protect the source tree.
+<IfModule !mod_rewrite.c>
+    Require all denied
+</IfModule>

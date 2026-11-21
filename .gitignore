@@ -9,3 +9,5 @@
 /.docker/
 /public/bundles/
 /config/reference.php
+/*.before-deploy
+/public/*.before-deploy
