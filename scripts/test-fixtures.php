@@ -6,6 +6,7 @@ use App\Entity\Larp;
 use App\Entity\Player;
 use App\Entity\User;
 use App\Entity\EventInvitation;
+use App\Enum\Feature;
 use App\Enum\RegistrationStatus;
 use App\Kernel;
 use App\Service\EventInvitationManager;
@@ -89,13 +90,19 @@ try {
     $playerUser = $users[TestFixture::PLAYER_EMAIL];
     $player = $entityManager->getRepository(Player::class)->findOneBy(['user' => $playerUser, 'larp' => $larp]) ?? new Player();
     $player->setUser($playerUser)->setLarp($larp)->setPipboyNumber('TEST-0001')->setName('Test player')->approve();
+    $player->grantFeature(Feature::NOTES);
     $entityManager->persist($player);
     $pendingUser = $users[TestFixture::PENDING_PLAYER_EMAIL];
     $pendingPlayer = $entityManager->getRepository(Player::class)->findOneBy(['user' => $pendingUser, 'larp' => $larp]) ?? new Player();
     $pendingPlayer->setUser($pendingUser)->setLarp($larp)->setPipboyNumber('TEST-PENDING')
         ->setName(TestFixture::PENDING_CHARACTER_NAME)->setStatus(RegistrationStatus::PENDING);
+    // Every feature already granted: the player must not be offered for new grants.
+    foreach (Feature::cases() as $feature) {
+        $pendingPlayer->grantFeature($feature);
+    }
     $entityManager->persist($pendingPlayer);
     $entityManager->flush();
+    TestFixture::$playerId = $player->getId();
 
     foreach ($entityManager->getRepository(EventInvitation::class)->findBy(['larp' => [$larp, $otherLarp]]) as $previousInvitation) {
         $entityManager->remove($previousInvitation);

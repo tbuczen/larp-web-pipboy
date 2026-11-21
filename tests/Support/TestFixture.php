@@ -26,6 +26,7 @@ final class TestFixture
     public const CSRF_LARP_NAME = 'Codeception rejected CSRF event';
 
     public static int $larpId;
+    public static int $playerId;
     public static int $otherLarpId;
     /** @var array<string, string> */
     public static array $invitationTokens = [];

@@ -44,6 +44,8 @@ final class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(HolodiskAccessCrudController::class, 'Holodisk access', 'fa fa-unlock');
         yield MenuItem::linkTo(NoteCrudController::class, 'Notes', 'fa fa-note-sticky');
         yield MenuItem::linkTo(ConditionCrudController::class, 'Conditions', 'fa fa-heart');
+        // A plain link: EasyAdmin's route items wrap the target in the dashboard context.
+        yield MenuItem::linkToUrl('Player view', 'fa fa-mobile-screen', $this->generateUrl('app_pipboy'));
         yield MenuItem::linkToLogout('Sign out', 'fa fa-sign-out');
     }
 }

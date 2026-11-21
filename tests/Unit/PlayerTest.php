@@ -38,6 +38,19 @@ final class PlayerTest extends TestCase
         self::assertCount(1, $player->getFeatureAccesses());
     }
 
+    public function testMissingFeaturesListsOnlyUngrantedFeatures(): void
+    {
+        $player = (new Player())->grantFeature(Feature::NOTES)->grantFeature(Feature::MAP);
+
+        self::assertSame([Feature::CHAT, Feature::HOLODISKS, Feature::CONDITIONS], $player->missingFeatures());
+
+        foreach (Feature::cases() as $feature) {
+            $player->grantFeature($feature);
+        }
+
+        self::assertSame([], $player->missingFeatures());
+    }
+
     public function testFeatureRevocationDoesNotRemoveOtherPermissions(): void
     {
         $player = (new Player())->grantFeature(Feature::MAP)->grantFeature(Feature::NOTES);
