@@ -17,6 +17,14 @@ final class AdminCest
         $I->seeElement('input[name="_csrf_token"]');
     }
 
+    public function signInPagesLinkToTheAdminPanel(FunctionalTester $I): void
+    {
+        $I->amOnPage('/login');
+        $I->seeLink('Admin', '/admin');
+        $I->amOnPage('/register');
+        $I->seeLink('Admin', '/admin');
+    }
+
     public function incorrectPasswordsDoNotAuthenticate(FunctionalTester $I): void
     {
         $I->amOnPage('/login');

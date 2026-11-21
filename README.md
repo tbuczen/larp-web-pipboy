@@ -27,6 +27,14 @@ scripts/dev console app:create-user organizer@example.org --admin
 
 The command prompts for a password without echoing it. No default application administrator is installed.
 
+To promote an account that already exists, for example one registered at `/register` or through Discord, run:
+
+```bash
+scripts/dev console app:grant-admin organizer@example.org
+```
+
+In production, run `php bin/console app:grant-admin <email> --env=prod` from the deployment directory. The admin panel is at `/admin`; the sign-in and register pages link to it as **Admin**.
+
 In the admin panel:
 
 1. Create organizer accounts and give them the Organizer role.
