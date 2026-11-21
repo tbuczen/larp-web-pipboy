@@ -13,6 +13,7 @@ Ask focused questions when business behavior is unclear. Continue useful work th
 - Use the existing checkout. Cloud tasks are isolated; create a worktree only when the user requests one.
 - Work on a branch named `task/short-description` (lowercase, hyphenated, e.g. `task/prod-deploy-workflow`) and open a pull request targeting `main`. Subsequent work must follow this route rather than direct pushes to `main`.
 - Preserve existing changes. Review the diff and run relevant checks before committing and pushing. Merge or deploy when the user authorizes that action.
+- The user authorizes merging your own pull requests into `main` once CI passes on the current head, with no merge conflict and no unresolved review comments. Every merge to `main` deploys to production, so check the resulting deploy run and report its outcome. Other merges and manual deploys still need the user's explicit request.
 - The user permits orchestration with up to three workers when separable tasks benefit from parallel work. Give each worker a bounded scope and explicit file ownership; avoid overlapping edits.
 - Assign one owner at a time to Composer changes, migration generation, and HTTP tests using the shared test database. Parallel unit checks and read-only reviews are appropriate.
 - PR descriptions explain the resulting behavior, relevant validation, and outstanding limitations. Use a body file or structured argument to preserve multiline text.
