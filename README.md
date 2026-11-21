@@ -2,7 +2,7 @@
 
 A Symfony 7.4 LTS application running on PHP 8.4 and PostgreSQL 17, with EasyAdmin 5 for organizers. This initial delivery covers accounts, event registration and approval, organizer authorization, and the first game-data entities. The remaining gameplay milestones are tracked in [docs/roadmap.md](docs/roadmap.md).
 
-Project guidance: [agent workflow](AGENTS.md), [product decisions and roadmap](docs/roadmap.md), [architecture](docs/architecture.md), and [environment/deployment context](docs/operations.md). Operations also records the read-only review of `tbuczen/webspace` and hosting compatibility questions.
+Project guidance: [agent workflow](AGENTS.md), [product decisions and roadmap](docs/roadmap.md), [architecture](docs/architecture.md), and [environment/deployment context](docs/operations.md). Organizers: see the [runbooks](docs/runbooks/README.md) for admin access, creating a LARP, inviting players and approving them. Operations also records the read-only review of `tbuczen/webspace` and hosting compatibility questions.
 
 ## Development
 
