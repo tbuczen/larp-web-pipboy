@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Map · {{ larp.name }}{% endblock %}
+{% block status %}Organizer console{% endblock %}
+{% block head %}
+    {% if map %}
+        <link rel="stylesheet" href="{{ asset('vendor/leaflet/leaflet.css') }}">
+        <script src="{{ asset('vendor/leaflet/leaflet.js') }}" defer></script>
+        <script src="{{ asset('vendor/leaflet-imageoverlay-rotated/Leaflet.ImageOverlay.Rotated.js') }}" defer></script>
+        <script src="{{ asset('js/admin-map-calibrate.js') }}" defer></script>
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    <h1>Map of {{ larp.name }}</h1>
+    <p class="muted">Upload a drawn or scanned map of the game area, then drag it over OpenStreetMap until roads and buildings line up. Players see only your image, tinted like their PipBoy; their GPS position is shown on their own phone and never sent to the server.</p>
+
+    {% if map %}
+        <section class="map-calibrate" aria-labelledby="map-align-title">
+            <h2 id="map-align-title">Alignment {% if map.aligned %}<span class="tag">saved</span>{% else %}<span class="tag tag--warn">not aligned yet</span>{% endif %}</h2>
+            <p class="muted">Drag the <strong>✛</strong> handle to move the whole map, and the corner handles <strong>TL</strong>, <strong>TR</strong> and <strong>BL</strong> to scale and rotate it. Lower the opacity to compare with the streets underneath.</p>
+            <div class="map-calibrate__tools">
+                <label>Opacity <input type="range" min="0.1" max="1" step="0.05" value="0.6" data-map-opacity></label>
+                <button type="button" class="button button--ghost" data-map-fit>Place in current view</button>
+                <button type="button" class="button button--ghost" data-map-locate>Go to my location</button>
+            </div>
+            <div class="map-calibrate__canvas" id="map-calibrate"
+                 data-image-url="{{ path('app_larp_map_image', {id: map.id, v: map.updatedAt.timestamp}) }}"
+                 data-image-width="{{ map.imageWidth }}"
+                 data-image-height="{{ map.imageHeight }}"
+                 data-corners="{{ map.corners|json_encode }}">
+                <noscript><p class="notice notice--error">Aligning the map needs JavaScript.</p></noscript>
+            </div>
+            <form method="post" action="{{ path('admin_larp_map_align', {id: larp.id}) }}" class="map-calibrate__save" data-map-align-form>
+                <input type="hidden" name="_token" value="{{ csrf_token('map_align_' ~ larp.id) }}">
+                {% for corner in ['topLeft', 'topRight', 'bottomLeft'] %}
+                    {% set point = map.corners ? attribute(map.corners, corner) : null %}
+                    <input type="hidden" name="{{ corner }}Lat" value="{{ point ? point[0] }}" data-corner="{{ corner }}" data-axis="lat">
+                    <input type="hidden" name="{{ corner }}Lng" value="{{ point ? point[1] }}" data-corner="{{ corner }}" data-axis="lng">
+                {% endfor %}
+                <label class="checkbox"><input type="checkbox" name="invertColors" value="1"{{ map.invertColors ? ' checked' }}> Invert colours so dark lines glow on the PipBoy screen (for drawn, scanned or street maps; turn off for aerial photos)</label>
+                <button type="submit">Save alignment</button>
+            </form>
+            <p class="muted small">Street map © <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap contributors</a>, shown only on this page.</p>
+        </section>
+    {% endif %}
+
+    <section aria-labelledby="map-upload-title">
+        <h2 id="map-upload-title">{{ map ? 'Replace image' : 'Upload image' }}</h2>
+        {{ form_start(form) }}{{ form_widget(form) }}<button type="submit">{{ map ? 'Replace image' : 'Upload map' }}</button>{{ form_end(form) }}
+    </section>
+    <ul class="links"><li><a href="{{ path('admin') }}">Back to admin</a></li></ul>
+{% endblock %}

@@ -70,7 +70,7 @@ The names of the secrets and variables already added to `prod` were not readable
 
 ### Uploaded holodisk media
 
-Holodisk images and recordings are stored in `PROJECT_DIR/var/storage/holodisks` under random file names, outside the web root. The deploy never touches this directory, so files survive deploys. Include it in backups together with the database: a database restore without the matching files leaves holodisks pointing at missing media. Uploads are limited to 15 MB; `public/.user.ini` raises PHP's upload limits on hosts that honour it, and the hosting panel's PHP settings may need the same values.
+Holodisk images and recordings are stored in `PROJECT_DIR/var/storage/holodisks`, and LARP map images in `PROJECT_DIR/var/storage/maps`, under random file names, outside the web root. The admin map calibration page loads street tiles from `tile.openstreetmap.org` in the organizer's browser (light use within the OpenStreetMap tile policy, with attribution); players never load them. The deploy never touches this directory, so files survive deploys. Include it in backups together with the database: a database restore without the matching files leaves holodisks and maps pointing at missing images. Uploads are limited to 15 MB; `public/.user.ini` raises PHP's upload limits on hosts that honour it, and the hosting panel's PHP settings may need the same values.
 
 ### Limitations
 
