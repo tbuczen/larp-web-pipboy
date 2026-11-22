@@ -20,6 +20,16 @@ security:
                 check_path: app_login
                 enable_csrf: true
                 default_target_path: app_pipboy
+            # Opt-in "Keep me signed in": installed apps are reopened often, and iOS
+            # home-screen apps lose session cookies when closed. Changing the
+            # password or signing out ends it.
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 2592000
+                path: /
+                secure: auto
+                samesite: lax
+                signature_properties: ['password']
             login_throttling:
                 max_attempts: 5
                 interval: '1 minute'

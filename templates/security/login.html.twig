@@ -18,6 +18,7 @@
             <label for="password" class="required">Password</label>
             <input id="password" type="password" name="_password" autocomplete="current-password" required>
         </div>
+        <label class="checkbox"><input type="checkbox" name="_remember_me" value="on"> Keep me signed in on this device for 30 days</label>
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
         <button type="submit">Sign in</button>
     </form>

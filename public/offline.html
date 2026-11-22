@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#052308">
+    <title>PipBoy — No signal</title>
+    <style>
+        @font-face { font-family: "VT323"; src: url("/fonts/vt323-regular.woff2") format("woff2"); font-display: swap; }
+        html, body { height: 100%; margin: 0; }
+        body {
+            display: grid; place-items: center; padding: 1.5rem; box-sizing: border-box;
+            background: radial-gradient(ellipse at center, #0b3313 0%, #052308 55%, #001100 100%);
+            color: #1cfa80; font: 1.5rem/1.4 "VT323", ui-monospace, monospace; text-align: center;
+            text-shadow: 0 0 6px rgb(28 250 128 / 60%);
+        }
+        body::after { content: ""; position: fixed; inset: 0; pointer-events: none;
+            background: repeating-linear-gradient(0deg, rgb(0 0 0 / 25%) 0 1px, transparent 1px 3px); }
+        h1 { margin: .4rem 0; font-size: 2.4rem; letter-spacing: .2em; text-transform: uppercase; }
+        p { max-width: 28rem; margin: .6rem auto; color: #8af5b9; }
+        .signal { letter-spacing: .4em; animation: blink 1.2s steps(2, jump-none) infinite; }
+        button { margin-top: 1.2rem; padding: .4rem 1.4rem; border: 2px solid #1cfa80; background: rgb(28 250 128 / 10%);
+            color: inherit; font: inherit; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
+        @keyframes blink { 50% { opacity: .2; } }
+        @media (prefers-reduced-motion: reduce) { .signal { animation: none; } }
+    </style>
+</head>
+<body>
+    <main>
+        <p class="signal" aria-hidden="true">▂ ▃ ▅ ▆ ▇</p>
+        <h1>No signal</h1>
+        <p>The PipBoy cannot reach the network right now. Move to better coverage and try again.</p>
+        <p>A map you have opened before still works offline: MAP › Local map.</p>
+        <button type="button" onclick="location.reload()">[ Retry ]</button>
+    </main>
+</body>
+</html>
