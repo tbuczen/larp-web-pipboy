@@ -9,6 +9,7 @@ Short step-by-step guides for running a LARP in PipBoy. Screenshots come from a 
 | [3. Invite players](03-invite-players.md) | Organizer | Personal invitation links, what the player does, revoking a link |
 | [4. Approve players and grant features](04-approve-players.md) | Organizer | Approving a pending player, PipBoy numbers, feature access |
 | [5. Upload and align the map](05-map.md) | Organizer | Map image, aligning it over OpenStreetMap, what players see |
+| [6. Print holodisk QR codes](06-holodisk-codes.md) | Organizer | Codes, printing, reusing printed labels, how players scan, revoking |
 
 ## Roles in one minute
 

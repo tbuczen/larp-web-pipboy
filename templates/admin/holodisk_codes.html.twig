@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Holodisk codes · {{ larp.name }}{% endblock %}
+{% block status %}Organizer console{% endblock %}
+
+{% block body %}
+    <div class="no-print">
+        <h1>Holodisk codes · {{ larp.name }}</h1>
+        <p class="muted">Print and place these in the game. Any phone camera opens the PipBoy from the QR code, and the PipBoy's DATA › Scan screen reads it directly; the printed text can be typed instead. Each player unlocks a holodisk once. Regenerating a code on the holodisk invalidates printed copies.</p>
+        <button type="button" onclick="window.print()">Print</button>
+    </div>
+    {% if cards is empty %}
+        <p class="muted">This LARP has no holodisks yet.</p>
+    {% else %}
+        <div class="qr-sheet">
+            {% for card in cards %}
+                <figure class="qr-card">
+                    <img src="{{ card.qr }}" alt="QR code for {{ card.holodisk.title }}" width="300" height="300">
+                    <figcaption>
+                        <span class="qr-card__code">{{ card.code }}</span>
+                        <p class="qr-card__title no-print">{{ card.holodisk.title }}</p>
+                    </figcaption>
+                </figure>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <ul class="links no-print"><li><a href="{{ path('admin') }}">Back to admin</a></li></ul>
+{% endblock %}

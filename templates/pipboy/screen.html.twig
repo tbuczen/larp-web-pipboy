@@ -14,6 +14,10 @@
 {% block body_class %}is-pipboy{% endblock %}
 {% block head %}
     {%- if screen.key == 'messages' and selected %}<script src="{{ asset('js/pipboy-chat.js') }}" defer></script>{% endif %}
+    {%- if screen.key == 'scan' %}
+        <script src="{{ asset('vendor/jsqr/jsQR.js') }}" defer></script>
+        <script src="{{ asset('js/pipboy-scan.js') }}" defer></script>
+    {%- endif %}
     {%- if screen.key == 'local' and map %}
         <link rel="stylesheet" href="{{ asset('vendor/leaflet/leaflet.css') }}">
         <script src="{{ asset('vendor/leaflet/leaflet.js') }}" defer></script>
@@ -49,6 +53,8 @@
         {{ include('pipboy/screens/_status.html.twig') }}
     {% elseif screen.key == 'messages' %}
         {{ include('pipboy/screens/_messages.html.twig') }}
+    {% elseif screen.key == 'scan' %}
+        {{ include('pipboy/screens/_scan.html.twig') }}
     {% elseif screen.key == 'local' and map %}
         {{ include('pipboy/screens/_map.html.twig') }}
     {% elseif screen.key in ['conditions', 'holodisks', 'notes'] %}

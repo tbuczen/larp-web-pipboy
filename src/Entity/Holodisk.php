@@ -6,12 +6,18 @@ namespace App\Entity;
 
 use App\Enum\HolodiskMediaType;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
+#[UniqueEntity(fields: ['code'], message: 'This code is already used by another holodisk.')]
 class Holodisk
 {
+    /** Generated codes avoid characters that are easy to misread (0/O, 1/I/L). */
+    private const string CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    private const int GENERATED_CODE_LENGTH = 12;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -43,6 +49,19 @@ class Holodisk
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $mediaOriginalName = null;
 
+    /**
+     * Secret printed in the holodisk's QR code (and readable as text). Scanning
+     * it unlocks the holodisk once for an eligible player. Stored normalized:
+     * upper case, without spaces or hyphens.
+     */
+    #[ORM\Column(length: 64, unique: true)]
+    #[Assert\NotBlank]
+    #[Assert\Regex(pattern: '/^[A-Z0-9]{6,64}$/', message: 'Use 6 to 64 letters or digits (spaces and hyphens are ignored).')]
+    private string $code;
+
+    /** Set from the admin form to replace the code, invalidating printed copies. */
+    private bool $regenerateCode = false;
+
     /** Upload received from the admin form; stored by HolodiskMediaStorage, never persisted itself. */
     #[Assert\File(
         maxSize: '15M',
@@ -53,6 +72,60 @@ class Holodisk
 
     /** Set from the admin form to delete the current media. */
     private bool $removeMedia = false;
+
+    public function __construct()
+    {
+        $this->code = self::generateCode();
+    }
+
+    public static function generateCode(): string
+    {
+        $code = '';
+        for ($i = 0; $i < self::GENERATED_CODE_LENGTH; ++$i) {
+            $code .= self::CODE_ALPHABET[random_int(0, strlen(self::CODE_ALPHABET) - 1)];
+        }
+
+        return $code;
+    }
+
+    /** The same normalization applies to codes entered by organizers and to scanned text. */
+    public static function normalizeCode(string $code): string
+    {
+        return strtoupper((string) preg_replace('/[\s-]+/u', '', $code));
+    }
+
+    public function getCode(): string
+    {
+        return $this->code;
+    }
+
+    public function setCode(?string $code): self
+    {
+        $this->code = self::normalizeCode((string) $code);
+
+        return $this;
+    }
+
+    public function isRegenerateCode(): bool
+    {
+        return $this->regenerateCode;
+    }
+
+    public function setRegenerateCode(bool $regenerateCode): self
+    {
+        $this->regenerateCode = $regenerateCode;
+
+        return $this;
+    }
+
+    /** Applies a pending regeneration from the admin form. */
+    public function applyCodeRegeneration(): void
+    {
+        if ($this->regenerateCode) {
+            $this->code = self::generateCode();
+            $this->regenerateCode = false;
+        }
+    }
 
     public function getId(): ?int
     {
