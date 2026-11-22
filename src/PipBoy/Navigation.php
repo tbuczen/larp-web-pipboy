@@ -31,6 +31,7 @@ final class Navigation
 
         $data = $this->screens([
             $player->canUse(Feature::HOLODISKS) ? new Screen('holodisks', 'Holodisks') : null,
+            $player->canUse(Feature::HOLODISKS) ? new Screen('scan', 'Scan') : null,
             $player->canUse(Feature::NOTES) ? new Screen('notes', 'Notes') : null,
         ]);
         if ($data !== []) {

@@ -142,6 +142,15 @@ try {
     }
     $entityManager->flush();
     TestFixture::$holodiskId = $holodisk->getId();
+
+    // A holodisk players unlock by scanning its code; nobody holds it at the start of a run.
+    $scanHolodisk = $entityManager->getRepository(Holodisk::class)->findOneBy(['title' => TestFixture::SCAN_HOLODISK_TITLE]) ?? new Holodisk();
+    $scanHolodisk->setLarp($larp)->setTitle(TestFixture::SCAN_HOLODISK_TITLE)->setContent('Coordinates of the vault door.')->setCode(TestFixture::SCAN_HOLODISK_CODE);
+    $entityManager->persist($scanHolodisk);
+    $entityManager->flush();
+    $entityManager->createQueryBuilder()->delete(HolodiskAccess::class, 'access')
+        ->where('access.holodisk = :holodisk')->setParameter('holodisk', $scanHolodisk)->getQuery()->execute();
+    TestFixture::$scanHolodiskId = $scanHolodisk->getId();
     TestFixture::$readerPlayerId = $reader->getId();
     // Never approved by any test: proves gameplay screens stay closed before approval.
     $staysPendingUser = $users[TestFixture::STAYS_PENDING_EMAIL];

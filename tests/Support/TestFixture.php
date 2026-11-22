@@ -19,6 +19,8 @@ final class TestFixture
     public const UNRELATED_INVITATION_EMAIL = 'unrelated-invitation@pipboy.test';
     public const HOLODISK_READER_EMAIL = 'holodisk-reader@pipboy.test';
     public const HOLODISK_TITLE = 'Codeception holodisk';
+    public const SCAN_HOLODISK_TITLE = 'Codeception scannable holodisk';
+    public const SCAN_HOLODISK_CODE = 'SCANTESTDISK1';
     public const NOTE_TITLE = 'Codeception note';
     public const STAYS_PENDING_EMAIL = 'stays-pending@pipboy.test';
     /** Approved players with chat in the fixture LARP; Dave has chat in the other LARP. */
@@ -41,6 +43,7 @@ final class TestFixture
     public static int $larpId;
     public static int $playerId;
     public static int $holodiskId;
+    public static int $scanHolodiskId;
     public static int $readerPlayerId;
     public static int $pendingPlayerId;
     public static int $staysPendingPlayerId;

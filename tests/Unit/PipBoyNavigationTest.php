@@ -24,7 +24,7 @@ final class PipBoyNavigationTest extends TestCase
         $player = (new Player())->grantFeature(Feature::HOLODISKS);
         $player->approve();
 
-        self::assertSame(['stat' => ['status'], 'data' => ['holodisks']], $this->layout((new Navigation())->tabsFor($player)));
+        self::assertSame(['stat' => ['status'], 'data' => ['holodisks', 'scan']], $this->layout((new Navigation())->tabsFor($player)));
     }
 
     public function testEveryFeatureAddsItsScreens(): void
@@ -37,7 +37,7 @@ final class PipBoyNavigationTest extends TestCase
 
         self::assertSame([
             'stat' => ['status', 'conditions'],
-            'data' => ['holodisks', 'notes'],
+            'data' => ['holodisks', 'scan', 'notes'],
             'map' => ['local'],
             'comms' => ['messages'],
         ], $this->layout((new Navigation())->tabsFor($player)));

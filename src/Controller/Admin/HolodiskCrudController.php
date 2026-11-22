@@ -7,7 +7,7 @@ use App\Entity\Holodisk;
 use App\Enum\HolodiskMediaType;
 use App\Service\HolodiskMediaStorage;
 use Doctrine\ORM\EntityManagerInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Config\{Action, Actions, Crud};
 use EasyCorp\Bundle\EasyAdminBundle\Field\{BooleanField, Field, TextField, TextareaField};
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 
@@ -26,6 +26,10 @@ final class HolodiskCrudController extends ScopedCrudController
     {
         yield $this->scopedAssociationField('larp')->setFormTypeOption('disabled', $pageName === Crud::PAGE_EDIT);
         yield TextField::new('title');
+        yield TextField::new('code', 'Scan code')->hideWhenCreating()
+            ->setHelp('Printed under the QR code. Enter the text of an existing printed code to reuse it; spaces and hyphens are ignored.');
+        yield BooleanField::new('regenerateCode', 'Generate a new code')->onlyWhenUpdating()->renderAsSwitch(false)
+            ->setHelp('Printed copies of the current code stop working.');
         yield TextareaField::new('content')->setRequired(false)->setFormTypeOption('empty_data', '')
             ->setHelp('Text shown on the holodisk. Optional when an image or recording is attached.');
         // Keyed on the stored file name: EasyAdmin's text field casts the value to a string first.
@@ -37,6 +41,13 @@ final class HolodiskCrudController extends ScopedCrudController
         yield BooleanField::new('removeMedia', 'Remove current media')->onlyWhenUpdating()->renderAsSwitch(false);
     }
 
+    public function configureActions(Actions $actions): Actions
+    {
+        return parent::configureActions($actions)
+            ->add(Crud::PAGE_INDEX, Action::new('printCode', 'QR code')->linkToRoute('admin_holodisk_code', static fn (Holodisk $holodisk): array => ['id' => $holodisk->getId()]))
+            ->add(Crud::PAGE_EDIT, Action::new('printCode', 'QR code')->linkToRoute('admin_holodisk_code', static fn (Holodisk $holodisk): array => ['id' => $holodisk->getId()]));
+    }
+
     public function persistEntity(EntityManagerInterface $entityManager, object $entityInstance): void
     {
         $this->mediaStorage->sync($entityInstance);
@@ -45,6 +56,7 @@ final class HolodiskCrudController extends ScopedCrudController
 
     public function updateEntity(EntityManagerInterface $entityManager, object $entityInstance): void
     {
+        $entityInstance->applyCodeRegeneration();
         $this->mediaStorage->sync($entityInstance);
         parent::updateEntity($entityManager, $entityInstance);
     }
