@@ -1,4 +1,7 @@
 framework:
+    assets:
+        # Versioned URLs bust the host's week-long static file cache after each deploy.
+        version_strategy: App\Asset\FileModifiedVersionStrategy
     secret: '%env(APP_SECRET)%'
     csrf_protection: true
     session:
