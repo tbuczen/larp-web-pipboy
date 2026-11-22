@@ -1,11 +1,11 @@
-{% extends 'base.html.twig' %}
+{% extends '@EasyAdmin/page/content.html.twig' %}
 
-{% block title %}Invite player{% endblock %}
-{% block status %}Organizer console{% endblock %}
+{% block page_title %}Invite to {{ larp.name }}{% endblock %}
+{% block content_title %}Invite to {{ larp.name }}{% endblock %}
 
-{% block body %}
-    <h1>Invite to {{ larp.name }}</h1>
-    <p class="muted">The link can be accepted once, by the account registered with this email. Invited players still need your approval.</p>
-    {{ form_start(form) }}{{ form_widget(form) }}<button type="submit">Generate invitation</button>{{ form_end(form) }}
-    <ul class="links"><li><a href="{{ path('admin') }}">Back to admin</a></li></ul>
+{% block main %}
+    <p class="text-muted">The link can be accepted once, by the account registered with this email. Invited players still need your approval.</p>
+    <div class="admin-box"><div>
+        {{ form_start(form) }}{{ form_widget(form) }}<button type="submit" class="btn btn-primary">Generate invitation</button>{{ form_end(form) }}
+    </div></div>
 {% endblock %}

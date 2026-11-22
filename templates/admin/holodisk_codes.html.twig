@@ -1,16 +1,13 @@
-{% extends 'base.html.twig' %}
+{% extends '@EasyAdmin/page/content.html.twig' %}
 
-{% block title %}Holodisk codes · {{ larp.name }}{% endblock %}
-{% block status %}Organizer console{% endblock %}
+{% block page_title %}Holodisk codes · {{ larp.name }}{% endblock %}
+{% block content_title %}Holodisk codes · {{ larp.name }}{% endblock %}
+{% block page_actions %}<button type="button" class="btn btn-primary no-print" onclick="window.print()"><i class="fa fa-print"></i> Print</button>{% endblock %}
 
-{% block body %}
-    <div class="no-print">
-        <h1>Holodisk codes · {{ larp.name }}</h1>
-        <p class="muted">Print and place these in the game. Any phone camera opens the PipBoy from the QR code, and the PipBoy's DATA › Scan screen reads it directly; the printed text can be typed instead. Each player unlocks a holodisk once. Regenerating a code on the holodisk invalidates printed copies.</p>
-        <button type="button" onclick="window.print()">Print</button>
-    </div>
+{% block main %}
+    <p class="text-muted no-print">Print and place these in the game. Any phone camera opens the PipBoy from the QR code, and the PipBoy's DATA › Scan screen reads it directly; the printed text can be typed instead. Each player unlocks a holodisk once. Regenerating a code on the holodisk invalidates printed copies.</p>
     {% if cards is empty %}
-        <p class="muted">This LARP has no holodisks yet.</p>
+        <p class="text-muted">This LARP has no holodisks yet.</p>
     {% else %}
         <div class="qr-sheet">
             {% for card in cards %}
@@ -24,5 +21,4 @@
             {% endfor %}
         </div>
     {% endif %}
-    <ul class="links no-print"><li><a href="{{ path('admin') }}">Back to admin</a></li></ul>
 {% endblock %}

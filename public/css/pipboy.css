@@ -1441,59 +1441,6 @@ body.is-pipboy::after {
     font-size: .9em;
 }
 
-/* Organizer calibration over OpenStreetMap. */
-.map-calibrate__canvas {
-    height: min(70vh, 40rem);
-    min-height: 20rem;
-    margin: .8rem 0;
-    border: 2px solid var(--green-dim);
-}
-
-.map-calibrate__tools {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: .6rem 1rem;
-}
-
-.map-calibrate__tools .button {
-    width: auto;
-    margin: 0;
-    font-size: 1.1rem;
-}
-
-.map-calibrate__tools input[type="range"] {
-    width: 9rem;
-    vertical-align: middle;
-}
-
-.map-handle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid var(--green);
-    border-radius: 50%;
-    background: rgb(5 35 8 / 85%);
-    color: var(--green);
-    font-size: 1rem;
-    letter-spacing: 0;
-    box-shadow: 0 0 8px rgb(28 250 128 / 60%);
-    cursor: grab;
-}
-
-.tag {
-    display: inline-block;
-    padding: 0 .4rem;
-    border: 1px solid var(--green);
-    font-size: .7em;
-    vertical-align: middle;
-}
-
-.tag--warn {
-    border-color: var(--danger);
-    color: var(--danger);
-}
-
 .checkbox {
     display: flex;
     gap: .6rem;
@@ -1546,75 +1493,6 @@ body.is-pipboy::after {
 .pip-scan__manual input {
     text-transform: uppercase;
     letter-spacing: .12em;
-}
-
-/* Printable holodisk code sheet (admin). */
-.qr-sheet {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-    gap: 1rem;
-    margin: 1rem 0;
-}
-
-.qr-card {
-    padding: .8rem;
-    border: 2px solid var(--green-dim);
-    text-align: center;
-    break-inside: avoid;
-}
-
-.qr-card img {
-    display: block;
-    width: 100%;
-    max-width: 14rem;
-    height: auto;
-    aspect-ratio: 1;
-    margin: 0 auto .4rem;
-    background: #fff;
-    image-rendering: pixelated;
-}
-
-.qr-card__code {
-    font-size: 1.3rem;
-    letter-spacing: .15em;
-}
-
-.qr-card__title {
-    margin: .2rem 0 0;
-    font-size: 1rem;
-}
-
-@media print {
-    body,
-    .terminal,
-    .screen {
-        border: 0 !important;
-        background: #fff !important;
-        box-shadow: none !important;
-        color: #000 !important;
-        text-shadow: none !important;
-    }
-
-    .tabs,
-    .status-bar,
-    .no-print,
-    .notice,
-    body::before,
-    body::after,
-    .screen::before,
-    .screen::after {
-        display: none !important;
-    }
-
-    .qr-sheet {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    .qr-card {
-        border: 1px dashed #000;
-        color: #000;
-        text-shadow: none;
-    }
 }
 
 /* Player notes. */

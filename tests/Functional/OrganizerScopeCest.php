@@ -113,7 +113,6 @@ final class OrganizerScopeCest
         $I->see('Invitation created');
         $I->seeElement('#invitation-link[readonly]');
         $I->rememberCreatedInvitation('admin-created');
-        $I->click('Back to admin');
         $I->click('Invitations');
         $I->see(TestFixture::ADMIN_INVITED_EMAIL, '.datagrid');
         $I->click('Sign out');

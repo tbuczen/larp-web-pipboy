@@ -1,18 +1,22 @@
-{% extends 'base.html.twig' %}
+{% extends '@EasyAdmin/page/content.html.twig' %}
 
-{% block title %}Invitation created{% endblock %}
-{% block status %}Organizer console{% endblock %}
+{% block page_title %}Invitation created{% endblock %}
+{% block content_title %}Invitation created{% endblock %}
 
-{% block body %}
-    <h1>Invitation created</h1>
-    <dl class="data-row"><dt>For</dt><dd>{{ invitation.email }}</dd></dl>
-    <dl class="data-row"><dt>LARP</dt><dd>{{ invitation.larp.name }}</dd></dl>
-    <dl class="data-row"><dt>Invited as</dt><dd>{{ invitation.role.label }}</dd></dl>
-    <dl class="data-row"><dt>Expires</dt><dd>{{ invitation.expiresAt|date('Y-m-d H:i T') }}</dd></dl>
-    <div class="field">
-        <label for="invitation-link">Send this personal link to the player:</label>
-        <input id="invitation-link" type="text" value="{{ link }}" readonly>
-    </div>
-    <p class="notice" role="status">This link is shown only now. You can revoke the invitation and generate another if needed.</p>
-    <ul class="links"><li><a href="{{ path('admin') }}">Back to admin</a></li></ul>
+{% block main %}
+    <div class="admin-box"><div>
+        <dl class="row mb-3">
+            <dt class="col-sm-3">For</dt><dd class="col-sm-9">{{ invitation.email }}</dd>
+            <dt class="col-sm-3">LARP</dt><dd class="col-sm-9">{{ invitation.larp.name }}</dd>
+            <dt class="col-sm-3">Invited as</dt><dd class="col-sm-9">{{ invitation.role.label }}</dd>
+            <dt class="col-sm-3">Expires</dt><dd class="col-sm-9">{{ invitation.expiresAt|date('Y-m-d H:i T') }}</dd>
+        </dl>
+        <label for="invitation-link" class="form-label">Send this personal link to the player:</label>
+        <div class="input-group mb-3">
+            <input id="invitation-link" type="text" class="form-control" value="{{ link }}" readonly>
+            <button type="button" class="btn btn-secondary" onclick="navigator.clipboard?.writeText(document.getElementById('invitation-link').value); this.textContent = 'Copied';">Copy</button>
+        </div>
+        <p class="alert alert-warning mb-0" role="status">This link is shown only now. You can revoke the invitation and generate another if needed.</p>
+    </div></div>
+    <p class="mt-3"><a class="btn btn-secondary" href="{{ path('admin_invitation_create', {id: invitation.larp.id}) }}">Invite another player</a></p>
 {% endblock %}

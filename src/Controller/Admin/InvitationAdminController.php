@@ -10,10 +10,10 @@ use App\Security\EventVoter;
 use App\Service\EventInvitationManager;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\{EmailType, EnumType, IntegerType};
 use Symfony\Component\HttpFoundation\{Request, Response};
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Constraints\{Email, Length, NotBlank, Range};
@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints\{Email, Length, NotBlank, Range};
 #[IsGranted('ROLE_ORGANIZER')]
 final class InvitationAdminController extends AbstractController
 {
-    #[Route('/admin/larp/{id}/invite', name: 'admin_invitation_create', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
+    #[AdminRoute('/larp/{id}/invite', name: 'invitation_create', options: ['requirements' => ['id' => '\d+'], 'methods' => ['GET', 'POST']])]
     public function create(int $id, Request $request, EntityManagerInterface $entityManager, EventInvitationManager $manager): Response
     {
         $larp = $entityManager->find(Larp::class, $id) ?? throw $this->createNotFoundException();
@@ -55,7 +55,7 @@ final class InvitationAdminController extends AbstractController
         return $this->privateResponse('invitation/create.html.twig', ['form' => $form, 'larp' => $larp]);
     }
 
-    #[Route('/admin/invitation/{id}/revoke', name: 'admin_invitation_revoke', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
+    #[AdminRoute('/invitation/{id}/revoke', name: 'invitation_revoke', options: ['requirements' => ['id' => '\d+'], 'methods' => ['GET', 'POST']])]
     public function revoke(int $id, Request $request, EntityManagerInterface $entityManager): Response
     {
         $invitation = $entityManager->find(EventInvitation::class, $id) ?? throw $this->createNotFoundException();

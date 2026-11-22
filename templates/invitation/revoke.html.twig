@@ -1,11 +1,9 @@
-{% extends 'base.html.twig' %}
+{% extends '@EasyAdmin/page/content.html.twig' %}
 
-{% block title %}Revoke invitation{% endblock %}
-{% block status %}Organizer console{% endblock %}
+{% block page_title %}Revoke invitation{% endblock %}
+{% block content_title %}Revoke invitation for {{ invitation.email }}?{% endblock %}
 
-{% block body %}
-    <h1>Revoke invitation for {{ invitation.email }}?</h1>
-    <p class="muted">This prevents use of the link. It does not remove a player who has already joined.</p>
-    {{ form_start(form) }}<button class="button--danger" type="submit">Revoke invitation</button>{{ form_end(form) }}
-    <ul class="links"><li><a href="{{ path('admin') }}">Back to admin</a></li></ul>
+{% block main %}
+    <p class="text-muted">This prevents use of the link. It does not remove a player who has already joined.</p>
+    {{ form_start(form) }}<button class="btn btn-danger" type="submit">Revoke invitation</button>{{ form_end(form) }}
 {% endblock %}
