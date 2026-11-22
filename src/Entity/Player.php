@@ -144,6 +144,26 @@ class Player
         ));
     }
 
+    /** @return list<Feature> granted features, in declaration order (used by the admin checkboxes) */
+    public function getFeatures(): array
+    {
+        return array_values(array_filter(Feature::cases(), $this->hasFeatureGrant(...)));
+    }
+
+    /** @param iterable<Feature> $features exactly the features this player should have */
+    public function setFeatures(iterable $features): self
+    {
+        $wanted = [];
+        foreach ($features as $feature) {
+            $wanted[$feature->value] = $feature;
+        }
+        foreach (Feature::cases() as $feature) {
+            isset($wanted[$feature->value]) ? $this->grantFeature($feature) : $this->revokeFeature($feature);
+        }
+
+        return $this;
+    }
+
     public function grantFeature(Feature $feature): self
     {
         if (!$this->hasFeatureGrant($feature)) {

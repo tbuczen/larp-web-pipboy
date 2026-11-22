@@ -11,4 +11,15 @@ enum Feature: string
     case MAP = 'map';
     case HOLODISKS = 'holodisks';
     case CONDITIONS = 'conditions';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::NOTES => 'Notes',
+            self::CHAT => 'Messages',
+            self::MAP => 'Map',
+            self::HOLODISKS => 'Holodisks',
+            self::CONDITIONS => 'Conditions',
+        };
+    }
 }

@@ -30,6 +30,9 @@ final class TestFixture
         'carol' => ['email' => 'chat-carol@pipboy.test', 'number' => 'CHAT-CAROL', 'name' => 'Carol Scrapper'],
         'dave' => ['email' => 'chat-dave@pipboy.test', 'number' => 'CHAT-DAVE', 'name' => 'Dave Elsewhere'],
     ];
+    /** Alice's second membership: the same account in the other LARP. */
+    public const ALICE_ELSEWHERE_NUMBER = 'ALICE-ABROAD';
+    public const ALICE_ELSEWHERE_NAME = 'Alice abroad';
     public const CONDITION_NAME = 'Codeception sprained ankle';
     public const ORGANIZER_INVITED_EMAIL = 'organizer-invited@pipboy.test';
     public const PASSWORD = 'LocalTestPassword-42';
@@ -50,6 +53,7 @@ final class TestFixture
     /** @var array<string, int> */
     public static array $chatPlayerIds = [];
     public static int $otherLarpId;
+    public static int $aliceElsewherePlayerId;
     /** @var array<string, string> */
     public static array $invitationTokens = [];
 }

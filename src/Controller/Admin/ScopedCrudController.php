@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
+use App\Admin\LarpContext;
 use App\Entity\Condition;
 use App\Entity\EventInvitation;
 use App\Entity\Holodisk;
@@ -30,11 +31,35 @@ use Symfony\Contracts\Service\Attribute\Required;
 abstract class ScopedCrudController extends AbstractCrudController
 {
     private EventMutationPolicy $mutationPolicy;
+    private LarpContext $larpContext;
 
     #[Required]
     public function setEventMutationPolicy(EventMutationPolicy $mutationPolicy): void
     {
         $this->mutationPolicy = $mutationPolicy;
+    }
+
+    #[Required]
+    public function setLarpContext(LarpContext $larpContext): void
+    {
+        $this->larpContext = $larpContext;
+    }
+
+    protected function larpContext(): LarpContext
+    {
+        return $this->larpContext;
+    }
+
+    /** New event records start in the LARP the panel is working on. */
+    public function createEntity(string $entityFqcn): ?object
+    {
+        $entity = parent::createEntity($entityFqcn);
+        $larp = $this->larpContext->current();
+        if ($larp !== null && $entityFqcn !== Larp::class && method_exists($entity, 'setLarp')) {
+            $entity->setLarp($larp);
+        }
+
+        return $entity;
     }
 
     public function configureCrud(Crud $crud): Crud
@@ -44,10 +69,12 @@ abstract class ScopedCrudController extends AbstractCrudController
 
     public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
     {
-        return $this->restrictToAssignedEvents(
+        $query = $this->restrictToAssignedEvents(
             parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters),
             static::getEntityFqcn(),
         );
+
+        return $this->restrictToCurrentLarp($query, static::getEntityFqcn());
     }
 
     /** @param (callable(QueryBuilder): QueryBuilder)|null $refine extra conditions applied after the event scope */
@@ -61,7 +88,11 @@ abstract class ScopedCrudController extends AbstractCrudController
         };
 
         return AssociationField::new($property)->setQueryBuilder(function (QueryBuilder $query) use ($class, $refine): QueryBuilder {
-            $query = $this->restrictToAssignedEvents($query, $class);
+            $query = $this->restrictToCurrentLarp($this->restrictToAssignedEvents($query, $class), $class);
+            // New records may only be placed in the LARP the panel is working on.
+            if ($class === Larp::class) {
+                $query->andWhere($query->getRootAliases()[0].' = :context_larp')->setParameter('context_larp', $this->larpContext->current());
+            }
 
             return $refine !== null ? $refine($query) : $query;
         });
@@ -124,6 +155,37 @@ abstract class ScopedCrudController extends AbstractCrudController
         return $query->innerJoin($larpAlias.'.organizers', 'scope_organizer')
             ->andWhere('scope_organizer = :scope_current_user')
             ->setParameter('scope_current_user', $user);
+    }
+
+    /**
+     * Limits event data to the LARP the panel is working on. The LARP list
+     * itself is not limited: it is where the LARP is chosen.
+     *
+     * @param class-string $class
+     */
+    protected function restrictToCurrentLarp(QueryBuilder $query, string $class): QueryBuilder
+    {
+        if ($class === Larp::class) {
+            return $query;
+        }
+
+        $larp = $this->larpContext->current();
+        if ($larp === null) {
+            return $query->andWhere('1 = 0');
+        }
+
+        // Autocomplete can apply the list and the association scope to one query.
+        if ($query->getParameter('context_larp') !== null) {
+            return $query;
+        }
+
+        $root = $query->getRootAliases()[0];
+        if ($class === Player::class || $class === Holodisk::class || $class === EventInvitation::class) {
+            return $query->andWhere($root.'.larp = :context_larp')->setParameter('context_larp', $larp);
+        }
+
+        return $query->innerJoin($root.'.player', 'context_player')
+            ->andWhere('context_player.larp = :context_larp')->setParameter('context_larp', $larp);
     }
 
     private function currentUser(): User

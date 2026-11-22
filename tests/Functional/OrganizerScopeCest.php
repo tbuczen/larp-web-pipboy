@@ -87,8 +87,7 @@ final class OrganizerScopeCest
     public function organizersCannotRevokeOtherEventsInvitations(FunctionalTester $I): void
     {
         $I->signInAs();
-        $I->amOnPage('/admin');
-        $I->click('Invitations');
+        $I->amOnPage('/admin/larp/'.TestFixture::$otherLarpId.'/manage?list=invitation');
         $I->seeResponseCodeIs(200);
         $revokeUrl = $I->grabAttributeFrom([
             'xpath' => '//tr[.//td[contains(., "'.TestFixture::UNRELATED_INVITATION_EMAIL.'")]]//a[contains(@class, "action-revokeInvitation")]',

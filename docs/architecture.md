@@ -49,6 +49,10 @@ Transient plaintext passwords must not enter the serialized security session. Pr
 - `LarpMap` (one per LARP, unique, cascade on LARP delete) stores the uploaded image's random file name, type and size and three aligned corners as `[lat, lng]` JSON; a database check requires all three corners or none.
 - Movement/location, QR assignments and offline storage have no complete implementation yet. Add their models with the feature's acceptance criteria rather than implying the initial dataset completes those milestones.
 
+## Admin panel scope
+
+`App\Admin\LarpContext` holds the LARP the panel works on (session; the first available LARP by default). `ScopedCrudController` limits every event list and association choice to it on top of the organizer scope, and new records get it as their LARP. `LarpContextController` (`/admin/larp/{id}/manage`) switches it after checking `MANAGE_EVENT`. The LARP list and accounts stay global. `FeatureAccessController` (`/admin/feature-access`, an EasyAdmin admin route) edits every player's features as checkboxes; `Player::setFeatures()` grants and revokes to match.
+
 ## Player interface
 
 `/pipboy` lists the account's memberships; each opens `/pipboy/{player}/{tab}/{screen}/{item}` (`PipBoyController`). `App\PipBoy\Navigation` decides which tabs and screens exist: until approval only STAT › Status, afterwards one screen per granted feature. The controller returns 404 for another account's player, unknown or ungranted screens, and entries that are not the player's own. Add a new player module by adding its screen to `Navigation`, its records to `PipBoyController::entries()` and a partial under `templates/pipboy/screens/`.

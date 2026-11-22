@@ -28,26 +28,20 @@ Never share a player's account email or real name with other players: in the gam
 
 ## 2. Grant features
 
-1. In **Players**, open the row's **⋯** menu and choose **Grant feature**, or open **Feature access** and choose **Add PlayerFeatureAccess**.
-2. Pick the **Player** (shown as `PipBoy number - character name`) and the **Feature**, then choose **Create**. Repeat for each feature.
+1. Make sure the menu shows your LARP (**LARP: …** at the top; use **Switch LARP** if you manage several).
+2. Open **Feature access**. Every player of the LARP is a row, every feature a column: tick or clear the boxes and choose **Save feature access**. The **all** link under a column header ticks (or clears) that feature for everyone.
 
-   The form only offers grants that do not exist yet: players who already have every feature are not listed, and once a player is chosen the form reloads to show only the features they still lack.
+   ![Feature access grid](images/13-feature-access.png)
 
-   ![Grant a feature form](images/13-grant-feature.png)
-
-3. The grant appears in the list. Remove a grant with the row's **⋯** menu and **Delete**.
-
-   ![Feature access list](images/14-feature-access-list.png)
+3. For a single player you can also tick the **Features** boxes on the player's **Edit** form in **Players**.
 
 | Feature | Meaning |
 | --- | --- |
-| NOTES | Personal notes |
-| CHAT | Direct messages by PipBoy number |
-| MAP | The event map |
-| HOLODISKS | Unlocking holodisks by scanning |
-| CONDITIONS | Fictional conditions (injuries, effects) |
-
-Most player screens for these features are still being built (see the [roadmap](../roadmap.md)). Granting a feature now prepares the player's access for when it ships.
+| Notes | DATA › Notes: organizer notes and the player's own private notes |
+| Messages | COMMS › Messages: direct chat by PipBoy number |
+| Map | MAP › Local map with the player's GPS position |
+| Holodisks | DATA › Holodisks and DATA › Scan |
+| Conditions | STAT › Conditions (injuries, effects) |
 
 ## 3. What the player sees
 
