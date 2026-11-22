@@ -26,7 +26,28 @@ class Note
     private string $title = '';
 
     #[ORM\Column(type: 'text')]
+    #[Assert\Length(max: 10000)]
     private string $content = '';
+
+    /**
+     * Notes players write for themselves are private: organizers never see
+     * them in admin. Notes written by organizers are read-only for players.
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $writtenByPlayer = false;
+
+    public static function writtenBy(Player $player): self
+    {
+        $note = (new self())->setPlayer($player);
+        $note->writtenByPlayer = true;
+
+        return $note;
+    }
+
+    public function isWrittenByPlayer(): bool
+    {
+        return $this->writtenByPlayer;
+    }
 
     public function getId(): ?int
     {

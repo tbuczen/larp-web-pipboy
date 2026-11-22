@@ -1,0 +1,52 @@
+{#- DATA › Notes: the player's own notes (editable) and organizer notes (read-only).
+    noteMode: 'new' shows the new-note form, 'edit' the selected note's edit form. -#}
+{% set notes_url = path('app_pipboy_screen', {player: player.id, tab: tab.key, screen: screen.key}) %}
+<section class="pip-split{{ selected or noteMode == 'new' ? ' has-selection' }}">
+    <div class="pip-split__side">
+        <a class="button pip-note-new" href="{{ notes_url }}?new=1">New note</a>
+        <ul class="pip-list" aria-label="{{ screen.label }}">
+            {% for id, entry in entries %}
+                <li>
+                    <a class="pip-list__item{{ selected and selected.id == id ? ' is-selected' }}"
+                       href="{{ path('app_pipboy_screen', {player: player.id, tab: tab.key, screen: screen.key, item: id}) }}"{{ selected and selected.id == id ? ' aria-current="true"' }}>
+                        <span>{{ entry.title }}</span>
+                        {% if not entry.writtenByPlayer %}<span class="pip-list__meta" title="Written by the organizers">Org</span>{% endif %}
+                    </a>
+                </li>
+            {% else %}
+                <li class="pip-list__empty muted">No notes yet. Write your first one.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <article class="pip-detail">
+        {% if noteMode == 'new' %}
+            <a class="pip-detail__back" href="{{ notes_url }}">◂ {{ screen.label }}</a>
+            <h2>New note</h2>
+            {{ include('pipboy/screens/_note_form.html.twig', {action: path('app_pipboy_note_create', {player: player.id}), token: 'note_new_' ~ player.id, note: null, cancel: notes_url}) }}
+        {% elseif selected and noteMode == 'edit' %}
+            {% set note_url = path('app_pipboy_screen', {player: player.id, tab: tab.key, screen: screen.key, item: selected.id}) %}
+            <a class="pip-detail__back" href="{{ note_url }}">◂ {{ selected.title }}</a>
+            <h2>Edit note</h2>
+            {{ include('pipboy/screens/_note_form.html.twig', {action: path('app_pipboy_note_update', {player: player.id, note: selected.id}), token: 'note_' ~ selected.id, note: selected, cancel: note_url}) }}
+        {% elseif selected %}
+            <a class="pip-detail__back" href="{{ notes_url }}">◂ {{ screen.label }}</a>
+            <h2>{{ selected.title }}</h2>
+            {% if selected.content is not empty %}<div class="holodisk-text">{{ selected.content|nl2br }}</div>{% endif %}
+            {% if selected.writtenByPlayer %}
+                <div class="pip-note-actions">
+                    <a class="button" href="{{ path('app_pipboy_screen', {player: player.id, tab: tab.key, screen: screen.key, item: selected.id}) }}?edit=1">Edit</a>
+                    <form method="post" action="{{ path('app_pipboy_note_delete', {player: player.id, note: selected.id}) }}" data-confirm="Delete this note? This cannot be undone.">
+                        <input type="hidden" name="_token" value="{{ csrf_token('note_delete_' ~ selected.id) }}">
+                        <button type="submit" class="button--danger">Delete</button>
+                    </form>
+                </div>
+                <p class="muted small">Private: only you can read your notes.</p>
+            {% else %}
+                <p class="muted small">From the organizers. Read-only.</p>
+            {% endif %}
+        {% elseif entries is not empty %}
+            <p class="pip-detail__hint muted">Select a note.</p>
+        {% endif %}
+    </article>
+</section>

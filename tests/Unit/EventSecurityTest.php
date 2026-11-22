@@ -61,6 +61,15 @@ final class EventSecurityTest extends TestCase
         self::assertFalse((new EventAccessPolicy())->canManage($superAdmin, new User()));
     }
 
+    public function testPlayerWrittenNotesArePrivateEvenFromSuperadministrators(): void
+    {
+        $superAdmin = (new User())->setRoles(['ROLE_SUPER_ADMIN']);
+        $player = (new Player())->setLarp(new Larp());
+
+        self::assertTrue((new EventAccessPolicy())->canManage($superAdmin, (new Note())->setPlayer($player)));
+        self::assertFalse((new EventAccessPolicy())->canManage($superAdmin, Note::writtenBy($player)));
+    }
+
     public function testVoterDeniesUnassignedEventEvenForAuthenticatedOrganizer(): void
     {
         $organizer = (new User())->setRoles(['ROLE_ORGANIZER']);

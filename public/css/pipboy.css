@@ -963,6 +963,7 @@ body.is-pipboy::after {
 
 @media (max-width: 47.99rem) {
     .pip-split.has-selection .pip-list,
+    .pip-split.has-selection .pip-split__side,
     .pip-split:not(.has-selection) .pip-detail {
         display: none;
     }
@@ -1614,4 +1615,142 @@ body.is-pipboy::after {
         color: #000;
         text-shadow: none;
     }
+}
+
+/* Player notes. */
+.pip-note-new {
+    margin: 0 0 .8rem;
+}
+
+.pip-note-form textarea {
+    min-height: 12rem;
+    resize: vertical;
+}
+
+.pip-note-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem;
+    margin-top: .8rem;
+}
+
+.pip-note-actions form {
+    margin: 0;
+}
+
+.pip-note-actions .button,
+.pip-note-actions button {
+    margin-top: 0;
+    font-size: 1.2rem;
+}
+
+/*
+ * STAT figure: line art in the phosphor colour, six bars around it. An active
+ * condition dims and blinks its bar and makes that body part flicker.
+ */
+.pip-figure {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr minmax(9rem, 14rem) 1fr;
+    grid-template-rows: auto 1fr 1fr auto;
+    grid-template-areas:
+        ". head ."
+        "arm-r body arm-l"
+        "leg-r body leg-l"
+        ". torso .";
+    align-items: center;
+    justify-items: center;
+    gap: .4rem .6rem;
+    max-width: 26rem;
+    margin: 1rem auto 1.4rem;
+}
+
+.pip-figure__body {
+    grid-area: body;
+    width: 100%;
+    height: auto;
+    fill: rgb(28 250 128 / 14%);
+    stroke: var(--green);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 5px rgb(28 250 128 / 55%));
+}
+
+.pip-figure__body .limb {
+    fill: none;
+    stroke-width: 14;
+}
+
+.pip-figure__body .helmet,
+.pip-figure__body .goggles,
+.pip-figure__body .boot {
+    fill: rgb(28 250 128 / 35%);
+}
+
+.pip-figure__body .eye {
+    fill: var(--green);
+    stroke: none;
+}
+
+.pip-figure__body .detail {
+    fill: none;
+    stroke-width: 2;
+}
+
+.pip-figure__part.is-hurt {
+    animation: pip-figure-flicker 1.6s steps(2, jump-none) infinite;
+}
+
+.pip-figure__bar {
+    width: 3.2rem;
+    height: .7rem;
+    background: var(--green);
+    box-shadow: 0 0 8px rgb(28 250 128 / 60%);
+}
+
+.pip-figure__bar.is-hurt {
+    background: transparent;
+    border: 2px solid var(--danger);
+    box-shadow: 0 0 8px rgb(255 177 92 / 50%);
+    animation: pip-figure-flicker 1.6s steps(2, jump-none) infinite;
+}
+
+.pip-figure__bar--head { grid-area: head; }
+.pip-figure__bar--arm-r { grid-area: arm-r; align-self: start; margin-top: 30%; }
+.pip-figure__bar--arm-l { grid-area: arm-l; align-self: start; margin-top: 30%; }
+.pip-figure__bar--leg-r { grid-area: leg-r; align-self: end; margin-bottom: 30%; }
+.pip-figure__bar--leg-l { grid-area: leg-l; align-self: end; margin-bottom: 30%; }
+.pip-figure__bar--torso { grid-area: torso; }
+
+.pip-figure__caption {
+    grid-column: 1 / -1;
+    color: var(--danger);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.pip-figure__caption a {
+    color: inherit;
+}
+
+@keyframes pip-figure-flicker {
+    50% { opacity: .35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pip-figure__part.is-hurt,
+    .pip-figure__bar.is-hurt {
+        animation: none;
+    }
+
+    .pip-figure__part.is-hurt {
+        opacity: .5;
+    }
+}
+
+[data-fx="off"] .pip-figure__part.is-hurt,
+[data-fx="off"] .pip-figure__bar.is-hurt {
+    animation: none;
 }
