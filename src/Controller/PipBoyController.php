@@ -15,6 +15,7 @@ use App\Enum\BodyPart;
 use App\Enum\Feature;
 use App\Enum\RegistrationStatus;
 use App\PipBoy\Navigation;
+use App\PipBoy\StatFigure;
 use App\Service\ChatService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,6 +37,7 @@ final class PipBoyController extends AbstractController
         private readonly Navigation $navigation,
         private readonly EntityManagerInterface $entityManager,
         private readonly ChatService $chat,
+        private readonly StatFigure $statFigure,
     ) {
     }
 
@@ -139,7 +141,7 @@ final class PipBoyController extends AbstractController
      * Body parts marked on the STAT figure by currently active conditions.
      * Only players who may see their conditions get them; others see a plain figure.
      *
-     * @return array{marks: array<string, list<Condition>>, conditionsVisible: bool}|null
+     * @return array{marks: array<string, list<Condition>>, conditionsVisible: bool, image: ?string}|null
      */
     private function figure(Player $player, DateTimeImmutable $now): ?array
     {
@@ -149,7 +151,7 @@ final class PipBoyController extends AbstractController
 
         $marks = array_fill_keys(array_map(static fn (BodyPart $part): string => $part->value, BodyPart::cases()), []);
         if (!$player->canUse(Feature::CONDITIONS)) {
-            return ['marks' => $marks, 'conditionsVisible' => false];
+            return ['marks' => $marks, 'conditionsVisible' => false, 'image' => $this->statFigure->imagePath()];
         }
 
         foreach ($this->entityManager->getRepository(Condition::class)->findBy(['player' => $player]) as $condition) {
@@ -158,7 +160,7 @@ final class PipBoyController extends AbstractController
             }
         }
 
-        return ['marks' => $marks, 'conditionsVisible' => true];
+        return ['marks' => $marks, 'conditionsVisible' => true, 'image' => $this->statFigure->imagePath()];
     }
 
     /** The LARP's map once organizers have aligned it; until then the screen reports it offline. */

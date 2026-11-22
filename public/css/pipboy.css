@@ -1754,3 +1754,20 @@ body.is-pipboy::after {
 [data-fx="off"] .pip-figure__bar.is-hurt {
     animation: none;
 }
+
+/* A licensed replacement figure image (public/images/stat-figure.*). */
+.pip-figure__filters {
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+.pip-figure__image {
+    max-height: 22rem;
+    object-fit: contain;
+    filter: url("#pip-figure-tint") drop-shadow(0 0 5px rgb(28 250 128 / 55%));
+}
+
+.pip-figure__image.is-hurt {
+    animation: pip-figure-flicker 3s steps(2, jump-none) infinite;
+}

@@ -12,6 +12,8 @@ Conditions are fictional states you give a player: an injury, poisoning, a curse
 
 ![STAT figure with an injured left leg](images/22-stat-figure.png)
 
+**Using licensed artwork for the figure:** if your event may use official artwork, add the image to the repository as `public/images/stat-figure.png` (or `.svg` / `.webp`) through a pull request; the next deploy shows it instead of the built-in figure for every LARP. Black line art on a white or transparent background works best: the lines are drawn in the screen green and the background disappears. The bars and condition marks stay the same, and the whole image blinks while any body part is affected. Remove the file to return to the built-in figure.
+
 Conditions without a body part appear only in the Conditions list. When the end time passes, the mark disappears by itself. The figure's left side is the character's right side, as if facing the player.
 
 ## Notes
