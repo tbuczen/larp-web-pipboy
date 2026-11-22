@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{#- PipBoy shell for one player: main tabs, sub-tabs ("screens"), the screen
+    itself and a segmented status bar. Neighbouring tabs are exposed as data
+    attributes for swipe and arrow-key navigation (public/js/pipboy.js). -#}
+{% set tab_index = 0 %}
+{% for t in tabs %}{% if t.key == tab.key %}{% set tab_index = loop.index0 %}{% endif %}{% endfor %}
+{% set prev_tab = tabs[(tab_index - 1 + tabs|length) % tabs|length] %}
+{% set next_tab = tabs[(tab_index + 1) % tabs|length] %}
+{% set screen_index = 0 %}
+{% for s in tab.screens %}{% if s.key == screen.key %}{% set screen_index = loop.index0 %}{% endif %}{% endfor %}
+
+{% block title %}{{ tab.label|upper }} · {{ screen.label }} · PipBoy{% endblock %}
+{% block body_class %}is-pipboy{% endblock %}
+
+{% block nav %}
+    <nav class="pip-nav" aria-label="PipBoy"
+         data-prev-tab="{{ path('app_pipboy_screen', {player: player.id, tab: prev_tab.key}) }}"
+         data-next-tab="{{ path('app_pipboy_screen', {player: player.id, tab: next_tab.key}) }}">
+        <div class="pip-tabs">
+            {% for t in tabs %}
+                <a class="pip-tab{{ t.key == tab.key ? ' is-active' }}" href="{{ path('app_pipboy_screen', {player: player.id, tab: t.key}) }}"{{ t.key == tab.key ? ' aria-current="page"' }}>{{ t.label }}</a>
+            {% endfor %}
+            <a class="pip-exit" href="{{ path('app_pipboy') }}" title="Back to your LARPs" aria-label="Back to your LARPs">&#x23FB;</a>
+        </div>
+        <div class="pip-subtabs">
+            {% for s in tab.screens %}
+                {% set distance = (loop.index0 - screen_index)|abs %}
+                <a class="pip-subtab pip-subtab--d{{ min(distance, 3) }}{{ s.key == screen.key ? ' is-active' }}"
+                   href="{{ path('app_pipboy_screen', {player: player.id, tab: tab.key, screen: s.key}) }}"{{ s.key == screen.key ? ' aria-current="true"' }}>{{ s.label }}</a>
+            {% endfor %}
+        </div>
+    </nav>
+{% endblock %}
+
+{% block body %}
+    {% if screen.key == 'status' %}
+        {{ include('pipboy/screens/_status.html.twig') }}
+    {% elseif screen.key in ['conditions', 'holodisks', 'notes'] %}
+        {{ include('pipboy/screens/_entries.html.twig') }}
+    {% else %}
+        {{ include('pipboy/screens/_offline.html.twig') }}
+    {% endif %}
+{% endblock %}
+
+{% block footer %}
+    <footer class="status-bar pip-status">
+        <span class="status-bar__cell" title="PipBoy number">PB {{ player.pipboyNumber }}</span>
+        <span class="status-bar__cell status-bar__cell--wide">{{ player.name }}</span>
+        <span class="status-bar__cell"><time data-clock datetime="{{ now|date('c') }}">{{ now|date('H:i') }}</time></span>
+        <button class="status-bar__cell fx-toggle" type="button" data-fx-toggle aria-pressed="true" title="Screen effects">FX</button>
+    </footer>
+{% endblock %}
