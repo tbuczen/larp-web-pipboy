@@ -12,6 +12,7 @@
 
 {% block title %}{{ tab.label|upper }} · {{ screen.label }} · PipBoy{% endblock %}
 {% block body_class %}is-pipboy{% endblock %}
+{% block head %}{% if screen.key == 'messages' and selected %}<script src="{{ asset('js/pipboy-chat.js') }}" defer></script>{% endif %}{% endblock %}
 
 {% block nav %}
     <nav class="pip-nav" aria-label="PipBoy"
@@ -19,7 +20,9 @@
          data-next-tab="{{ path('app_pipboy_screen', {player: player.id, tab: next_tab.key}) }}">
         <div class="pip-tabs">
             {% for t in tabs %}
-                <a class="pip-tab{{ t.key == tab.key ? ' is-active' }}" href="{{ path('app_pipboy_screen', {player: player.id, tab: t.key}) }}"{{ t.key == tab.key ? ' aria-current="page"' }}>{{ t.label }}</a>
+                <a class="pip-tab{{ t.key == tab.key ? ' is-active' }}" href="{{ path('app_pipboy_screen', {player: player.id, tab: t.key}) }}"{{ t.key == tab.key ? ' aria-current="page"' }}>{{ t.label }}
+                    {%- if t.key == 'comms' and chat.unreadTotal > 0 %}<span class="pip-badge" title="Unread messages">{{ chat.unreadTotal }}</span>{% endif -%}
+                </a>
             {% endfor %}
             <a class="pip-exit" href="{{ path('app_pipboy') }}" title="Back to your LARPs" aria-label="Back to your LARPs">&#x23FB;</a>
         </div>
@@ -36,6 +39,8 @@
 {% block body %}
     {% if screen.key == 'status' %}
         {{ include('pipboy/screens/_status.html.twig') }}
+    {% elseif screen.key == 'messages' %}
+        {{ include('pipboy/screens/_messages.html.twig') }}
     {% elseif screen.key in ['conditions', 'holodisks', 'notes'] %}
         {{ include('pipboy/screens/_entries.html.twig') }}
     {% else %}

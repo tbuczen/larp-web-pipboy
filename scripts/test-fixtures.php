@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Entity\Holodisk;
 use App\Entity\HolodiskAccess;
 use App\Entity\Condition;
+use App\Entity\Conversation;
 use App\Entity\Larp;
 use App\Entity\Note;
 use App\Entity\Player;
@@ -75,7 +76,7 @@ try {
         TestFixture::HOLODISK_READER_EMAIL => [],
         TestFixture::STAYS_PENDING_EMAIL => [],
         TestFixture::ORGANIZER_INVITED_EMAIL => [],
-    ] as $email => $roles) {
+    ] + array_fill_keys(array_column(TestFixture::CHAT_PLAYERS, 'email'), []) as $email => $roles) {
         $user = $userRepository->findOneBy(['email' => $email]) ?? new User();
         $user->setEmail($email)->setRoles($roles)->setFirstName('Test')->setLastName('Account');
         $user->setPassword($passwordHasher->hashPassword($user, TestFixture::PASSWORD));
@@ -156,6 +157,25 @@ try {
         $entityManager->flush();
     }
     TestFixture::$staysPendingPlayerId = $staysPending->getId();
+
+    // Chat players; their conversations start empty on every run.
+    $chatPlayers = [];
+    foreach (TestFixture::CHAT_PLAYERS as $key => $details) {
+        $chatLarp = $key === 'dave' ? $otherLarp : $larp;
+        $chatUser = $users[$details['email']];
+        $chatPlayer = $entityManager->getRepository(Player::class)->findOneBy(['user' => $chatUser, 'larp' => $chatLarp]) ?? new Player();
+        $chatPlayer->setUser($chatUser)->setLarp($chatLarp)->setPipboyNumber($details['number'])->setName($details['name'])->approve();
+        $chatPlayer->grantFeature(Feature::CHAT);
+        $entityManager->persist($chatPlayer);
+        $chatPlayers[$key] = $chatPlayer;
+    }
+    $entityManager->flush();
+    $entityManager->createQueryBuilder()->delete(Conversation::class, 'conversation')
+        ->where('conversation.playerA IN (:players) OR conversation.playerB IN (:players)')
+        ->setParameter('players', array_values($chatPlayers))->getQuery()->execute();
+    foreach ($chatPlayers as $key => $chatPlayer) {
+        TestFixture::$chatPlayerIds[$key] = $chatPlayer->getId();
+    }
     TestFixture::$pendingPlayerId = $pendingPlayer->getId();
     TestFixture::$playerId = $player->getId();
 

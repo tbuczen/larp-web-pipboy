@@ -1147,3 +1147,161 @@ body.is-pipboy::after {
         animation: none !important;
     }
 }
+
+/* Direct chat (COMMS › Messages) */
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.pip-badge {
+    display: inline-block;
+    min-width: 1.4em;
+    margin-left: .35em;
+    padding: 0 .3em;
+    background: var(--green);
+    color: var(--screen);
+    font-size: .85em;
+    line-height: 1.3;
+    text-align: center;
+    text-shadow: none;
+    vertical-align: .1em;
+}
+
+.pip-chat-new-box {
+    margin-bottom: 1rem;
+    padding-bottom: .6rem;
+    border-bottom: 2px dotted var(--green-faint);
+}
+
+.pip-chat-new-box > summary {
+    padding: .2rem .6rem;
+    border: 2px solid var(--green-dim);
+    cursor: pointer;
+    letter-spacing: .1em;
+    list-style: none;
+    text-transform: uppercase;
+}
+
+.pip-chat-new-box > summary::-webkit-details-marker {
+    display: none;
+}
+
+.pip-chat-new-box > summary::before {
+    content: "+ ";
+}
+
+.pip-chat-new-box[open] > summary::before {
+    content: "− ";
+}
+
+.pip-chat-new-box > summary:hover,
+.pip-chat-new-box > summary:focus-visible {
+    background: var(--green);
+    color: var(--screen);
+    text-shadow: none;
+    outline: 0;
+}
+
+.pip-chat-new {
+    margin: .8rem 0 0;
+}
+
+@media (max-width: 47.99rem) {
+    .pip-split.has-selection .pip-chat-side {
+        display: none;
+    }
+}
+
+.pip-chat-new textarea {
+    margin-top: .5rem;
+}
+
+.pip-chat-thread {
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+    max-height: 55vh;
+    max-height: 55dvh;
+    margin: 0 0 1rem;
+    padding: 0 .1rem .2rem 0;
+    overflow-y: auto;
+    list-style: none;
+    overscroll-behavior: contain;
+}
+
+.pip-chat-msg {
+    max-width: 85%;
+    padding: .35rem .6rem .25rem;
+    border: 2px solid var(--green-dim);
+}
+
+.pip-chat-msg p {
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.pip-chat-msg time {
+    display: block;
+    margin-top: .15rem;
+    color: var(--green-dim);
+    font-size: 1rem;
+    letter-spacing: .08em;
+    text-shadow: none;
+    text-transform: uppercase;
+}
+
+.pip-chat-msg--mine {
+    align-self: flex-end;
+    border-color: var(--green);
+    background: rgb(28 250 128 / 10%);
+}
+
+.pip-chat-msg--mine time {
+    text-align: right;
+}
+
+.pip-chat-msg--theirs {
+    align-self: flex-start;
+}
+
+.pip-chat-msg.is-new {
+    animation: boot-line .2s steps(2) 1;
+}
+
+.pip-chat-compose button,
+.pip-chat-new button {
+    margin-top: .5rem;
+}
+
+.pip-chat-names {
+    margin-top: 1.1rem;
+    padding-top: .8rem;
+    border-top: 2px dotted var(--green-faint);
+}
+
+.pip-chat-actions {
+    display: grid;
+    gap: .5rem;
+}
+
+@media (min-width: 30rem) {
+    .pip-chat-actions {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.pip-chat-actions form {
+    margin: 0;
+}
+
+.pip-chat-actions button {
+    margin-top: 0;
+    font-size: 1.2rem;
+}
