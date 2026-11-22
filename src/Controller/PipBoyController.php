@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Condition;
 use App\Entity\Conversation;
 use App\Entity\Holodisk;
+use App\Entity\LarpMap;
 use App\Entity\HolodiskAccess;
 use App\Entity\Note;
 use App\Entity\Player;
@@ -57,6 +58,7 @@ final class PipBoyController extends AbstractController
 
         $response = $this->render('pipboy/screen.html.twig', [
             'chat' => $chat,
+            'map' => $currentScreen->key === 'local' ? $this->alignedMap($player) : null,
             'player' => $player,
             'tabs' => $this->navigation->tabsFor($player),
             'tab' => $currentTab,
@@ -115,6 +117,14 @@ final class PipBoyController extends AbstractController
         }
 
         return ['unread' => $unread, 'unreadTotal' => array_sum($unread), 'messages' => $messages];
+    }
+
+    /** The LARP's map once organizers have aligned it; until then the screen reports it offline. */
+    private function alignedMap(Player $player): ?LarpMap
+    {
+        $map = $this->entityManager->getRepository(LarpMap::class)->findOneBy(['larp' => $player->getLarp()]);
+
+        return $map?->isAligned() ? $map : null;
     }
 
     /** @return list<Holodisk> */

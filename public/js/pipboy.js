@@ -74,7 +74,7 @@
             }
         };
         document.addEventListener('keydown', (event) => {
-            if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.target.closest('input, textarea, select, audio, [contenteditable]')) {
+            if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.target.closest('input, textarea, select, audio, [contenteditable], .leaflet-container')) {
                 return;
             }
             if (event.key === 'ArrowRight') { go('next'); }
@@ -83,7 +83,7 @@
         let start = null;
         const screen = document.getElementById('screen');
         screen?.addEventListener('touchstart', (event) => {
-            start = event.target.closest('audio, input, textarea, .pip-subtabs') ? null : { x: event.touches[0].clientX, y: event.touches[0].clientY };
+            start = event.target.closest('audio, input, textarea, .pip-subtabs, .leaflet-container') ? null : { x: event.touches[0].clientX, y: event.touches[0].clientY };
         }, { passive: true });
         screen?.addEventListener('touchend', (event) => {
             if (!start) {

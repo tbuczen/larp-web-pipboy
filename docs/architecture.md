@@ -45,7 +45,8 @@ Transient plaintext passwords must not enter the serialized security session. Pr
 - `PlayerFeatureAccess` grants notes, chat, map, holodisks, or conditions. `Player::canUse()` also checks approval.
 - `Holodisk` belongs to one LARP. `HolodiskAccess` belongs to a player/holodisk pair, supports revocation/restoration, and rejects cross-event associations. A grant alone is insufficient for a future content endpoint: membership, approval, and feature checks remain required.
 - `Note` and `Condition` belong to a player. Conditions are fictional game state, with UTC timestamps and a database check preventing an end before the start. Player-note visibility still needs a product decision.
-- Chat, map calibration/location, QR assignments, uploads, and offline storage have no complete implementation yet. Add their models with the feature's acceptance criteria rather than implying the initial dataset completes those milestones.
+- `LarpMap` (one per LARP, unique, cascade on LARP delete) stores the uploaded image's random file name, type and size and three aligned corners as `[lat, lng]` JSON; a database check requires all three corners or none.
+- Movement/location, QR assignments and offline storage have no complete implementation yet. Add their models with the feature's acceptance criteria rather than implying the initial dataset completes those milestones.
 
 ## Player interface
 
@@ -53,13 +54,15 @@ Transient plaintext passwords must not enter the serialized security session. Pr
 
 Direct chat (`ChatService`, `ChatController`, entities `Conversation` and `ChatMessage`) stores one conversation per pair of players (`player_a_id < player_b_id`, unique), so a declined or closed chat can never be requested again. Recipient lookup answers identically for unknown numbers, other events, players without chat and the sender's own number, and requests are rate-limited, so numbers cannot be probed. All chat endpoints re-check ownership, approval, the chat feature and conversation visibility; writes are POST with CSRF. `public/js/pipboy-chat.js` adds sending without reload and polling; messages are inserted as text.
 
+Maps: `MapAdminController` (`/admin/larp/{id}/map`, organizers of the LARP) uploads through `MapImageStorage` (`var/storage/maps`, outside the web root) and saves the alignment. `public/js/admin-map-calibrate.js` lays the image over OpenStreetMap tiles with Leaflet and the vendored `Leaflet.ImageOverlay.Rotated` (see `public/vendor/README.md`); corner handles keep the image rectangular. `MapController` serves the image only to organizers or approved players with the map feature (`LarpMapVoter`). The player screen (`_map.html.twig`, `public/js/pipboy-map.js`) shows the image without base tiles, tinted by the inline SVG filter `#pip-map-tint`, and reads `navigator.geolocation` on the device only.
+
 Visual effects are CSS (`public/css/pipboy.css`): cross-document View Transitions for screen switches with a power-on fallback, scanlines, noise and a boot log. `public/js/pipboy.js` is optional enhancement (clock, FX toggle, boot log, swipe/arrow-key tab switching). Effects stop with the FX toggle or `prefers-reduced-motion`.
 
 ## Extension guidance
 
 For chat, use event-scoped participants and authorize conversation membership on every read/write. Direct messages come first. Store character-name disclosure as explicit mutual consent; never substitute personal names. Incremental polling is a proposed initial transport; measure against the 100-user target before choosing long polling or additional infrastructure.
 
-For maps, calibrate an uploaded image to GPS coordinates and enforce map feature permission. Decide calibration, location consent, stale-position behavior, and connectivity before movement logic. PostGIS is an option when actual spatial queries justify it.
+Map alignment is affine in Web Mercator, which is accurate for event-sized areas. Positions are never sent to the server; movement detection will need its own consent, freshness and connectivity rules before any position leaves the device. PostGIS is an option when actual spatial queries justify it.
 
 For QR discovery, authorize the scan server-side and create an idempotent player/holodisk grant. Define multi-disk codes, imports, reassignment, and expiry before finalizing QR relations. Use maintained QR packages. Camera scanning is the baseline; Web NFC has limited browser support.
 

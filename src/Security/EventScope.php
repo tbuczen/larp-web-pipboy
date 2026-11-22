@@ -9,6 +9,7 @@ use App\Entity\EventInvitation;
 use App\Entity\Holodisk;
 use App\Entity\HolodiskAccess;
 use App\Entity\Larp;
+use App\Entity\LarpMap;
 use App\Entity\Note;
 use App\Entity\Player;
 use App\Entity\PlayerFeatureAccess;
@@ -19,7 +20,7 @@ final class EventScope
     {
         return match (true) {
             $subject instanceof Larp => $subject,
-            $subject instanceof Player, $subject instanceof Holodisk, $subject instanceof EventInvitation => $subject->getLarp(),
+            $subject instanceof Player, $subject instanceof Holodisk, $subject instanceof EventInvitation, $subject instanceof LarpMap => $subject->getLarp(),
             $subject instanceof PlayerFeatureAccess,
             $subject instanceof HolodiskAccess,
             $subject instanceof Note,

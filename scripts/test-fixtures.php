@@ -6,6 +6,7 @@ use App\Entity\Holodisk;
 use App\Entity\HolodiskAccess;
 use App\Entity\Condition;
 use App\Entity\Conversation;
+use App\Entity\LarpMap;
 use App\Entity\Larp;
 use App\Entity\Note;
 use App\Entity\Player;
@@ -166,6 +167,10 @@ try {
         $chatPlayer = $entityManager->getRepository(Player::class)->findOneBy(['user' => $chatUser, 'larp' => $chatLarp]) ?? new Player();
         $chatPlayer->setUser($chatUser)->setLarp($chatLarp)->setPipboyNumber($details['number'])->setName($details['name'])->approve();
         $chatPlayer->grantFeature(Feature::CHAT);
+        // Alice also carries the map; Bob is the chat player without it.
+        if ($key === 'alice') {
+            $chatPlayer->grantFeature(Feature::MAP);
+        }
         $entityManager->persist($chatPlayer);
         $chatPlayers[$key] = $chatPlayer;
     }
@@ -173,6 +178,9 @@ try {
     $entityManager->createQueryBuilder()->delete(Conversation::class, 'conversation')
         ->where('conversation.playerA IN (:players) OR conversation.playerB IN (:players)')
         ->setParameter('players', array_values($chatPlayers))->getQuery()->execute();
+    // Maps start absent on every run; the map tests upload and align their own.
+    $entityManager->createQueryBuilder()->delete(LarpMap::class, 'map')
+        ->where('map.larp IN (:larps)')->setParameter('larps', [$larp, $otherLarp])->getQuery()->execute();
     foreach ($chatPlayers as $key => $chatPlayer) {
         TestFixture::$chatPlayerIds[$key] = $chatPlayer->getId();
     }
