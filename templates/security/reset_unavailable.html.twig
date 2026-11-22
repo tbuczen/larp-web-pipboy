@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block active_tab %}login{% endblock %}
+{% block title %}PipBoy — Link not valid{% endblock %}
+{% block status %}Access terminal{% endblock %}
+
+{% block body %}
+    <h1>Reset link not valid</h1>
+    <p class="muted">This password reset link was already used, has expired, or was replaced by a newer one. Ask an organizer of your LARP for a new link.</p>
+    <ul class="links"><li><a href="{{ path('app_login') }}">Sign in</a></li></ul>
+{% endblock %}

@@ -37,6 +37,8 @@ final class PlayerCrudController extends ScopedCrudController
     public function configureActions(Actions $actions): Actions
     {
         return parent::configureActions($actions)
+            ->add(Crud::PAGE_INDEX, Action::new('passwordReset', 'Password reset link', 'fa fa-key')
+                ->linkToRoute('admin_player_password_reset', static fn (Player $player): array => ['id' => $player->getId()]))
             ->add(Crud::PAGE_INDEX, Action::new('featureAccess', 'Feature access', 'fa fa-key')->linkToRoute('admin_feature_access')->createAsGlobalAction())
             ->setPermission(Action::NEW, 'ROLE_SUPER_ADMIN');
     }

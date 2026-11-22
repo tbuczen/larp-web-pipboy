@@ -12,6 +12,7 @@ Short step-by-step guides for running a LARP in PipBoy. Screenshots come from a 
 | [6. Print holodisk QR codes](06-holodisk-codes.md) | Organizer | Codes, printing, reusing printed labels, how players scan, revoking |
 | [7. Conditions and notes](07-conditions-notes.md) | Organizer | Conditions, organizer notes, private player notes |
 | [8. Install the PipBoy on a phone](08-install-app.md) | Players (share with them) | Home-screen install on Android and iPhone, staying signed in, offline use |
+| [9. Reset a player's password](09-password-reset.md) | Organizer | One-time reset links, sending them to players |
 
 ## Roles in one minute
 

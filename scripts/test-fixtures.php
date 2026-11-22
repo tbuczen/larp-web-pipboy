@@ -77,6 +77,7 @@ try {
         TestFixture::HOLODISK_READER_EMAIL => [],
         TestFixture::STAYS_PENDING_EMAIL => [],
         TestFixture::ORGANIZER_INVITED_EMAIL => [],
+        TestFixture::RESET_EMAIL => [],
     ] + array_fill_keys(array_column(TestFixture::CHAT_PLAYERS, 'email'), []) as $email => $roles) {
         $user = $userRepository->findOneBy(['email' => $email]) ?? new User();
         $user->setEmail($email)->setRoles($roles)->setFirstName('Test')->setLastName('Account');
@@ -187,6 +188,14 @@ try {
     $entityManager->createQueryBuilder()->delete(Conversation::class, 'conversation')
         ->where('conversation.playerA IN (:players) OR conversation.playerB IN (:players)')
         ->setParameter('players', array_values($chatPlayers))->getQuery()->execute();
+    // A player whose password the reset tests change; the password is restored on every run.
+    $resetUser = $users[TestFixture::RESET_EMAIL];
+    $resetPlayer = $entityManager->getRepository(Player::class)->findOneBy(['user' => $resetUser, 'larp' => $larp]) ?? new Player();
+    $resetPlayer->setUser($resetUser)->setLarp($larp)->setPipboyNumber('TEST-RESET')->setName('Forgetful wanderer')->approve();
+    $entityManager->persist($resetPlayer);
+    $entityManager->flush();
+    TestFixture::$resetPlayerId = $resetPlayer->getId();
+
     // One account, two LARPs: Alice also plays the other event, as a different character.
     $aliceUser = $users[TestFixture::CHAT_PLAYERS['alice']['email']];
     $aliceElsewhere = $entityManager->getRepository(Player::class)->findOneBy(['user' => $aliceUser, 'larp' => $otherLarp]) ?? new Player();

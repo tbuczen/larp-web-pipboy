@@ -35,6 +35,7 @@ final class TestFixture
     public const ALICE_ELSEWHERE_NAME = 'Alice abroad';
     public const CONDITION_NAME = 'Codeception sprained ankle';
     public const ORGANIZER_INVITED_EMAIL = 'organizer-invited@pipboy.test';
+    public const RESET_EMAIL = 'forgetful@pipboy.test';
     public const PASSWORD = 'LocalTestPassword-42';
     public const LARP_NAME = 'Codeception fixtures event';
     public const OTHER_LARP_NAME = 'Codeception unrelated event';
@@ -53,6 +54,7 @@ final class TestFixture
     /** @var array<string, int> */
     public static array $chatPlayerIds = [];
     public static int $otherLarpId;
+    public static int $resetPlayerId;
     public static int $aliceElsewherePlayerId;
     /** @var array<string, string> */
     public static array $invitationTokens = [];

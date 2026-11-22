@@ -6,7 +6,7 @@ namespace App\Controller\Admin;
 use App\Entity\Player;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Config\{Action, Actions, Crud};
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\{ChoiceField, EmailField, TextField};
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -43,6 +43,12 @@ final class UserCrudController extends AbstractCrudController
             $password->setFormTypeOption('constraints', [new NotBlank()]);
         }
         yield $password;
+    }
+
+    public function configureActions(Actions $actions): Actions
+    {
+        return parent::configureActions($actions)->add(Crud::PAGE_INDEX, Action::new('passwordReset', 'Password reset link', 'fa fa-key')
+            ->linkToRoute('admin_account_password_reset', static fn (User $user): array => ['id' => $user->getId()]));
     }
 
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
