@@ -74,7 +74,7 @@ Holodisk images and recordings are stored in `PROJECT_DIR/var/storage/holodisks`
 
 ### Limitations
 
-The host serves static files with a week-long browser cache (`Cache-Control: max-age=604800`). Twig `asset()` URLs therefore carry each file's modification time (`?v=…`, `App\Asset\FileModifiedVersionStrategy`); a deploy that changes a CSS or JS file changes its URL. Reference new static files through `asset()`.
+The host serves static files with a week-long browser cache (`Cache-Control: max-age=604800`). Twig `asset()` URLs therefore carry each file's modification time (`?v=…`, `App\Asset\FileModifiedVersionStrategy`); a deploy that changes a CSS or JS file changes its URL. Reference new static files through `asset()`. `public/.htaccess` serves `sw.js` with `Cache-Control: no-cache` (where mod_headers is available) and `.webmanifest` as `application/manifest+json`; installation and the service worker require HTTPS. "Keep me signed in" cookies are signed with `APP_SECRET`: rotating it signs everyone out.
 
 The deploy updates the live checkout in place, like LARPilot: requests during the build may fail, and there is no automatic rollback. Roll back by reverting on `main`; migrations are not reversed automatically. Take a database backup before deploying destructive migrations. Persistent upload storage, release switching and a backup/restore plan remain to be designed. Live deployment, OAuth and the production PHP runtime have not been tested from this repository.
 

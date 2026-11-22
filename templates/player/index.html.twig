@@ -7,6 +7,13 @@
 
 {% block body %}
     <h1>Your LARPs</h1>
+    {# Shown by pipboy.js when the browser can install the app, or with instructions on iOS. #}
+    <section class="install-card" data-install hidden>
+        <h2>Install PipBoy</h2>
+        <p class="muted">Put the PipBoy on your home screen: it opens full screen like an app, and a map you have opened works without signal.</p>
+        <button type="button" data-install-button hidden>Install PipBoy</button>
+        <p class="install-card__ios" data-install-ios hidden>On iPhone or iPad: tap <strong>Share</strong> <span aria-hidden="true">⬆</span> in Safari, then <strong>Add to Home Screen</strong>.</p>
+    </section>
     {% if players is not empty %}
         <ul class="card-list">
             {% for player in players %}

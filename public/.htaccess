@@ -3,6 +3,19 @@
 
 DirectoryIndex index.php
 
+# Web app manifest type, so browsers accept it for installation.
+<IfModule mod_mime.c>
+    AddType application/manifest+json .webmanifest
+</IfModule>
+
+# The service worker must be revalidated on every check so updates reach phones.
+<IfModule mod_headers.c>
+    <Files "sw.js">
+        Header set Cache-Control "no-cache"
+        Header set Service-Worker-Allowed "/"
+    </Files>
+</IfModule>
+
 <IfModule mod_negotiation.c>
     Options -MultiViews
 </IfModule>

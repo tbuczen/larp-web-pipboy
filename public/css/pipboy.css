@@ -1643,3 +1643,18 @@ body.is-pipboy::after {
     margin-top: 0;
     font-size: 1.2rem;
 }
+
+/* Install prompt on the LARP list. */
+.install-card {
+    margin: 0 0 1.2rem;
+    padding: .8rem 1rem;
+    border: 2px dashed var(--green-dim);
+}
+
+.install-card h2 {
+    margin-top: 0;
+}
+
+.install-card__ios {
+    margin-bottom: 0;
+}

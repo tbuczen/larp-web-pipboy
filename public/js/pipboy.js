@@ -1,6 +1,7 @@
 // PipBoy player interface enhancements. Every page works without this file;
 // it adds a live clock, the screen-effects toggle, a once-per-session boot
-// sequence, swipe/arrow-key tab switching and centring of the active sub-tab.
+// sequence, swipe/arrow-key tab switching, centring of the active sub-tab,
+// service worker registration and the "Install PipBoy" prompt.
 (() => {
     const root = document.documentElement;
     const store = {
@@ -107,7 +108,49 @@
         }
     });
 
+    // Installable app: the service worker enables installation and offline use.
+    if ('serviceWorker' in navigator && window.isSecureContext) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' }).catch(() => { /* app still works online */ });
+        });
+    }
+
+    // "Install PipBoy": Android/desktop browsers offer a prompt; iOS needs Share › Add to Home Screen.
+    let installPrompt = null;
+    window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        installPrompt = event;
+        document.querySelectorAll('[data-install]').forEach((box) => { box.hidden = false; box.querySelector('[data-install-button]').hidden = false; });
+    });
+    window.addEventListener('appinstalled', () => {
+        document.querySelectorAll('[data-install]').forEach((box) => { box.hidden = true; });
+    });
+    const installHelp = () => {
+        const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        document.querySelectorAll('[data-install]').forEach((box) => {
+            if (standalone) {
+                box.hidden = true;
+                return;
+            }
+            if (ios) {
+                box.hidden = false;
+                box.querySelector('[data-install-ios]').hidden = false;
+            }
+            box.querySelector('[data-install-button]')?.addEventListener('click', async () => {
+                if (!installPrompt) {
+                    return;
+                }
+                installPrompt.prompt();
+                await installPrompt.userChoice;
+                installPrompt = null;
+                box.hidden = true;
+            });
+        });
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
+        installHelp();
         syncFxButtons();
         startClock();
         boot();
