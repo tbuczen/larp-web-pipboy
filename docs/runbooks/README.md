@@ -10,7 +10,7 @@ Short step-by-step guides for running a LARP in PipBoy. Screenshots come from a 
 | [4. Approve players and grant features](04-approve-players.md) | Organizer | Approving a pending player, PipBoy numbers, feature access |
 | [5. Upload and align the map](05-map.md) | Organizer | Map image, aligning it over OpenStreetMap, what players see |
 | [6. Print holodisk QR codes](06-holodisk-codes.md) | Organizer | Codes, printing, reusing printed labels, how players scan, revoking |
-| [7. Conditions and notes](07-conditions-notes.md) | Organizer | Conditions on the STAT figure, organizer notes, private player notes |
+| [7. Conditions and notes](07-conditions-notes.md) | Organizer | Conditions, organizer notes, private player notes |
 
 ## Roles in one minute
 

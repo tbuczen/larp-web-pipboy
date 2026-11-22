@@ -9,7 +9,6 @@
     {% elseif player.status.value == 'rejected' %}
         <p class="error" role="status">This registration was not approved. Contact the organizers if you think this is a mistake.</p>
     {% else %}
-        {% if figure %}{{ include('pipboy/screens/_figure.html.twig') }}{% endif %}
         <h2>Modules</h2>
         <ul class="pip-modules">
             {% for t in tabs %}

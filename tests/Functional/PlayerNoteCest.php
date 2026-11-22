@@ -89,29 +89,6 @@ final class PlayerNoteCest
         }
     }
 
-    public function theStatFigureMarksBodyPartsWithActiveConditions(FunctionalTester $I): void
-    {
-        $I->signInAs(TestFixture::HOLODISK_READER_EMAIL);
-        $I->amOnPage('/pipboy/'.TestFixture::$readerPlayerId);
-        $I->seeElement('.pip-figure');
-        $I->seeElement('.pip-figure__bar--leg-l.is-hurt');
-        $I->dontSeeElement('.pip-figure__bar--head.is-hurt');
-        $I->see(TestFixture::CONDITION_NAME, '.pip-figure__caption');
-        $I->amOnPage('/logout');
-
-        // Without the conditions feature the figure shows no conditions.
-        $I->signInAs(TestFixture::CHAT_PLAYERS['alice']['email']);
-        $I->amOnPage('/pipboy/'.TestFixture::$chatPlayerIds['alice']);
-        $I->seeElement('.pip-figure');
-        $I->dontSeeElement('.pip-figure .is-hurt');
-        $I->amOnPage('/logout');
-
-        // Pending players see only their status.
-        $I->signInAs(TestFixture::STAYS_PENDING_EMAIL);
-        $I->amOnPage('/pipboy/'.TestFixture::$staysPendingPlayerId);
-        $I->dontSeeElement('.pip-figure');
-    }
-
     private function notes(): string
     {
         return '/pipboy/'.TestFixture::$readerPlayerId.'/data/notes';

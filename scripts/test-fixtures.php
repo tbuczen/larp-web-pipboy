@@ -12,7 +12,6 @@ use App\Entity\Note;
 use App\Entity\Player;
 use App\Entity\User;
 use App\Entity\EventInvitation;
-use App\Enum\BodyPart;
 use App\Enum\Feature;
 use App\Enum\RegistrationStatus;
 use App\Kernel;
@@ -134,7 +133,7 @@ try {
     }
     $entityManager->persist((new Note())->setPlayer($reader)->setTitle(TestFixture::NOTE_TITLE)->setContent('Meet the courier at dawn.'));
     $entityManager->persist((new Condition())->setPlayer($reader)->setName(TestFixture::CONDITION_NAME)
-        ->setDescription('Rest before running.')->setBodyPart(BodyPart::LEFT_LEG)->setStartsAt(new DateTimeImmutable('-1 hour')));
+        ->setDescription('Rest before running.')->setStartsAt(new DateTimeImmutable('-1 hour')));
     // The pending player also holds a grant, to prove approval is still required.
     foreach ([$reader, $pendingPlayer] as $grantee) {
         if ($entityManager->getRepository(HolodiskAccess::class)->findOneBy(['player' => $grantee, 'holodisk' => $holodisk]) === null) {
