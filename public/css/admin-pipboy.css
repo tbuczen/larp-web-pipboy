@@ -168,3 +168,142 @@ audio.holodisk-media--audio {
 .feature-access-form > .btn {
     margin-top: 1rem;
 }
+
+/* Map calibration over OpenStreetMap (admin/map.html.twig). */
+.map-calibrate__canvas {
+    height: min(70vh, 40rem);
+    min-height: 20rem;
+    margin: .8rem 0;
+    border: 1px solid var(--gray-600, #0e5a23);
+}
+
+.map-calibrate__tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .6rem 1rem;
+}
+
+.map-calibrate__tools input[type="range"] {
+    width: 10rem;
+    vertical-align: middle;
+}
+
+.map-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #1cfa80;
+    border-radius: 50%;
+    background: rgb(5 35 8 / 85%);
+    color: #1cfa80;
+    font-size: 1rem;
+    box-shadow: 0 0 8px rgb(28 250 128 / 60%);
+    cursor: grab;
+}
+
+/* Printable holodisk codes (admin/holodisk_codes.html.twig). */
+.qr-sheet {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.qr-card {
+    margin: 0;
+    padding: .8rem;
+    border: 1px solid var(--gray-600, #0e5a23);
+    text-align: center;
+    break-inside: avoid;
+}
+
+.qr-card img {
+    display: block;
+    width: 100%;
+    max-width: 14rem;
+    height: auto;
+    aspect-ratio: 1;
+    margin: 0 auto .4rem;
+    background: #fff;
+    image-rendering: pixelated;
+}
+
+.qr-card__code {
+    font-size: 1.3rem;
+    letter-spacing: .15em;
+}
+
+.qr-card__title {
+    margin: .2rem 0 0;
+    font-size: 1rem;
+}
+
+/* Only the code cards are printed: no menu, header or buttons. */
+@media print {
+    body.ea,
+    body.ea .wrapper,
+    body.ea .main-content,
+    body.ea .content {
+        background: #fff !important;
+        color: #000 !important;
+        text-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+    body.ea .sidebar-wrapper,
+    body.ea .main-header,
+    body.ea .content-top,
+    body.ea .content-header,
+    body.ea .responsive-header,
+    body.ea #flash-messages,
+    body.ea .no-print {
+        display: none !important;
+    }
+
+    body.ea::before,
+    body.ea::after {
+        display: none !important;
+    }
+
+    body.ea .wrapper,
+    body.ea .main-content,
+    body.ea .content,
+    body.ea .content-body,
+    body.ea #main {
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    body.ea .main-content {
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+    }
+
+    .qr-sheet {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr);
+        width: 100%;
+    }
+
+    .qr-card,
+    .qr-card__code {
+        border-color: #000;
+        color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    .qr-card {
+        border: 1px dashed #000;
+    }
+}
+
+/* Framed section on custom admin pages (map, invitations). */
+.admin-box {
+    padding: 1rem;
+    border: 1px solid var(--gray-700, #0a3e18);
+    border-radius: 4px;
+    background: var(--gray-950, #001100);
+}

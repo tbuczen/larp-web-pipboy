@@ -10,11 +10,11 @@ use App\Security\EventVoter;
 use App\Service\MapImageStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use DomainException;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Constraints\Image;
 use Symfony\Component\Validator\Constraints\NotNull;
@@ -32,7 +32,7 @@ final class MapAdminController extends AbstractController
     {
     }
 
-    #[Route('/admin/larp/{id}/map', name: 'admin_larp_map', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+    #[AdminRoute('/larp/{id}/map', name: 'larp_map', options: ['requirements' => ['id' => '\d+'], 'methods' => ['GET', 'POST']])]
     public function edit(int $id, Request $request, MapImageStorage $storage): Response
     {
         $larp = $this->managedLarp($id);
@@ -63,13 +63,13 @@ final class MapAdminController extends AbstractController
         return $this->privateResponse('admin/map.html.twig', ['larp' => $larp, 'map' => $map, 'form' => $form], $form->isSubmitted() ? 422 : 200);
     }
 
-    #[Route('/admin/larp/{id}/map/align', name: 'admin_larp_map_align', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[AdminRoute('/larp/{id}/map/align', name: 'larp_map_align', options: ['requirements' => ['id' => '\d+'], 'methods' => ['POST']])]
     public function align(int $id, Request $request): Response
     {
         $larp = $this->managedLarp($id);
         $map = $this->mapOf($larp) ?? throw $this->createNotFoundException();
         if (!$this->isCsrfTokenValid('map_align_'.$id, (string) $request->request->get('_token'))) {
-            $this->addFlash('error', 'The form expired. Please try again.');
+            $this->addFlash('danger', 'The form expired. Please try again.');
 
             return $this->redirectToRoute('admin_larp_map', ['id' => $id]);
         }
@@ -85,7 +85,7 @@ final class MapAdminController extends AbstractController
             $this->entityManager->flush();
             $this->addFlash('success', 'Map alignment saved. Players with the map feature can use it now.');
         } catch (DomainException $exception) {
-            $this->addFlash('error', $exception->getMessage());
+            $this->addFlash('danger', $exception->getMessage());
         }
 
         return $this->redirectToRoute('admin_larp_map', ['id' => $id]);

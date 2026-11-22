@@ -9,9 +9,9 @@ use App\Entity\Larp;
 use App\Security\EventVoter;
 use App\Service\HolodiskQrCode;
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /** Printable QR labels for holodisks: one LARP's whole set, or a single disk. */
@@ -24,7 +24,7 @@ final class HolodiskCodeAdminController extends AbstractController
     ) {
     }
 
-    #[Route('/admin/larp/{id}/holodisk-codes', name: 'admin_larp_holodisk_codes', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[AdminRoute('/larp/{id}/holodisk-codes', name: 'larp_holodisk_codes', options: ['requirements' => ['id' => '\d+'], 'methods' => ['GET']])]
     public function larp(int $id): Response
     {
         $larp = $this->entityManager->find(Larp::class, $id) ?? throw $this->createNotFoundException();
@@ -34,7 +34,7 @@ final class HolodiskCodeAdminController extends AbstractController
         return $this->sheet($larp, $holodisks);
     }
 
-    #[Route('/admin/holodisk/{id}/code', name: 'admin_holodisk_code', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[AdminRoute('/holodisk/{id}/code', name: 'holodisk_code', options: ['requirements' => ['id' => '\d+'], 'methods' => ['GET']])]
     public function holodisk(int $id): Response
     {
         $holodisk = $this->entityManager->find(Holodisk::class, $id) ?? throw $this->createNotFoundException();
