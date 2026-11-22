@@ -53,6 +53,8 @@ Transient plaintext passwords must not enter the serialized security session. Pr
 
 `App\Admin\LarpContext` holds the LARP the panel works on (session; the first available LARP by default). `ScopedCrudController` limits every event list and association choice to it on top of the organizer scope, and new records get it as their LARP. `LarpContextController` (`/admin/larp/{id}/manage`) switches it after checking `MANAGE_EVENT`. The LARP list and accounts stay global. `FeatureAccessController` (`/admin/feature-access`, an EasyAdmin admin route) edits every player's features as checkboxes; `Player::setFeatures()` grants and revokes to match.
 
+Password resets: `PasswordResetManager` issues organizer-created one-time links (`PasswordResetToken`, only the SHA-256 of the token is stored, 24 hours, single use, older unused links deleted). Organizers may reset accounts without a staff role that play in a LARP they organize; superadministrators any account. `PasswordResetController` (`/reset-password/{token}`) changes nothing on GET; the password change invalidates remember-me cookies and other sessions.
+
 ## Player interface
 
 `/pipboy` lists the account's memberships; each opens `/pipboy/{player}/{tab}/{screen}/{item}` (`PipBoyController`). `App\PipBoy\Navigation` decides which tabs and screens exist: until approval only STAT › Status, afterwards one screen per granted feature. The controller returns 404 for another account's player, unknown or ungranted screens, and entries that are not the player's own. Add a new player module by adding its screen to `Navigation`, its records to `PipBoyController::entries()` and a partial under `templates/pipboy/screens/`.
