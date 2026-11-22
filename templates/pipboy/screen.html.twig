@@ -57,7 +57,9 @@
         {{ include('pipboy/screens/_scan.html.twig') }}
     {% elseif screen.key == 'local' and map %}
         {{ include('pipboy/screens/_map.html.twig') }}
-    {% elseif screen.key in ['conditions', 'holodisks', 'notes'] %}
+    {% elseif screen.key == 'notes' %}
+        {{ include('pipboy/screens/_notes.html.twig') }}
+    {% elseif screen.key in ['conditions', 'holodisks'] %}
         {{ include('pipboy/screens/_entries.html.twig') }}
     {% else %}
         {{ include('pipboy/screens/_offline.html.twig') }}

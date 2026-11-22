@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\BodyPart;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use InvalidArgumentException;
@@ -31,6 +32,10 @@ class Condition
 
     #[ORM\Column(type: 'text')]
     private string $description = '';
+
+    /** The part of the STAT figure this condition marks, if any. */
+    #[ORM\Column(length: 10, nullable: true, enumType: BodyPart::class)]
+    private ?BodyPart $bodyPart = null;
 
     #[ORM\Column(type: 'datetimetz_immutable')]
     private DateTimeImmutable $startsAt;
@@ -138,5 +143,17 @@ class Condition
     public function __toString(): string
     {
         return $this->name;
+    }
+
+    public function getBodyPart(): ?BodyPart
+    {
+        return $this->bodyPart;
+    }
+
+    public function setBodyPart(?BodyPart $bodyPart): self
+    {
+        $this->bodyPart = $bodyPart;
+
+        return $this;
     }
 }

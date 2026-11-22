@@ -11,12 +11,15 @@ use App\Entity\LarpMap;
 use App\Entity\HolodiskAccess;
 use App\Entity\Note;
 use App\Entity\Player;
+use App\Enum\BodyPart;
 use App\Enum\Feature;
+use App\Enum\RegistrationStatus;
 use App\PipBoy\Navigation;
 use App\Service\ChatService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -43,7 +46,7 @@ final class PipBoyController extends AbstractController
         defaults: ['tab' => 'stat', 'screen' => null, 'item' => null],
         methods: ['GET'],
     )]
-    public function screen(Player $player, string $tab, ?string $screen, ?int $item): Response
+    public function screen(Player $player, string $tab, ?string $screen, ?int $item, Request $request): Response
     {
         // Another account's player is reported as missing rather than forbidden.
         if ($player->getUser() !== $this->getUser()) {
@@ -56,7 +59,10 @@ final class PipBoyController extends AbstractController
         $selected = $item === null ? null : ($entries[$item] ?? throw $this->createNotFoundException());
         $chat = $this->chatContext($player, $currentScreen->key === 'messages' ? $entries : [], $selected);
 
+        $now = new DateTimeImmutable();
         $response = $this->render('pipboy/screen.html.twig', [
+            'noteMode' => $currentScreen->key === 'notes' ? $this->noteMode($request, $selected) : null,
+            'figure' => $currentScreen->key === 'status' ? $this->figure($player, $now) : null,
             'chat' => $chat,
             'map' => $currentScreen->key === 'local' ? $this->alignedMap($player) : null,
             'player' => $player,
@@ -65,7 +71,7 @@ final class PipBoyController extends AbstractController
             'screen' => $currentScreen,
             'entries' => $entries,
             'selected' => $selected,
-            'now' => new DateTimeImmutable(),
+            'now' => $now,
         ]);
         $response->headers->set('Cache-Control', 'no-store, private');
 
@@ -117,6 +123,42 @@ final class PipBoyController extends AbstractController
         }
 
         return ['unread' => $unread, 'unreadTotal' => array_sum($unread), 'messages' => $messages];
+    }
+
+    /** 'new' shows the new-note form; 'edit' the edit form of the player's own selected note. */
+    private function noteMode(Request $request, ?object $selected): ?string
+    {
+        return match (true) {
+            $request->query->has('new') => 'new',
+            $request->query->has('edit') && $selected instanceof Note && $selected->isWrittenByPlayer() => 'edit',
+            default => null,
+        };
+    }
+
+    /**
+     * Body parts marked on the STAT figure by currently active conditions.
+     * Only players who may see their conditions get them; others see a plain figure.
+     *
+     * @return array{marks: array<string, list<Condition>>, conditionsVisible: bool}|null
+     */
+    private function figure(Player $player, DateTimeImmutable $now): ?array
+    {
+        if ($player->getStatus() !== RegistrationStatus::APPROVED) {
+            return null;
+        }
+
+        $marks = array_fill_keys(array_map(static fn (BodyPart $part): string => $part->value, BodyPart::cases()), []);
+        if (!$player->canUse(Feature::CONDITIONS)) {
+            return ['marks' => $marks, 'conditionsVisible' => false];
+        }
+
+        foreach ($this->entityManager->getRepository(Condition::class)->findBy(['player' => $player]) as $condition) {
+            if ($condition->getBodyPart() !== null && $condition->isActiveAt($now)) {
+                $marks[$condition->getBodyPart()->value][] = $condition;
+            }
+        }
+
+        return ['marks' => $marks, 'conditionsVisible' => true];
     }
 
     /** The LARP's map once organizers have aligned it; until then the screen reports it offline. */
