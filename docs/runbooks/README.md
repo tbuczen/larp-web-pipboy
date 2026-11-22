@@ -13,6 +13,7 @@ Short step-by-step guides for running a LARP in PipBoy. Screenshots come from a 
 | [7. Conditions and notes](07-conditions-notes.md) | Organizer | Conditions, organizer notes, private player notes |
 | [8. Install the PipBoy on a phone](08-install-app.md) | Players (share with them) | Home-screen install on Android and iPhone, staying signed in, offline use |
 | [9. Reset a player's password](09-password-reset.md) | Organizer | One-time reset links, sending them to players |
+| [10. Motion detector](10-motion-detector.md) | Organizer, players | Enabling it, what sharing means, privacy |
 
 ## Roles in one minute
 

@@ -1,0 +1,45 @@
+{# Motion detector (proof of concept): opt-in position sharing and a radar of nearby sharing PipBoys. #}
+<section class="pip-motion"
+         data-motion
+         data-position-url="{{ path('app_motion_position', {player: player.id}) }}"
+         data-stop-url="{{ path('app_motion_stop', {player: player.id}) }}"
+         data-blips-url="{{ path('app_motion_blips', {player: player.id}) }}"
+         data-token="{{ csrf_token('motion_' ~ player.id) }}"
+         data-sharing="{{ motion.sharing ? '1' : '0' }}">
+    <div class="pip-motion__switch">
+        <button type="button" class="pip-motion__toggle" data-motion-toggle aria-pressed="false">Share my location: <strong data-motion-state>OFF</strong></button>
+        <p class="pip-motion__badge" data-motion-badge hidden>● SHARING</p>
+    </div>
+
+    <div class="pip-motion__radar" aria-hidden="true">
+        <svg viewBox="-110 -110 220 220" data-motion-radar>
+            <circle class="ring" r="100"/>
+            <circle class="ring" r="66.6"/>
+            <circle class="ring" r="33.3"/>
+            <line class="axis" x1="-100" y1="0" x2="100" y2="0"/>
+            <line class="axis" x1="0" y1="-100" x2="0" y2="100"/>
+            <text class="label" x="0" y="-103" text-anchor="middle">N</text>
+            <text class="label label--range" x="4" y="-90" data-motion-range-label>100 m</text>
+            <g class="sweep"><path d="M0 0 L0 -100 A100 100 0 0 1 50 -86.6 Z"/></g>
+            <g data-motion-blips></g>
+            <circle class="self" r="3"/>
+        </svg>
+    </div>
+    <p class="pip-motion-status" data-motion-status role="status">Detector idle. Turn sharing on to scan.</p>
+
+    <div class="pip-motion__ranges" role="group" aria-label="Range">
+        {% for range in motion.ranges %}
+            <button type="button" class="pip-map-button" data-motion-range="{{ range }}" aria-pressed="{{ range == 100 ? 'true' : 'false' }}">{{ range }} m</button>
+        {% endfor %}
+    </div>
+
+    <details class="pip-motion__privacy" open>
+        <summary>How sharing works</summary>
+        <ul>
+            <li>Sharing is <strong>off</strong> until you turn it on, and only works while this screen is open.</li>
+            <li>When on, PipBoys of this LARP that also share see you as an <strong>anonymous blip</strong> (rounded to about 5 m, within their range). No name or number is shown.</li>
+            <li>You see others only while you share yourself.</li>
+            <li>Only your latest position is kept. It disappears when you turn sharing off, and stops being shown a minute after you close this screen.</li>
+        </ul>
+    </details>
+</section>

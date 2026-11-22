@@ -42,7 +42,7 @@ final class PlayerTest extends TestCase
     {
         $player = (new Player())->grantFeature(Feature::NOTES)->grantFeature(Feature::MAP);
 
-        self::assertSame([Feature::CHAT, Feature::HOLODISKS, Feature::CONDITIONS], $player->missingFeatures());
+        self::assertSame([Feature::CHAT, Feature::HOLODISKS, Feature::CONDITIONS, Feature::MOTION], $player->missingFeatures());
 
         foreach (Feature::cases() as $feature) {
             $player->grantFeature($feature);

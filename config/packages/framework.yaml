@@ -21,6 +21,11 @@ framework:
             limit: 30
             interval: '1 hour'
         # Starting chats is limited so PipBoy numbers cannot be probed by guessing.
+        # Motion detector: position updates and radar polls, per player and kind.
+        motion:
+            policy: sliding_window
+            limit: 40
+            interval: '1 minute'
         holodisk_scan:
             policy: sliding_window
             limit: 30
