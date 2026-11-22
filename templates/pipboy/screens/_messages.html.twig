@@ -1,0 +1,110 @@
+{#- COMMS › Messages: chat requests and direct chats by PipBoy number.
+    Forms work without JavaScript (post and redirect); public/js/pipboy-chat.js
+    sends without reloading and polls for new messages. -#}
+<section class="pip-split{{ selected ? ' has-selection' }}">
+    <div class="pip-chat-side">
+        <details class="pip-chat-new-box"{{ entries is empty ? ' open' }}>
+        <summary>New transmission</summary>
+        <form class="pip-chat-new" method="post" action="{{ path('app_chat_request', {player: player.id}) }}">
+            <label for="chat-pipboy">PipBoy number</label>
+            <input id="chat-pipboy" name="pipboy" required maxlength="50" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="PipBoy number">
+            <label class="visually-hidden" for="chat-opening">Opening message</label>
+            <textarea id="chat-opening" name="message" required maxlength="2000" rows="2" placeholder="Opening message"></textarea>
+            <input type="hidden" name="_token" value="{{ csrf_token('chat_request_' ~ player.id) }}">
+            <button type="submit">Send request</button>
+            <p class="form-text">The receiver sees your PipBoy number and this message, and decides whether to accept.</p>
+        </form>
+        </details>
+
+        <ul class="pip-list" aria-label="Transmissions">
+            {% for id, conversation in entries %}
+                {% set status = conversation.statusFor(player).value %}
+                {% set unread = chat.unread[id] ?? 0 %}
+                <li>
+                    <a class="pip-list__item{{ selected and selected.id == id ? ' is-selected' }}"
+                       href="{{ path('app_pipboy_screen', {player: player.id, tab: tab.key, screen: screen.key, item: id}) }}"{{ selected and selected.id == id ? ' aria-current="true"' }}>
+                        <span>{{ conversation.labelFor(player) }}</span>
+                        <span class="pip-list__meta">
+                            {%- if conversation.awaitsAnswerFrom(player) %}Request
+                            {%- elseif status == 'pending' %}Waiting
+                            {%- elseif status == 'closed' %}Closed
+                            {%- elseif unread > 0 %}<span class="pip-badge">{{ unread }}</span>
+                            {%- endif -%}
+                        </span>
+                    </a>
+                </li>
+            {% else %}
+                <li class="pip-list__empty muted">No transmissions yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <article class="pip-detail">
+        {% if selected %}
+            {% set status = selected.statusFor(player).value %}
+            {% set other = selected.otherParticipant(player) %}
+            <a class="pip-detail__back" href="{{ path('app_pipboy_screen', {player: player.id, tab: tab.key, screen: screen.key}) }}">◂ {{ screen.label }}</a>
+            <h2>{{ selected.labelFor(player) }}</h2>
+
+            <ol class="pip-chat-thread" data-chat-thread data-status="{{ status }}"
+                data-poll-url="{{ path('app_chat_poll', {player: player.id, conversation: selected.id}) }}"
+                data-after="{{ chat.messages is empty ? 0 : (chat.messages|last).id }}" aria-live="polite">
+                {% for message in chat.messages %}
+                    {% set mine = message.isFrom(player) %}
+                    <li class="pip-chat-msg {{ mine ? 'pip-chat-msg--mine' : 'pip-chat-msg--theirs' }}" data-id="{{ message.id }}">
+                        <p>{{ message.body }}</p>
+                        <time datetime="{{ message.sentAt|date('c') }}">{{ mine ? 'You' : 'PB ' ~ other.pipboyNumber }} · {{ message.sentAt|date('H:i') }}</time>
+                    </li>
+                {% endfor %}
+            </ol>
+
+            {% set token = csrf_token('chat_' ~ selected.id) %}
+            {% if selected.awaitsAnswerFrom(player) %}
+                <p class="notice" role="status">PB {{ other.pipboyNumber }} wants to start a direct chat with you.</p>
+                <div class="pip-chat-actions">
+                    <form method="post" action="{{ path('app_chat_answer', {player: player.id, conversation: selected.id, answer: 'accept'}) }}">
+                        <input type="hidden" name="_token" value="{{ token }}"><button type="submit">Accept</button>
+                    </form>
+                    <form method="post" action="{{ path('app_chat_answer', {player: player.id, conversation: selected.id, answer: 'decline'}) }}">
+                        <input type="hidden" name="_token" value="{{ token }}"><button class="button--ghost" type="submit">Decline</button>
+                    </form>
+                </div>
+            {% elseif status == 'pending' %}
+                <p class="notice" role="status">Waiting for PB {{ other.pipboyNumber }} to accept your request.</p>
+            {% elseif status == 'active' %}
+                <form class="pip-chat-compose" method="post" data-chat-form
+                      action="{{ path('app_chat_send', {player: player.id, conversation: selected.id}) }}">
+                    <label class="visually-hidden" for="chat-message">Message</label>
+                    <textarea id="chat-message" name="message" required maxlength="2000" rows="2" placeholder="Type a message"></textarea>
+                    <input type="hidden" name="_token" value="{{ token }}">
+                    <button type="submit">Send</button>
+                    <p class="invalid-feedback" data-chat-error hidden></p>
+                </form>
+
+                <div class="pip-chat-names">
+                    {% set reveals = selected.revealsName(player) %}
+                    <p class="muted">
+                        {% if selected.namesRevealed %}Character names are shared.
+                        {% elseif reveals %}You agreed to share character names. Waiting for PB {{ other.pipboyNumber }}.
+                        {% else %}Character names stay hidden until both of you agree.{% endif %}
+                    </p>
+                    <div class="pip-chat-actions">
+                        <form method="post" action="{{ path('app_chat_reveal', {player: player.id, conversation: selected.id}) }}">
+                            <input type="hidden" name="_token" value="{{ token }}">
+                            <input type="hidden" name="reveal" value="{{ reveals ? '0' : '1' }}">
+                            <button class="button--ghost" type="submit">{{ reveals ? 'Stop sharing my name' : 'Share my character name' }}</button>
+                        </form>
+                        <form method="post" action="{{ path('app_chat_answer', {player: player.id, conversation: selected.id, answer: 'close'}) }}"
+                              data-confirm="Close this chat? Neither of you will be able to write again.">
+                            <input type="hidden" name="_token" value="{{ token }}"><button class="button--danger" type="submit">Close chat</button>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <p class="notice" role="status">This chat is closed. Nobody can write in it any more.</p>
+            {% endif %}
+        {% elseif entries is not empty %}
+            <p class="pip-detail__hint muted">Select a transmission.</p>
+        {% endif %}
+    </article>
+</section>

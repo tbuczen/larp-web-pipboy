@@ -21,6 +21,13 @@ final class TestFixture
     public const HOLODISK_TITLE = 'Codeception holodisk';
     public const NOTE_TITLE = 'Codeception note';
     public const STAYS_PENDING_EMAIL = 'stays-pending@pipboy.test';
+    /** Approved players with chat in the fixture LARP; Dave has chat in the other LARP. */
+    public const CHAT_PLAYERS = [
+        'alice' => ['email' => 'chat-alice@pipboy.test', 'number' => 'CHAT-ALICE', 'name' => 'Alice of the Wastes'],
+        'bob' => ['email' => 'chat-bob@pipboy.test', 'number' => 'CHAT-BOB', 'name' => 'Bob the Courier'],
+        'carol' => ['email' => 'chat-carol@pipboy.test', 'number' => 'CHAT-CAROL', 'name' => 'Carol Scrapper'],
+        'dave' => ['email' => 'chat-dave@pipboy.test', 'number' => 'CHAT-DAVE', 'name' => 'Dave Elsewhere'],
+    ];
     public const CONDITION_NAME = 'Codeception sprained ankle';
     public const ORGANIZER_INVITED_EMAIL = 'organizer-invited@pipboy.test';
     public const PASSWORD = 'LocalTestPassword-42';
@@ -37,6 +44,8 @@ final class TestFixture
     public static int $readerPlayerId;
     public static int $pendingPlayerId;
     public static int $staysPendingPlayerId;
+    /** @var array<string, int> */
+    public static array $chatPlayerIds = [];
     public static int $otherLarpId;
     /** @var array<string, string> */
     public static array $invitationTokens = [];

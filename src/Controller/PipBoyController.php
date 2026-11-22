@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Condition;
+use App\Entity\Conversation;
 use App\Entity\Holodisk;
 use App\Entity\HolodiskAccess;
 use App\Entity\Note;
 use App\Entity\Player;
+use App\Enum\Feature;
 use App\PipBoy\Navigation;
+use App\Service\ChatService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,6 +31,7 @@ final class PipBoyController extends AbstractController
     public function __construct(
         private readonly Navigation $navigation,
         private readonly EntityManagerInterface $entityManager,
+        private readonly ChatService $chat,
     ) {
     }
 
@@ -49,8 +53,10 @@ final class PipBoyController extends AbstractController
         $currentScreen = $currentTab->screen($screen) ?? throw $this->createNotFoundException();
         $entries = $this->entries($player, $currentScreen->key);
         $selected = $item === null ? null : ($entries[$item] ?? throw $this->createNotFoundException());
+        $chat = $this->chatContext($player, $currentScreen->key === 'messages' ? $entries : [], $selected);
 
         $response = $this->render('pipboy/screen.html.twig', [
+            'chat' => $chat,
             'player' => $player,
             'tabs' => $this->navigation->tabsFor($player),
             'tab' => $currentTab,
@@ -67,7 +73,7 @@ final class PipBoyController extends AbstractController
     /**
      * The player's own records listed on a screen, keyed by id.
      *
-     * @return array<int, Condition|Holodisk|Note>
+     * @return array<int, Condition|Conversation|Holodisk|Note>
      */
     private function entries(Player $player, string $screen): array
     {
@@ -75,6 +81,7 @@ final class PipBoyController extends AbstractController
             'conditions' => $this->entityManager->getRepository(Condition::class)->findBy(['player' => $player], ['startsAt' => 'DESC']),
             'notes' => $this->entityManager->getRepository(Note::class)->findBy(['player' => $player], ['title' => 'ASC']),
             'holodisks' => $this->unlockedHolodisks($player),
+            'messages' => $this->chat->conversationsFor($player),
             default => [],
         };
 
@@ -84,6 +91,30 @@ final class PipBoyController extends AbstractController
         }
 
         return $entries;
+    }
+
+    /**
+     * Unread counts for the COMMS badge and the conversation list, and the open
+     * thread's messages (marked read once shown).
+     *
+     * @param array<int, object> $conversations conversations listed on this screen, if any
+     * @return array{unread: array<int, int>, unreadTotal: int, messages: list<\App\Entity\ChatMessage>}
+     */
+    private function chatContext(Player $player, array $conversations, ?object $selected): array
+    {
+        if (!$player->canUse(Feature::CHAT)) {
+            return ['unread' => [], 'unreadTotal' => 0, 'messages' => []];
+        }
+
+        $unread = $this->chat->unreadCounts($player, $conversations !== [] ? array_values($conversations) : $this->chat->conversationsFor($player));
+        $messages = [];
+        if ($selected instanceof Conversation) {
+            $messages = $this->chat->messages($selected);
+            $this->chat->markRead($player, $selected, $messages);
+            $unread[(int) $selected->getId()] = 0;
+        }
+
+        return ['unread' => $unread, 'unreadTotal' => array_sum($unread), 'messages' => $messages];
     }
 
     /** @return list<Holodisk> */

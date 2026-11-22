@@ -51,6 +51,8 @@ Transient plaintext passwords must not enter the serialized security session. Pr
 
 `/pipboy` lists the account's memberships; each opens `/pipboy/{player}/{tab}/{screen}/{item}` (`PipBoyController`). `App\PipBoy\Navigation` decides which tabs and screens exist: until approval only STAT › Status, afterwards one screen per granted feature. The controller returns 404 for another account's player, unknown or ungranted screens, and entries that are not the player's own. Add a new player module by adding its screen to `Navigation`, its records to `PipBoyController::entries()` and a partial under `templates/pipboy/screens/`.
 
+Direct chat (`ChatService`, `ChatController`, entities `Conversation` and `ChatMessage`) stores one conversation per pair of players (`player_a_id < player_b_id`, unique), so a declined or closed chat can never be requested again. Recipient lookup answers identically for unknown numbers, other events, players without chat and the sender's own number, and requests are rate-limited, so numbers cannot be probed. All chat endpoints re-check ownership, approval, the chat feature and conversation visibility; writes are POST with CSRF. `public/js/pipboy-chat.js` adds sending without reload and polling; messages are inserted as text.
+
 Visual effects are CSS (`public/css/pipboy.css`): cross-document View Transitions for screen switches with a power-on fallback, scanlines, noise and a boot log. `public/js/pipboy.js` is optional enhancement (clock, FX toggle, boot log, swipe/arrow-key tab switching). Effects stop with the FX toggle or `prefers-reduced-motion`.
 
 ## Extension guidance

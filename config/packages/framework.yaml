@@ -17,6 +17,15 @@ framework:
             policy: sliding_window
             limit: 30
             interval: '1 hour'
+        # Starting chats is limited so PipBoy numbers cannot be probed by guessing.
+        chat_request:
+            policy: sliding_window
+            limit: 10
+            interval: '1 hour'
+        chat_send:
+            policy: sliding_window
+            limit: 30
+            interval: '1 minute'
 
 when@test:
     framework:

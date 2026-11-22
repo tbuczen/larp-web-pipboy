@@ -99,6 +99,14 @@
         nav.querySelector('.pip-subtab.is-active')?.scrollIntoView({ inline: 'center', block: 'nearest' });
     };
 
+    // Forms marked data-confirm ask before submitting (e.g. closing a chat).
+    document.addEventListener('submit', (event) => {
+        const message = event.target.closest('form[data-confirm]')?.dataset.confirm;
+        if (message && !window.confirm(message)) {
+            event.preventDefault();
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
         syncFxButtons();
         startClock();
