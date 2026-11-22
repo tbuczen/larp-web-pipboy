@@ -79,7 +79,7 @@ final class PlayerNoteCest
         // Organizers and superadministrators never see notes players write for themselves.
         foreach ([TestFixture::ORGANIZER_EMAIL, TestFixture::ADMIN_EMAIL] as $email) {
             $I->signInAs($email);
-            $I->amOnPage('/admin/note');
+            $I->amOnPage('/admin/larp/'.TestFixture::$larpId.'/manage?list=note');
             $I->seeResponseCodeIs(200);
             $I->see(TestFixture::NOTE_TITLE);
             $I->dontSee('My secret plan');

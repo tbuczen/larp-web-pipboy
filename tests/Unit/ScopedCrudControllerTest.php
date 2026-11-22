@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit;
 
+use App\Admin\LarpContext;
 use App\Controller\Admin\ScopedCrudController;
+use App\Entity\Larp;
 use App\Entity\Player;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,6 +38,17 @@ final class ScopedCrudControllerTest extends TestCase
             }
         };
         $controller->setContainer($container);
+        $larp = new Larp();
+        $controller->setLarpContext(new class($larp) extends LarpContext {
+            public function __construct(private readonly Larp $larp)
+            {
+            }
+
+            public function current(): Larp
+            {
+                return $this->larp;
+            }
+        });
         $scopeQuery = $controller->playerField()->getAsDto()->getCustomOption(AssociationField::OPTION_QUERY_BUILDER_CALLABLE);
         $query = (new QueryBuilder($this->createStub(EntityManagerInterface::class)))
             ->select('entity')->from(Player::class, 'entity');
@@ -47,5 +60,8 @@ final class ScopedCrudControllerTest extends TestCase
         self::assertSame($scopedDql, $query->getDQL());
         self::assertStringContainsString('scope_organizer = :scope_current_user', $query->getDQL());
         self::assertSame($user, $query->getParameter('scope_current_user')->getValue());
+        // Event data is limited to the LARP the panel is working on.
+        self::assertStringContainsString('entity.larp = :context_larp', $query->getDQL());
+        self::assertSame($larp, $query->getParameter('context_larp')->getValue());
     }
 }

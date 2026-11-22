@@ -1,0 +1,56 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}Feature access · {{ larp.name }}{% endblock %}
+{% block content_title %}Feature access · {{ larp.name }}{% endblock %}
+
+{% block main %}
+    <p class="text-muted">Tick the modules each player can use in their PipBoy. Players also need to be approved.</p>
+    {% if players is empty %}
+        <p>This LARP has no players yet. Invite players from the LARP list.</p>
+    {% else %}
+        <form method="post" class="feature-access-form">
+            <input type="hidden" name="_token" value="{{ csrf_token('feature_access_' ~ larp.id) }}">
+            <div class="table-responsive">
+                <table class="table datagrid feature-access">
+                    <thead>
+                        <tr>
+                            <th scope="col">Player</th>
+                            <th scope="col">PipBoy</th>
+                            <th scope="col">Status</th>
+                            {% for feature in features %}
+                                <th scope="col" class="text-center">
+                                    {{ feature.label }}
+                                    <button type="button" class="btn btn-link btn-sm p-0 d-block mx-auto" data-toggle-column="{{ feature.value }}" title="Tick or clear {{ feature.label }} for everyone">all</button>
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for player in players %}
+                            {% set granted = player.features|map(f => f.value) %}
+                            <tr>
+                                <th scope="row">{{ player.name }}</th>
+                                <td>{{ player.pipboyNumber }}</td>
+                                <td><span class="badge badge-{{ player.status.value == 'approved' ? 'success' : (player.status.value == 'pending' ? 'warning' : 'secondary') }}">{{ player.status.value }}</span></td>
+                                {% for feature in features %}
+                                    <td class="text-center">
+                                        <input class="form-check-input" type="checkbox" name="access[{{ player.id }}][]" value="{{ feature.value }}"
+                                               data-feature="{{ feature.value }}" aria-label="{{ feature.label }} for {{ player.name }}"{{ feature.value in granted ? ' checked' }}>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <button type="submit" class="btn btn-primary">Save feature access</button>
+        </form>
+        <script>
+            document.querySelectorAll('[data-toggle-column]').forEach((button) => button.addEventListener('click', () => {
+                const boxes = [...document.querySelectorAll(`input[data-feature="${button.dataset.toggleColumn}"]`)];
+                const tick = boxes.some((box) => !box.checked);
+                boxes.forEach((box) => { box.checked = tick; });
+            }));
+        </script>
+    {% endif %}
+{% endblock %}

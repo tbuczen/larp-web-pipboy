@@ -3,6 +3,7 @@
 declare(strict_types=1);
 namespace App\Controller\Admin;
 
+use App\Entity\Player;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -16,8 +17,10 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_SUPER_ADMIN')]
 final class UserCrudController extends AbstractCrudController
 {
-    public function __construct(private readonly UserPasswordHasherInterface $passwordHasher)
-    {
+    public function __construct(
+        private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly EntityManagerInterface $entityManager,
+    ) {
     }
 
     public static function getEntityFqcn(): string
@@ -30,6 +33,9 @@ final class UserCrudController extends AbstractCrudController
         yield EmailField::new('email');
         yield TextField::new('firstName');
         yield TextField::new('lastName');
+        // One account can play in several LARPs, with a separate character in each.
+        yield TextField::new('email', 'LARPs')->hideOnForm()
+            ->formatValue(fn (?string $email, User $user): string => $this->memberships($user));
         yield ChoiceField::new('roles')->setChoices(['Player' => 'ROLE_USER', 'Organizer' => 'ROLE_ORGANIZER', 'Superadministrator' => 'ROLE_SUPER_ADMIN'])->allowMultipleChoices();
         $password = TextField::new('plainPassword', 'New password')->setFormType(PasswordType::class)
             ->onlyOnForms()->setRequired($pageName === Crud::PAGE_NEW);
@@ -49,6 +55,16 @@ final class UserCrudController extends AbstractCrudController
     {
         $this->hashNewPassword($entityInstance);
         parent::updateEntity($entityManager, $entityInstance);
+    }
+
+    private function memberships(User $user): string
+    {
+        $players = $this->entityManager->getRepository(Player::class)->findBy(['user' => $user]);
+
+        return $players === [] ? '—' : implode(', ', array_map(
+            static fn (Player $player): string => sprintf('%s (%s)', $player->getLarp()?->getName(), $player->getPipboyNumber()),
+            $players,
+        ));
     }
 
     private function hashNewPassword(User $user): void

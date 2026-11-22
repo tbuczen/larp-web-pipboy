@@ -7,7 +7,7 @@ Short step-by-step guides for running a LARP in PipBoy. Screenshots come from a 
 | [1. Get admin access](01-admin-access.md) | Server maintainer | First superadministrator, promoting an existing account, signing in to the panel |
 | [2. Create a LARP and assign organizers](02-create-larp.md) | Superadministrator | New event, Organizer role, assigning organizers to the event |
 | [3. Invite players](03-invite-players.md) | Organizer | Personal invitation links, what the player does, revoking a link |
-| [4. Approve players and grant features](04-approve-players.md) | Organizer | Approving a pending player, PipBoy numbers, feature access |
+| [4. Approve players and grant features](04-approve-players.md) | Organizer | Approving a pending player, PipBoy numbers, feature access checkboxes |
 | [5. Upload and align the map](05-map.md) | Organizer | Map image, aligning it over OpenStreetMap, what players see |
 | [6. Print holodisk QR codes](06-holodisk-codes.md) | Organizer | Codes, printing, reusing printed labels, how players scan, revoking |
 | [7. Conditions and notes](07-conditions-notes.md) | Organizer | Conditions, organizer notes, private player notes |
@@ -22,5 +22,7 @@ Short step-by-step guides for running a LARP in PipBoy. Screenshots come from a 
 | **Superadministrator** | Everything: create LARPs, assign organizers, manage accounts |
 
 Every account registers first at `/register` (email and password, or Discord). Joining a LARP always goes through a personal invitation, and gameplay starts only after an organizer approves the player. Real first and last names are never shown to other players. In the game, players are identified by PipBoy number and character name.
+
+**One LARP at a time:** the admin menu shows the LARP you are working on (**LARP: …**). Players, feature access, invitations, holodisks, notes and conditions are listed and created for that LARP only; **Switch LARP** changes it. Superadministrators can switch to any LARP, organizers to the LARPs assigned to them. **LARPs** and **Accounts** (superadministrators) stay global. One account can play in several LARPs, with a separate character, PipBoy number and features in each.
 
 The panel lives at **https://pipboy.larpilot.com/admin**. The **Admin** tab on the sign-in page leads there.

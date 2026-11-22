@@ -187,6 +187,16 @@ try {
     $entityManager->createQueryBuilder()->delete(Conversation::class, 'conversation')
         ->where('conversation.playerA IN (:players) OR conversation.playerB IN (:players)')
         ->setParameter('players', array_values($chatPlayers))->getQuery()->execute();
+    // One account, two LARPs: Alice also plays the other event, as a different character.
+    $aliceUser = $users[TestFixture::CHAT_PLAYERS['alice']['email']];
+    $aliceElsewhere = $entityManager->getRepository(Player::class)->findOneBy(['user' => $aliceUser, 'larp' => $otherLarp]) ?? new Player();
+    $aliceElsewhere->setUser($aliceUser)->setLarp($otherLarp)->setPipboyNumber(TestFixture::ALICE_ELSEWHERE_NUMBER)
+        ->setName(TestFixture::ALICE_ELSEWHERE_NAME)->approve();
+    $aliceElsewhere->setFeatures([]);
+    $entityManager->persist($aliceElsewhere);
+    $entityManager->flush();
+    TestFixture::$aliceElsewherePlayerId = $aliceElsewhere->getId();
+
     // Maps start absent on every run; the map tests upload and align their own.
     $entityManager->createQueryBuilder()->delete(LarpMap::class, 'map')
         ->where('map.larp IN (:larps)')->setParameter('larps', [$larp, $otherLarp])->getQuery()->execute();
