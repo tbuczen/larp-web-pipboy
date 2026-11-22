@@ -38,7 +38,7 @@ final class PipBoyNavigationTest extends TestCase
         self::assertSame([
             'stat' => ['status', 'conditions'],
             'data' => ['holodisks', 'scan', 'notes'],
-            'map' => ['local'],
+            'map' => ['local', 'motion'],
             'comms' => ['messages'],
         ], $this->layout((new Navigation())->tabsFor($player)));
     }

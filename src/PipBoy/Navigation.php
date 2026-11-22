@@ -38,8 +38,12 @@ final class Navigation
             $tabs[] = new Tab('data', 'Data', $data);
         }
 
-        if ($player->canUse(Feature::MAP)) {
-            $tabs[] = new Tab('map', 'Map', [new Screen('local', 'Local map')]);
+        $map = $this->screens([
+            $player->canUse(Feature::MAP) ? new Screen('local', 'Local map') : null,
+            $player->canUse(Feature::MOTION) ? new Screen('motion', 'Motion') : null,
+        ]);
+        if ($map !== []) {
+            $tabs[] = new Tab('map', 'Map', $map);
         }
 
         if ($player->canUse(Feature::CHAT)) {

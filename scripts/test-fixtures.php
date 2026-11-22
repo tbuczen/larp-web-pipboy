@@ -181,6 +181,8 @@ try {
         if ($key === 'alice') {
             $chatPlayer->grantFeature(Feature::MAP);
         }
+        // Everyone but Carol has the motion detector (Dave in the other LARP).
+        $key === 'carol' ? $chatPlayer->revokeFeature(Feature::MOTION) : $chatPlayer->grantFeature(Feature::MOTION);
         $entityManager->persist($chatPlayer);
         $chatPlayers[$key] = $chatPlayer;
     }
@@ -205,6 +207,9 @@ try {
     $entityManager->persist($aliceElsewhere);
     $entityManager->flush();
     TestFixture::$aliceElsewherePlayerId = $aliceElsewhere->getId();
+
+    // Shared positions start empty on every run.
+    $entityManager->createQueryBuilder()->delete(\App\Entity\PlayerPosition::class, 'position')->getQuery()->execute();
 
     // Maps start absent on every run; the map tests upload and align their own.
     $entityManager->createQueryBuilder()->delete(LarpMap::class, 'map')

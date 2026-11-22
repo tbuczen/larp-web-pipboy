@@ -14,6 +14,7 @@ use App\Entity\Player;
 use App\Enum\Feature;
 use App\PipBoy\Navigation;
 use App\Service\ChatService;
+use App\Service\MotionDetector;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,6 +35,7 @@ final class PipBoyController extends AbstractController
         private readonly Navigation $navigation,
         private readonly EntityManagerInterface $entityManager,
         private readonly ChatService $chat,
+        private readonly MotionDetector $motion,
     ) {
     }
 
@@ -62,6 +64,7 @@ final class PipBoyController extends AbstractController
             'noteMode' => $currentScreen->key === 'notes' ? $this->noteMode($request, $selected) : null,
             'chat' => $chat,
             'map' => $currentScreen->key === 'local' ? $this->alignedMap($player) : null,
+            'motion' => $currentScreen->key === 'motion' ? ['sharing' => $this->motion->isSharing($player), 'ranges' => MotionDetector::RANGES] : null,
             'player' => $player,
             'tabs' => $this->navigation->tabsFor($player),
             'tab' => $currentTab,

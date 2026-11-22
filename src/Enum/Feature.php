@@ -11,6 +11,7 @@ enum Feature: string
     case MAP = 'map';
     case HOLODISKS = 'holodisks';
     case CONDITIONS = 'conditions';
+    case MOTION = 'motion';
 
     public function label(): string
     {
@@ -20,6 +21,7 @@ enum Feature: string
             self::MAP => 'Map',
             self::HOLODISKS => 'Holodisks',
             self::CONDITIONS => 'Conditions',
+            self::MOTION => 'Motion detector',
         };
     }
 }

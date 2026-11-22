@@ -1536,3 +1536,145 @@ body.is-pipboy::after {
 .install-card__ios {
     margin-bottom: 0;
 }
+
+/* Motion detector: opt-in switch and a sweeping radar of anonymous blips. */
+.pip-motion__switch {
+    display: grid;
+    gap: .4rem;
+    text-align: center;
+}
+
+.pip-motion__toggle {
+    margin: 0;
+}
+
+.pip-motion__toggle[aria-pressed="true"] {
+    background: var(--green);
+    color: var(--screen);
+    text-shadow: none;
+}
+
+.pip-motion__badge {
+    margin: 0;
+    color: var(--danger);
+    letter-spacing: .14em;
+    animation: pip-blink 1.2s steps(2, jump-none) infinite;
+}
+
+.pip-motion__radar {
+    max-width: 22rem;
+    margin: 1rem auto .4rem;
+}
+
+.pip-motion__radar svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.pip-motion__radar .ring,
+.pip-motion__radar .axis {
+    fill: none;
+    stroke: var(--green-dim);
+    stroke-width: 1;
+}
+
+.pip-motion__radar .ring:first-child {
+    fill: rgb(28 250 128 / 5%);
+    stroke: var(--green);
+    stroke-width: 1.5;
+}
+
+.pip-motion__radar .label {
+    fill: var(--green);
+    font-size: 9px;
+    letter-spacing: .1em;
+}
+
+.pip-motion__radar .label--range {
+    fill: var(--green-dim);
+}
+
+.pip-motion__radar .sweep {
+    display: none;
+    fill: rgb(28 250 128 / 18%);
+    transform-origin: 0 0;
+    animation: pip-sweep 3s linear infinite;
+}
+
+.pip-motion.is-sharing .sweep {
+    display: block;
+}
+
+.pip-motion__radar .self {
+    fill: var(--green);
+}
+
+.pip-motion__radar .blip {
+    fill: var(--green);
+    filter: drop-shadow(0 0 3px var(--green));
+    animation: pip-blip 3s ease-out infinite;
+}
+
+.pip-motion-status {
+    letter-spacing: .12em;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.pip-motion__ranges {
+    display: flex;
+    justify-content: center;
+    gap: .4rem;
+}
+
+.pip-motion__ranges .pip-map-button {
+    width: auto;
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.pip-motion__ranges .pip-map-button[aria-pressed="true"] {
+    background: var(--green);
+    color: var(--screen);
+    text-shadow: none;
+}
+
+.pip-motion__privacy {
+    margin-top: 1.2rem;
+    padding-top: .8rem;
+    border-top: 2px dotted var(--green-faint);
+}
+
+.pip-motion__privacy summary {
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+}
+
+@keyframes pip-sweep {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pip-blip {
+    0%, 60% { opacity: 1; }
+    100% { opacity: .35; }
+}
+
+@keyframes pip-blink {
+    50% { opacity: .3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pip-motion__radar .sweep,
+    .pip-motion__radar .blip,
+    .pip-motion__badge {
+        animation: none;
+    }
+}
+
+[data-fx="off"] .pip-motion__radar .sweep,
+[data-fx="off"] .pip-motion__radar .blip {
+    animation: none;
+}
