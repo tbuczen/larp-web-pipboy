@@ -11,9 +11,7 @@ use App\Entity\LarpMap;
 use App\Entity\HolodiskAccess;
 use App\Entity\Note;
 use App\Entity\Player;
-use App\Enum\BodyPart;
 use App\Enum\Feature;
-use App\Enum\RegistrationStatus;
 use App\PipBoy\Navigation;
 use App\Service\ChatService;
 use DateTimeImmutable;
@@ -62,7 +60,6 @@ final class PipBoyController extends AbstractController
         $now = new DateTimeImmutable();
         $response = $this->render('pipboy/screen.html.twig', [
             'noteMode' => $currentScreen->key === 'notes' ? $this->noteMode($request, $selected) : null,
-            'figure' => $currentScreen->key === 'status' ? $this->figure($player, $now) : null,
             'chat' => $chat,
             'map' => $currentScreen->key === 'local' ? $this->alignedMap($player) : null,
             'player' => $player,
@@ -133,32 +130,6 @@ final class PipBoyController extends AbstractController
             $request->query->has('edit') && $selected instanceof Note && $selected->isWrittenByPlayer() => 'edit',
             default => null,
         };
-    }
-
-    /**
-     * Body parts marked on the STAT figure by currently active conditions.
-     * Only players who may see their conditions get them; others see a plain figure.
-     *
-     * @return array{marks: array<string, list<Condition>>, conditionsVisible: bool}|null
-     */
-    private function figure(Player $player, DateTimeImmutable $now): ?array
-    {
-        if ($player->getStatus() !== RegistrationStatus::APPROVED) {
-            return null;
-        }
-
-        $marks = array_fill_keys(array_map(static fn (BodyPart $part): string => $part->value, BodyPart::cases()), []);
-        if (!$player->canUse(Feature::CONDITIONS)) {
-            return ['marks' => $marks, 'conditionsVisible' => false];
-        }
-
-        foreach ($this->entityManager->getRepository(Condition::class)->findBy(['player' => $player]) as $condition) {
-            if ($condition->getBodyPart() !== null && $condition->isActiveAt($now)) {
-                $marks[$condition->getBodyPart()->value][] = $condition;
-            }
-        }
-
-        return ['marks' => $marks, 'conditionsVisible' => true];
     }
 
     /** The LARP's map once organizers have aligned it; until then the screen reports it offline. */
