@@ -31,7 +31,9 @@
     <nav class="pip-nav" aria-label="PipBoy"
          data-prev-tab="{{ path('app_pipboy_screen', {player: player.id, tab: prev_tab.key}) }}"
          data-next-tab="{{ path('app_pipboy_screen', {player: player.id, tab: next_tab.key}) }}">
-        <div class="pip-tabs">
+        {# Tab text is sized from the number of tabs and their total length, so every language fits one row. #}
+        {% set tab_chars = 0 %}{% for t in tabs %}{% set tab_chars = tab_chars + (t.label|trans)|length %}{% endfor %}
+        <div class="pip-tabs" style="--tab-count: {{ tabs|length }}; --tab-chars: {{ tab_chars }};">
             {% for t in tabs %}
                 <a class="pip-tab{{ t.key == tab.key ? ' is-active' }}" href="{{ path('app_pipboy_screen', {player: player.id, tab: t.key}) }}"{{ t.key == tab.key ? ' aria-current="page"' }}>{{ t.label|trans }}
                     {%- if t.key == 'comms' and chat.unreadTotal > 0 %}<span class="pip-badge" title="{{ 'Unread messages'|trans }}">{{ chat.unreadTotal }}</span>{% endif -%}
@@ -53,6 +55,8 @@
                    href="{{ path('app_pipboy_screen', {player: player.id, tab: tab.key, screen: s.key}) }}"{{ s.key == screen.key ? ' aria-current="true"' }}>{{ s.label|trans }}</a>
             {% endfor %}
         </div>
+        {# Centre the active sub-tab before the first paint, so the strip never jumps afterwards. #}
+        <script>(() => { const strip = document.currentScript.previousElementSibling; const active = strip.querySelector('.is-active'); if (active) { strip.scrollLeft = active.offsetLeft - (strip.clientWidth - active.offsetWidth) / 2; } })();</script>
     </nav>
 {% endblock %}
 

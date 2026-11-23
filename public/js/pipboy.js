@@ -126,7 +126,6 @@
                 go(dx < 0 ? 'next' : 'prev');
             }
         }, { passive: true });
-        nav.querySelector('.pip-subtab.is-active')?.scrollIntoView({ inline: 'center', block: 'nearest' });
     };
 
     // Forms marked data-confirm ask before submitting (e.g. closing a chat).

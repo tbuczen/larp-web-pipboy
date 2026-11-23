@@ -19,7 +19,11 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="PipBoy">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="preload" href="{{ asset('fonts/vt323-regular.woff2') }}" as="font" type="font/woff2" crossorigin>
+    {# One font URL for the preload and the @font-face (a second, unversioned URL made every page
+       download the font again and swap from a fallback font, which shifted the layout). #}
+    {% set font_url = asset('fonts/vt323-regular.woff2') %}
+    <link rel="preload" href="{{ font_url }}" as="font" type="font/woff2" crossorigin>
+    <style>@font-face { font-family: "VT323"; src: url("{{ font_url }}") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }</style>
     <link rel="stylesheet" href="{{ asset('css/pipboy.css') }}">
     {# Applied before the first paint so switching effects off never flashes them. #}
     <script>try { if (localStorage.getItem('pipboy-fx') === 'off') document.documentElement.dataset.fx = 'off'; if (localStorage.getItem('pipboy-rotate') === '180') document.documentElement.dataset.rotate = '180'; } catch (e) {}</script>
