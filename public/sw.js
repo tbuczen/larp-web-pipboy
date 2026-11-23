@@ -6,7 +6,7 @@
 // - every other page always comes from the network (personal data is not
 //   stored), with a "No signal" screen when offline.
 // Signing out or opening the sign-in page clears the stored map data.
-const VERSION = 'v1';
+const VERSION = 'v2';
 const STATIC_CACHE = `pipboy-static-${VERSION}`;
 const MAP_CACHE = 'pipboy-map';
 const OFFLINE_URL = '/offline.html';

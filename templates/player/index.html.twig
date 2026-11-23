@@ -2,32 +2,36 @@
 
 {% block active_tab %}larps{% endblock %}
 
-{% block title %}PipBoy — Your LARPs{% endblock %}
-{% block status %}Event registry{% endblock %}
+{% block title %}PipBoy — {{ 'Your LARPs'|trans }}{% endblock %}
+{% block status %}{{ 'Event registry'|trans }}{% endblock %}
 
 {% block body %}
-    <h1>Your LARPs</h1>
+    <h1>{{ 'Your LARPs'|trans }}</h1>
     {# Shown by pipboy.js when the browser can install the app, or with instructions on iOS. #}
     <section class="install-card" data-install hidden>
-        <h2>Install PipBoy</h2>
-        <p class="muted">Put the PipBoy on your home screen: it opens full screen like an app, and a map you have opened works without signal.</p>
-        <button type="button" data-install-button hidden>Install PipBoy</button>
-        <p class="install-card__ios" data-install-ios hidden>On iPhone or iPad: tap <strong>Share</strong> <span aria-hidden="true">⬆</span> in Safari, then <strong>Add to Home Screen</strong>.</p>
+        <h2>{{ 'Install PipBoy'|trans }}</h2>
+        <p class="muted">{{ 'Put the PipBoy on your home screen: it opens full screen like an app, and a map you have opened works without signal.'|trans }}</p>
+        <button type="button" data-install-button hidden>{{ 'Install PipBoy'|trans }}</button>
+        <p class="install-card__ios" data-install-ios hidden>{{ 'On iPhone or iPad: tap <strong>Share</strong> <span aria-hidden="true">⬆</span> in Safari, then <strong>Add to Home Screen</strong>.'|trans|raw }}</p>
     </section>
     {% if players is not empty %}
         <ul class="card-list">
             {% for player in players %}
                 <li class="card">
                     <h2>{{ player.larp.name }}</h2>
-                    <dl class="data-row"><dt>Character</dt><dd>{{ player.name }}</dd></dl>
-                    <dl class="data-row"><dt>PipBoy</dt><dd>{{ player.pipboyNumber }}</dd></dl>
-                    <dl class="data-row"><dt>Status</dt><dd><span class="badge badge--{{ player.status.value }}">{{ player.status.value }}</span></dd></dl>
-                    {% if player.status.value == 'pending' %}<p class="muted">Waiting for organizer approval.</p>{% endif %}
-                    <a class="button" href="{{ path('app_pipboy_screen', {player: player.id}) }}">Open PipBoy</a>
+                    <dl class="data-row"><dt>{{ 'Character'|trans }}</dt><dd>{{ player.name }}</dd></dl>
+                    <dl class="data-row"><dt>{{ 'PipBoy'|trans }}</dt><dd>{{ player.pipboyNumber }}</dd></dl>
+                    <dl class="data-row"><dt>{{ 'Status'|trans }}</dt><dd><span class="badge badge--{{ player.status.value }}">{{ player.status.value|trans }}</span></dd></dl>
+                    {% if player.status.value == 'pending' %}<p class="muted">{{ 'Waiting for organizer approval.'|trans }}</p>{% endif %}
+                    <a class="button" href="{{ path('app_pipboy_screen', {player: player.id}) }}">{{ 'Open PipBoy'|trans }}</a>
                 </li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>You have not joined a LARP. Use your organizer’s registration link.</p>
+        <p>{{ 'You have not joined a LARP. Use your organizer’s registration link.'|trans }}</p>
     {% endif %}
+    <section class="card device-settings" aria-labelledby="device-settings-title">
+        <h2 id="device-settings-title">{{ 'This device'|trans }}</h2>
+        {{ include('_settings.html.twig') }}
+    </section>
 {% endblock %}

@@ -14,6 +14,32 @@
     const syncFxButtons = () => document.querySelectorAll('[data-fx-toggle]').forEach((button) => {
         button.setAttribute('aria-pressed', String(root.dataset.fx !== 'off'));
     });
+    // Rotate 180°: for a phone worn on the other arm. Applied in <head> before paint.
+    const syncRotateButtons = () => document.querySelectorAll('[data-rotate-toggle]').forEach((button) => {
+        button.setAttribute('aria-pressed', String(root.dataset.rotate === '180'));
+    });
+    document.addEventListener('click', (event) => {
+        if (!event.target.closest('[data-rotate-toggle]')) {
+            return;
+        }
+        if (root.dataset.rotate === '180') {
+            delete root.dataset.rotate;
+        } else {
+            root.dataset.rotate = '180';
+        }
+        store.set('localStorage', 'pipboy-rotate', root.dataset.rotate ?? 'none');
+        syncRotateButtons();
+        // Leaflet and other widgets measure the screen; let them re-measure.
+        window.dispatchEvent(new Event('resize'));
+    });
+
+    // Close the PipBoy menu when tapping elsewhere.
+    document.addEventListener('click', (event) => {
+        document.querySelectorAll('details.pip-menu[open]').forEach((menu) => {
+            if (!menu.contains(event.target)) { menu.open = false; }
+        });
+    });
+
     document.addEventListener('click', (event) => {
         if (!event.target.closest('[data-fx-toggle]')) {
             return;
@@ -44,7 +70,8 @@
             return;
         }
         store.set('sessionStorage', 'pipboy-booted', '1');
-        const lines = ['PIPBOY PERSONAL TERMINAL', 'MEMORY CHECK ......... OK', 'DISPLAY ............... OK', 'LOADING PROFILE', '> READY'];
+        const t = window.pipT ?? ((text) => text);
+        const lines = ['PIPBOY PERSONAL TERMINAL', 'MEMORY CHECK ......... OK', 'DISPLAY ............... OK', 'LOADING PROFILE', '> READY'].map((line) => t(line));
         const overlay = document.createElement('div');
         overlay.className = 'pip-boot';
         overlay.setAttribute('aria-hidden', 'true');
@@ -90,7 +117,9 @@
             if (!start) {
                 return;
             }
-            const dx = event.changedTouches[0].clientX - start.x;
+            // A rotated screen reverses the swipe direction in device coordinates.
+            const flip = root.dataset.rotate === '180' ? -1 : 1;
+            const dx = (event.changedTouches[0].clientX - start.x) * flip;
             const dy = event.changedTouches[0].clientY - start.y;
             start = null;
             if (Math.abs(dx) > 70 && Math.abs(dx) > 2 * Math.abs(dy)) {
@@ -149,9 +178,13 @@
         });
     };
 
+    // Remembered for the static offline page, which cannot ask the server.
+    store.set('localStorage', 'pipboy-lang', root.lang || 'en');
+
     document.addEventListener('DOMContentLoaded', () => {
         installHelp();
         syncFxButtons();
+        syncRotateButtons();
         startClock();
         boot();
         tabNavigation();

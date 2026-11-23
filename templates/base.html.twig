@@ -2,7 +2,7 @@
     set `active_tab` (login, register, larps) to highlight their tab. -#}
 {%- set active = block('active_tab') is defined ? block('active_tab')|trim : '' -%}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app.request.locale }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,7 +22,8 @@
     <link rel="preload" href="{{ asset('fonts/vt323-regular.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ asset('css/pipboy.css') }}">
     {# Applied before the first paint so switching effects off never flashes them. #}
-    <script>try { if (localStorage.getItem('pipboy-fx') === 'off') document.documentElement.dataset.fx = 'off'; } catch (e) {}</script>
+    <script>try { if (localStorage.getItem('pipboy-fx') === 'off') document.documentElement.dataset.fx = 'off'; if (localStorage.getItem('pipboy-rotate') === '180') document.documentElement.dataset.rotate = '180'; } catch (e) {}</script>
+    {{ include('_js_i18n.html.twig') }}
     <script src="{{ asset('js/pipboy.js') }}" defer></script>
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -30,12 +31,12 @@
     {% block nav %}
     <nav class="tabs" aria-label="Sections">
         {% if app.user %}
-            <a class="tab{{ active == 'larps' ? ' tab--active' }}" href="{{ path('app_pipboy') }}"{{ active == 'larps' ? ' aria-current="page"' }}>LARPs</a>
+            <a class="tab{{ active == 'larps' ? ' tab--active' }}" href="{{ path('app_pipboy') }}"{{ active == 'larps' ? ' aria-current="page"' }}>{{ 'LARPs'|trans }}</a>
             {% if is_granted('ROLE_ORGANIZER') %}<a class="tab" href="{{ path('admin') }}">Admin</a>{% endif %}
-            <a class="tab tab--end" href="{{ path('app_logout') }}">Sign out</a>
+            <a class="tab tab--end" href="{{ path('app_logout') }}">{{ 'Sign out'|trans }}</a>
         {% else %}
-            <a class="tab{{ active == 'login' ? ' tab--active' }}" href="{{ path('app_login') }}"{{ active == 'login' ? ' aria-current="page"' }}>Sign in</a>
-            <a class="tab{{ active == 'register' ? ' tab--active' }}" href="{{ path('app_register') }}"{{ active == 'register' ? ' aria-current="page"' }}>Register</a>
+            <a class="tab{{ active == 'login' ? ' tab--active' }}" href="{{ path('app_login') }}"{{ active == 'login' ? ' aria-current="page"' }}>{{ 'Sign in'|trans }}</a>
+            <a class="tab{{ active == 'register' ? ' tab--active' }}" href="{{ path('app_register') }}"{{ active == 'register' ? ' aria-current="page"' }}>{{ 'Register'|trans }}</a>
             {# Organizers sign in here too; /admin sends anonymous visitors to the sign-in form and back. #}
             <a class="tab tab--end" href="{{ path('admin') }}">Admin</a>
         {% endif %}
@@ -45,7 +46,7 @@
     <main class="screen" id="screen">
         {% for type, messages in app.flashes %}
             {% for message in messages %}
-                <p class="notice notice--{{ type }}" role="{{ type == 'error' ? 'alert' : 'status' }}">{{ message }}</p>
+                <p class="notice notice--{{ type }}" role="{{ type == 'error' ? 'alert' : 'status' }}">{{ message|trans }}</p>
             {% endfor %}
         {% endfor %}
         {% block body %}{% endblock %}
@@ -54,7 +55,7 @@
     {% block footer %}
     <footer class="status-bar">
         <span class="status-bar__cell">PipBoy</span>
-        <span class="status-bar__cell status-bar__cell--wide">{% block status %}Personal terminal{% endblock %}<span class="cursor" aria-hidden="true"></span></span>
+        <span class="status-bar__cell status-bar__cell--wide">{% block status %}{{ 'Personal terminal'|trans }}{% endblock %}<span class="cursor" aria-hidden="true"></span></span>
         <span class="status-bar__cell"><time datetime="{{ 'now'|date('Y-m-d') }}">{{ 'now'|date('d.m.Y') }}</time></span>
     </footer>
     {% endblock %}

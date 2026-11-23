@@ -1,11 +1,11 @@
 <form method="post" action="{{ action }}" class="pip-note-form">
     <input type="hidden" name="_token" value="{{ csrf_token(token) }}">
-    <label for="note-title">Title</label>
+    <label for="note-title">{{ 'Title'|trans }}</label>
     <input id="note-title" name="title" value="{{ note ? note.title }}" required maxlength="180" autocomplete="off"{{ note ? '' : ' autofocus' }}>
-    <label for="note-content">Note</label>
+    <label for="note-content">{{ 'Note'|trans }}</label>
     <textarea id="note-content" name="content" rows="10" maxlength="10000">{{ note ? note.content }}</textarea>
     <div class="pip-note-actions">
-        <button type="submit">Save</button>
-        <a class="button button--ghost" href="{{ cancel }}">Cancel</a>
+        <button type="submit">{{ 'Save'|trans }}</button>
+        <a class="button button--ghost" href="{{ cancel }}">{{ 'Cancel'|trans }}</a>
     </div>
 </form>

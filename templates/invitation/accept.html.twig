@@ -3,15 +3,15 @@
 {% block active_tab %}larps{% endblock %}
 
 {% block head %}<meta name="referrer" content="no-referrer">{% endblock %}
-{% block title %}Join {{ event_name }}{% endblock %}
-{% block status %}Incoming invitation{% endblock %}
+{% block title %}{{ 'Join %larp%'|trans({'%larp%': event_name}) }}{% endblock %}
+{% block status %}{{ 'Incoming invitation'|trans }}{% endblock %}
 
 {% block body %}
-    <h1>Join {{ event_name }}</h1>
-    <p class="muted">Your player will need organizer approval before game features become available.</p>
+    <h1>{{ 'Join %larp%'|trans({'%larp%': event_name}) }}</h1>
+    <p class="muted">{{ 'Your player will need organizer approval before game features become available.'|trans }}</p>
     {{ form_start(form) }}
         {{ form_widget(form) }}
-        <button type="submit">Accept invitation</button>
+        <button type="submit">{{ 'Accept invitation'|trans }}</button>
     {{ form_end(form) }}
-    <ul class="links"><li><a href="{{ path('app_pipboy') }}">Your LARPs</a></li></ul>
+    <ul class="links"><li><a href="{{ path('app_pipboy') }}">{{ 'Your LARPs'|trans }}</a></li></ul>
 {% endblock %}

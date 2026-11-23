@@ -20,6 +20,20 @@ The PipBoy installs to the home screen and opens full screen like an app. Nothin
 
 ![No signal screen](images/24-offline.png)
 
+## The PipBoy menu
+
+The ⏻ button at the top right opens the menu:
+
+- **Your LARPs** — back to the list of your events.
+- **Rotate screen 180°** — for a phone worn on the other arm (or upside down in a holder). Remembered on this phone.
+- **Screen effects** — scanlines, flicker and animations on or off.
+- **Language** — **EN** or **PL**. Your choice is saved with your account and follows you to other devices. Before you choose, the PipBoy follows the phone's language.
+- **Sign out**.
+
+![PipBoy menu in Polish](images/26-pipboy-menu.png)
+
+The same settings are at the bottom of **Your LARPs**, and the language switch is on the sign-in page too.
+
 ## Signing out
 
-Use the ⏻ button and then **Sign out** on a shared or borrowed phone. Signing out also ends "Keep me signed in". Changing your password signs out every device.
+Use **⏻ › Sign out** on a shared or borrowed phone. Signing out also ends "Keep me signed in". Changing your password signs out every device.

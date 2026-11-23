@@ -1,0 +1,27 @@
+{#- Texts used by the PipBoy scripts, translated for the current language.
+    Scripts call window.pipT(text, {placeholder: value}); missing texts fall back to English. -#}
+{%- set js_texts = [
+    'GPS OFF', 'ACQUIRING SIGNAL…', 'POSITION LOCKED ±{m} m', 'OUTSIDE MAPPED AREA ±{m} m', 'NO GPS SIGNAL',
+    'LOCATION PERMISSION DENIED', 'NO GPS ON THIS DEVICE', 'MAP DATA CORRUPTED - RELOAD',
+    'SESSION EXPIRED - RELOAD THE PAGE', 'UPLINK ERROR', 'NO SIGNAL - RETRYING', 'ACQUIRING YOUR POSITION…',
+    'NO MOTION WITHIN {range} M', 'Detector idle. Turn sharing on to scan.', 'ON', 'OFF',
+    'contacts.one', 'contacts.few', 'contacts.many', 'contacts.other',
+    'SIGNAL ACQUIRED - DOWNLOADING…', 'SCANNING…', 'CAMERA ACCESS DENIED - TYPE THE CODE BELOW',
+    'NO CAMERA AVAILABLE - TYPE THE CODE BELOW', 'SCANNER OFF',
+    'You', 'The message could not be sent.', 'No signal. The message was not sent.',
+    'PIPBOY PERSONAL TERMINAL', 'MEMORY CHECK ......... OK', 'DISPLAY ............... OK', 'LOADING PROFILE', '> READY',
+] -%}
+{%- set dictionary = {} -%}
+{%- for text in js_texts %}{% set dictionary = dictionary|merge({(text): text|trans}) %}{% endfor -%}
+<script>
+    window.PIPBOY_I18N = {{ dictionary|json_encode|raw }};
+    window.pipT = (text, values = {}) => Object.entries(values).reduce(
+        (result, [key, value]) => result.replaceAll(`{${key}}`, String(value)),
+        window.PIPBOY_I18N[text] ?? text,
+    );
+    // Plural forms follow the page language (Polish has one, few and many).
+    window.pipPlural = (n, values = {}) => {
+        const form = new Intl.PluralRules(document.documentElement.lang || 'en').select(n);
+        return window.pipT(`contacts.${form}`, { n, ...values });
+    };
+</script>

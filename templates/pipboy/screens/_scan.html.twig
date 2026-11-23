@@ -1,20 +1,20 @@
 {# Holodisk scanner: the camera reads a QR code; typing the printed code works without a camera or JavaScript. #}
 <section class="pip-scan" aria-labelledby="scan-title">
-    <h1 id="scan-title" class="visually-hidden">Scan a holodisk</h1>
+    <h1 id="scan-title" class="visually-hidden">{{ 'Scan a holodisk'|trans }}</h1>
     <div class="pip-scan__viewport" data-scan-viewport hidden>
         <video data-scan-video playsinline muted></video>
         <span class="pip-scan__frame" aria-hidden="true"></span>
     </div>
-    <p class="pip-scan-status" data-scan-status role="status">Point the camera at a holodisk code.</p>
-    <button type="button" data-scan-start hidden>Start scanner</button>
-    <button type="button" class="button--ghost" data-scan-stop hidden>Stop scanner</button>
+    <p class="pip-scan-status" data-scan-status role="status">{{ 'Point the camera at a holodisk code.'|trans }}</p>
+    <button type="button" data-scan-start hidden>{{ 'Start scanner'|trans }}</button>
+    <button type="button" class="button--ghost" data-scan-stop hidden>{{ 'Stop scanner'|trans }}</button>
 
     <form method="post" action="{{ path('app_holodisk_scan') }}" class="pip-scan__manual" data-scan-form>
         <input type="hidden" name="_token" value="{{ csrf_token('holodisk_scan') }}">
         <input type="hidden" name="player" value="{{ player.id }}">
-        <label for="scan-code">Or type the code printed under the QR</label>
+        <label for="scan-code">{{ 'Or type the code printed under the QR'|trans }}</label>
         <input id="scan-code" name="code" required maxlength="100" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABCD-EFGH-JKLM" data-scan-code>
-        <button type="submit">Download holodisk</button>
+        <button type="submit">{{ 'Download holodisk'|trans }}</button>
     </form>
-    <p class="muted small">The camera image stays on this phone; only the code is sent.</p>
+    <p class="muted small">{{ 'The camera image stays on this phone; only the code is sent.'|trans }}</p>
 </section>

@@ -8,7 +8,7 @@
         </figure>
     {% else %}
         <div class="holodisk-media holodisk-media--audio">
-            <audio controls preload="metadata" src="{{ src }}">Your browser cannot play this recording.</audio>
+            <audio controls preload="metadata" src="{{ src }}">{{ 'Your browser cannot play this recording.'|trans }}</audio>
         </div>
     {% endif %}
 {% endif %}

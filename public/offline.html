@@ -16,6 +16,7 @@
         }
         body::after { content: ""; position: fixed; inset: 0; pointer-events: none;
             background: repeating-linear-gradient(0deg, rgb(0 0 0 / 25%) 0 1px, transparent 1px 3px); }
+        [hidden] { display: none !important; }
         h1 { margin: .4rem 0; font-size: 2.4rem; letter-spacing: .2em; text-transform: uppercase; }
         p { max-width: 28rem; margin: .6rem auto; color: #8af5b9; }
         .signal { letter-spacing: .4em; animation: blink 1.2s steps(2, jump-none) infinite; }
@@ -26,12 +27,32 @@
     </style>
 </head>
 <body>
-    <main>
+    <main lang="en" data-lang="en">
         <p class="signal" aria-hidden="true">▂ ▃ ▅ ▆ ▇</p>
         <h1>No signal</h1>
         <p>The PipBoy cannot reach the network right now. Move to better coverage and try again.</p>
         <p>A map you have opened before still works offline: MAP › Local map.</p>
         <button type="button" onclick="location.reload()">[ Retry ]</button>
     </main>
+    <main lang="pl" data-lang="pl" hidden>
+        <p class="signal" aria-hidden="true">▂ ▃ ▅ ▆ ▇</p>
+        <h1>Brak zasięgu</h1>
+        <p>PipBoy nie może teraz połączyć się z siecią. Przejdź w miejsce z lepszym zasięgiem i spróbuj ponownie.</p>
+        <p>Otwarta wcześniej mapa działa bez zasięgu: MAPA › Mapa lokalna.</p>
+        <button type="button" onclick="location.reload()">[ Ponów ]</button>
+    </main>
+    <script>
+        // Static page (shown by the service worker offline): follow the last page language, else the phone's.
+        (() => {
+            let lang = 'en';
+            try { lang = localStorage.getItem('pipboy-lang') || (navigator.language || 'en').slice(0, 2); } catch { lang = (navigator.language || 'en').slice(0, 2); }
+            if (lang === 'pl') {
+                document.querySelector('[data-lang="en"]').hidden = true;
+                document.querySelector('[data-lang="pl"]').hidden = false;
+                document.documentElement.lang = 'pl';
+                document.title = 'PipBoy — Brak zasięgu';
+            }
+        })();
+    </script>
 </body>
 </html>

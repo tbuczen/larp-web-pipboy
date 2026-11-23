@@ -1,0 +1,9 @@
+{# EN | PL switch. Posts to the settings route and returns to the current page. #}
+<form method="post" action="{{ path('app_settings_language') }}" class="language-switch">
+    <input type="hidden" name="_token" value="{{ csrf_token('language') }}">
+    <input type="hidden" name="back" value="{{ app.request.requestUri }}">
+    <span class="language-switch__label">{{ 'Language'|trans }}</span>
+    {% for code, name in {en: 'English', pl: 'Polski'} %}
+        <button type="submit" name="locale" value="{{ code }}" lang="{{ code }}" aria-pressed="{{ app.request.locale == code ? 'true' : 'false' }}" title="{{ name }}">{{ code|upper }}</button>
+    {% endfor %}
+</form>

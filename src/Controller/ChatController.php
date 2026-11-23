@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
@@ -36,6 +37,7 @@ final class ChatController extends AbstractController
         private readonly Navigation $navigation,
         #[Autowire(service: 'limiter.chat_request')] private readonly RateLimiterFactory $requestLimiter,
         #[Autowire(service: 'limiter.chat_send')] private readonly RateLimiterFactory $sendLimiter,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -63,14 +65,14 @@ final class ChatController extends AbstractController
         $wantsJson = $request->getPreferredFormat() === 'json';
 
         if (!$this->sendLimiter->create('player-'.$player->getId())->consume()->isAccepted()) {
-            return $wantsJson ? new JsonResponse(['error' => 'Too many messages. Wait a moment.'], Response::HTTP_TOO_MANY_REQUESTS)
+            return $wantsJson ? new JsonResponse(['error' => $this->translator->trans('Too many messages. Wait a moment.')], Response::HTTP_TOO_MANY_REQUESTS)
                 : $this->back($player, $conversation, 'Too many messages. Wait a moment.');
         }
 
         try {
             $message = $this->chat->send($player, $conversation, (string) $request->request->get('message'));
         } catch (DomainException $exception) {
-            return $wantsJson ? new JsonResponse(['error' => $exception->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY)
+            return $wantsJson ? new JsonResponse(['error' => $this->translator->trans($exception->getMessage())], Response::HTTP_UNPROCESSABLE_ENTITY)
                 : $this->back($player, $conversation, $exception->getMessage());
         }
 

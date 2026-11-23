@@ -12,7 +12,8 @@
     if (!form || !video || !navigator.mediaDevices?.getUserMedia || (!('BarcodeDetector' in window) && !window.jsQR)) {
         return;
     }
-    const say = (text) => { status.textContent = text; };
+    const t = window.pipT ?? ((text) => text);
+    const say = (text) => { status.textContent = t(text); };
     let stream = null;
     let timer = null;
     let detector = null;

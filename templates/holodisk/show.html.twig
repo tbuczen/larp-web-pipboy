@@ -2,7 +2,7 @@
 
 {% block active_tab %}larps{% endblock %}
 {% block title %}{{ holodisk.title }} · Holodisk{% endblock %}
-{% block status %}Holodisk playback{% endblock %}
+{% block status %}{{ 'Holodisk playback'|trans }}{% endblock %}
 
 {% block body %}
     <h1>{{ holodisk.title }}</h1>
@@ -10,5 +10,5 @@
     {% if holodisk.content is not empty %}
         <div class="holodisk-text">{{ holodisk.content|nl2br }}</div>
     {% endif %}
-    <ul class="links"><li><a href="{{ path('app_pipboy') }}">Your LARPs</a></li></ul>
+    <ul class="links"><li><a href="{{ path('app_pipboy') }}">{{ 'Your LARPs'|trans }}</a></li></ul>
 {% endblock %}

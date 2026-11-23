@@ -1,9 +1,9 @@
 <section class="pip-offline">
     <p class="pip-offline__signal" aria-hidden="true">▂ ▃ ▅ ▆ ▇</p>
-    <h1>Module offline</h1>
+    <h1>{{ 'Module offline'|trans }}</h1>
     {% if tab.key == 'map' %}
-        <p class="muted">The map has not been calibrated for {{ player.larp.name }} yet. It will appear here once the organizers upload it.</p>
+        <p class="muted">{{ 'The map has not been calibrated for %larp% yet. It will appear here once the organizers upload it.'|trans({'%larp%': player.larp.name}) }}</p>
     {% else %}
-        <p class="muted">Direct messages by PipBoy number are coming in a future update.</p>
+        <p class="muted">{{ 'Direct messages by PipBoy number are coming in a future update.'|trans }}</p>
     {% endif %}
 </section>

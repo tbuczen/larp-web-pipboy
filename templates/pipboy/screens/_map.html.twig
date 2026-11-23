@@ -1,5 +1,5 @@
 {# Fallout 4 style local map: the organizers' image tinted to the screen colour, with a grid and the player's own GPS marker. #}
-<section class="pip-map-screen" aria-label="Local map of {{ player.larp.name }}">
+<section class="pip-map-screen" aria-label="{{ 'Local map of %larp%'|trans({'%larp%': player.larp.name}) }}">
     <svg class="pip-map-filters" aria-hidden="true" focusable="false" width="0" height="0">
         <filter id="pip-map-tint" color-interpolation-filters="sRGB">
             {% if map.invertColors %}
@@ -14,14 +14,14 @@
     <div class="pip-map" id="pip-map"
          data-image-url="{{ path('app_larp_map_image', {id: map.id, v: map.updatedAt.timestamp}) }}"
          data-corners="{{ map.corners|json_encode }}">
-        <noscript><img src="{{ path('app_larp_map_image', {id: map.id, v: map.updatedAt.timestamp}) }}" alt="Map of {{ player.larp.name }}"></noscript>
+        <noscript><img src="{{ path('app_larp_map_image', {id: map.id, v: map.updatedAt.timestamp}) }}" alt="{{ 'Map of %larp%'|trans({'%larp%': player.larp.name}) }}"></noscript>
     </div>
     <div class="pip-map-controls">
-        <button type="button" class="pip-map-button" data-map-zoom-in aria-label="Zoom in">+</button>
-        <button type="button" class="pip-map-button" data-map-zoom-out aria-label="Zoom out">−</button>
-        <button type="button" class="pip-map-button" data-map-reset aria-label="Show the whole map">⌂</button>
-        <button type="button" class="pip-map-button pip-map-button--locate" data-map-locate aria-pressed="false">Locate</button>
+        <button type="button" class="pip-map-button" data-map-zoom-in aria-label="{{ 'Zoom in'|trans }}">+</button>
+        <button type="button" class="pip-map-button" data-map-zoom-out aria-label="{{ 'Zoom out'|trans }}">−</button>
+        <button type="button" class="pip-map-button" data-map-reset aria-label="{{ 'Show the whole map'|trans }}">⌂</button>
+        <button type="button" class="pip-map-button pip-map-button--locate" data-map-locate aria-pressed="false">{{ 'Locate'|trans }}</button>
     </div>
-    <p class="pip-map-status" data-map-status role="status">GPS OFF</p>
-    <p class="muted small">Your position is read on this phone only and never sent to the organizers.</p>
+    <p class="pip-map-status" data-map-status role="status">{{ 'GPS OFF'|trans }}</p>
+    <p class="muted small">{{ 'Your position is read on this phone only and never sent to the organizers.'|trans }}</p>
 </section>
