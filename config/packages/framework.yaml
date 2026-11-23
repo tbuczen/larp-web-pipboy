@@ -3,6 +3,9 @@ framework:
         # Versioned URLs bust the host's week-long static file cache after each deploy.
         version_strategy: App\Asset\FileModifiedVersionStrategy
     secret: '%env(APP_SECRET)%'
+    # Player-facing pages are translated; admin stays English.
+    default_locale: en
+    enabled_locales: ['en', 'pl']
     csrf_protection: true
     session:
         cookie_secure: auto

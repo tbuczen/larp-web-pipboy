@@ -4,9 +4,9 @@
     conditions: 'No conditions recorded.',
     holodisks: 'No holodisks recovered yet. Scan one to add it here.',
     notes: 'No notes yet.',
-}[screen.key] %}
+}[screen.key]|trans %}
 <section class="pip-split{{ selected ? ' has-selection' }}">
-    <ul class="pip-list" aria-label="{{ screen.label }}">
+    <ul class="pip-list" aria-label="{{ screen.label|trans }}">
         {% for id, entry in entries %}
             {% set label = screen.key == 'conditions' ? entry.name : entry.title %}
             <li>
@@ -14,9 +14,9 @@
                    href="{{ path('app_pipboy_screen', {player: player.id, tab: tab.key, screen: screen.key, item: id}) }}"{{ selected and selected.id == id ? ' aria-current="true"' }}>
                     <span>{{ label }}</span>
                     {% if screen.key == 'conditions' %}
-                        <span class="pip-list__meta">{{ entry.isActiveAt(now) ? 'Active' : (entry.startsAt > now ? 'Upcoming' : 'Ended') }}</span>
+                        <span class="pip-list__meta">{{ (entry.isActiveAt(now) ? 'Active' : (entry.startsAt > now ? 'Upcoming' : 'Ended'))|trans }}</span>
                     {% elseif screen.key == 'holodisks' and entry.hasMedia %}
-                        <span class="pip-list__meta">{{ entry.mediaType.value == 'audio' ? 'Audio' : 'Image' }}</span>
+                        <span class="pip-list__meta">{{ (entry.mediaType.value == 'audio' ? 'Audio' : 'Image')|trans }}</span>
                     {% endif %}
                 </a>
             </li>
@@ -27,11 +27,11 @@
 
     <article class="pip-detail">
         {% if selected %}
-            <a class="pip-detail__back" href="{{ path('app_pipboy_screen', {player: player.id, tab: tab.key, screen: screen.key}) }}">◂ {{ screen.label }}</a>
+            <a class="pip-detail__back" href="{{ path('app_pipboy_screen', {player: player.id, tab: tab.key, screen: screen.key}) }}">◂ {{ screen.label|trans }}</a>
             {% if screen.key == 'conditions' %}
                 <h2>{{ selected.name }}</h2>
-                <dl class="data-row"><dt>Since</dt><dd>{{ selected.startsAt|date('d.m.Y H:i') }}</dd></dl>
-                <dl class="data-row"><dt>Until</dt><dd>{{ selected.endsAt ? selected.endsAt|date('d.m.Y H:i') : 'Further notice' }}</dd></dl>
+                <dl class="data-row"><dt>{{ 'Since'|trans }}</dt><dd>{{ selected.startsAt|date('d.m.Y H:i') }}</dd></dl>
+                <dl class="data-row"><dt>{{ 'Until'|trans }}</dt><dd>{{ selected.endsAt ? selected.endsAt|date('d.m.Y H:i') : 'Further notice'|trans }}</dd></dl>
                 {% if selected.description is not empty %}<div class="holodisk-text">{{ selected.description|nl2br }}</div>{% endif %}
             {% elseif screen.key == 'holodisks' %}
                 <h2>{{ selected.title }}</h2>
@@ -42,7 +42,7 @@
                 <div class="holodisk-text">{{ selected.content|nl2br }}</div>
             {% endif %}
         {% elseif entries is not empty %}
-            <p class="pip-detail__hint muted">Select an entry.</p>
+            <p class="pip-detail__hint muted">{{ 'Select an entry.'|trans }}</p>
         {% endif %}
     </article>
 </section>

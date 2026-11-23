@@ -2,11 +2,11 @@
 
 {% block active_tab %}larps{% endblock %}
 
-{% block title %}Invitation accepted{% endblock %}
-{% block status %}Registration received{% endblock %}
+{% block title %}{{ 'Invitation accepted'|trans }}{% endblock %}
+{% block status %}{{ 'Registration received'|trans }}{% endblock %}
 
 {% block body %}
-    <h1>Invitation accepted</h1>
-    <p>Your player in {{ event_name }} is waiting for organizer approval.</p>
-    <a class="button" href="{{ path('app_pipboy') }}">Your LARPs</a>
+    <h1>{{ 'Invitation accepted'|trans }}</h1>
+    <p>{{ 'Your player in %larp% is waiting for organizer approval.'|trans({'%larp%': event_name}) }}</p>
+    <a class="button" href="{{ path('app_pipboy') }}">{{ 'Your LARPs'|trans }}</a>
 {% endblock %}

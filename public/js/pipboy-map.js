@@ -6,8 +6,26 @@
     if (!element || !window.L || !L.imageOverlay.rotated) {
         return;
     }
+    // On a screen rotated 180° (data-rotate on <html>), Leaflet's pointer maths
+    // would pan and zoom the wrong way: mirror its coordinates back.
+    const rotated = () => document.documentElement.dataset.rotate === '180';
+    const toContainerPoint = L.Map.prototype.mouseEventToContainerPoint;
+    L.Map.prototype.mouseEventToContainerPoint = function (event) {
+        const point = toContainerPoint.call(this, event);
+        const size = this.getSize();
+        return rotated() ? L.point(size.x - point.x, size.y - point.y) : point;
+    };
+    const onDown = L.Draggable.prototype._onDown;
+    L.Draggable.prototype._onDown = function (event) {
+        onDown.call(this, event);
+        if (rotated() && this._parentScale) {
+            this._parentScale = { ...this._parentScale, x: -this._parentScale.x, y: -this._parentScale.y };
+        }
+    };
+
     const status = document.querySelector('[data-map-status]');
     const locateButton = document.querySelector('[data-map-locate]');
+    const t = window.pipT ?? ((text) => text);
     const say = (text) => { if (status) { status.textContent = text; } };
 
     const raw = JSON.parse(element.dataset.corners);
@@ -24,7 +42,7 @@
     map.setMaxBounds(bounds.pad(0.3));
 
     const overlay = L.imageOverlay.rotated(element.dataset.imageUrl, topLeft, topRight, bottomLeft, { interactive: false }).addTo(map);
-    overlay.on('error', () => say('MAP DATA CORRUPTED - RELOAD'));
+    overlay.on('error', () => say(t('MAP DATA CORRUPTED - RELOAD')));
 
     document.querySelector('[data-map-zoom-in]')?.addEventListener('click', () => map.zoomIn());
     document.querySelector('[data-map-zoom-out]')?.addEventListener('click', () => map.zoomOut());
@@ -69,9 +87,9 @@
         if (svg && moving) { svg.style.transform = `rotate(${heading}deg)`; }
 
         if (!insideMap(last)) {
-            say(`OUTSIDE MAPPED AREA ±${Math.round(metres)} m`);
+            say(t('OUTSIDE MAPPED AREA ±{m} m', { m: Math.round(metres) }));
         } else {
-            say(`POSITION LOCKED ±${Math.round(metres)} m`);
+            say(t('POSITION LOCKED ±{m} m', { m: Math.round(metres) }));
             if (following) { map.panTo(last, { animate: true }); }
         }
     };
@@ -83,24 +101,24 @@
         marker?.remove(); accuracy?.remove();
         marker = accuracy = last = null;
         locateButton?.setAttribute('aria-pressed', 'false');
-        say('GPS OFF');
+        say(t('GPS OFF'));
     };
 
     const fail = (error) => {
-        say(error.code === 1 ? 'LOCATION PERMISSION DENIED' : 'NO GPS SIGNAL');
-        if (error.code === 1) { stop(); say('LOCATION PERMISSION DENIED'); }
+        say(t(error.code === 1 ? 'LOCATION PERMISSION DENIED' : 'NO GPS SIGNAL'));
+        if (error.code === 1) { stop(); say(t('LOCATION PERMISSION DENIED')); }
     };
 
     // Tap once to start and follow, again to re-centre, and once more while centred to turn GPS off.
     locateButton?.addEventListener('click', () => {
         if (!('geolocation' in navigator)) {
-            say('NO GPS ON THIS DEVICE');
+            say(t('NO GPS ON THIS DEVICE'));
             return;
         }
         if (watchId === null) {
             following = true;
             locateButton.setAttribute('aria-pressed', 'true');
-            say('ACQUIRING SIGNAL…');
+            say(t('ACQUIRING SIGNAL…'));
             watchId = navigator.geolocation.watchPosition(show, fail, { enableHighAccuracy: true, maximumAge: 5000, timeout: 30000 });
         } else if (!following && last) {
             following = true;

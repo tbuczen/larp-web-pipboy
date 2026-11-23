@@ -1,10 +1,10 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Invitation unavailable{% endblock %}
-{% block status %}Signal lost{% endblock %}
+{% block title %}{{ 'Invitation unavailable'|trans }}{% endblock %}
+{% block status %}{{ 'Signal lost'|trans }}{% endblock %}
 
 {% block body %}
-    <h1>Invitation unavailable</h1>
-    <p class="error" role="alert">This invitation has expired, was revoked, or has already been accepted. Ask your organizer for a new invitation.</p>
-    {% if not app.user %}<a class="button" href="{{ path('app_login') }}">Sign in</a>{% endif %}
+    <h1>{{ 'Invitation unavailable'|trans }}</h1>
+    <p class="error" role="alert">{{ 'This invitation has expired, was revoked, or has already been accepted. Ask your organizer for a new invitation.'|trans }}</p>
+    {% if not app.user %}<a class="button" href="{{ path('app_login') }}">{{ 'Sign in'|trans }}</a>{% endif %}
 {% endblock %}

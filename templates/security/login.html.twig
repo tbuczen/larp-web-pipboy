@@ -2,31 +2,32 @@
 
 {% block active_tab %}login{% endblock %}
 
-{% block title %}PipBoy — Sign in{% endblock %}
-{% block status %}Access terminal{% endblock %}
+{% block title %}PipBoy — {{ 'Sign in'|trans }}{% endblock %}
+{% block status %}{{ 'Access terminal'|trans }}{% endblock %}
 
 {% block body %}
-    <h1>Sign in</h1>
-    <p class="muted">Sign in to your account to open your PipBoy.</p>
+    <h1>{{ 'Sign in'|trans }}</h1>
+    <p class="muted">{{ 'Sign in to your account to open your PipBoy.'|trans }}</p>
     {% if error %}<p class="error" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</p>{% endif %}
     <form method="post" action="{{ path('app_login') }}">
         <div class="field">
-            <label for="email" class="required">Email</label>
+            <label for="email" class="required">{{ 'Email'|trans }}</label>
             <input id="email" type="email" name="_username" value="{{ last_username }}" autocomplete="username" required autofocus>
         </div>
         <div class="field">
-            <label for="password" class="required">Password</label>
+            <label for="password" class="required">{{ 'Password'|trans }}</label>
             <input id="password" type="password" name="_password" autocomplete="current-password" required>
         </div>
-        <label class="checkbox"><input type="checkbox" name="_remember_me" value="on"> Keep me signed in on this device for 30 days</label>
+        <label class="checkbox"><input type="checkbox" name="_remember_me" value="on"> {{ 'Keep me signed in on this device for 30 days'|trans }}</label>
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-        <button type="submit">Sign in</button>
+        <button type="submit">{{ 'Sign in'|trans }}</button>
     </form>
-    {% if discord_enabled %}<a class="button button--ghost" href="{{ path('connect_discord') }}">Sign in with Discord</a>{% endif %}
+    {% if discord_enabled %}<a class="button button--ghost" href="{{ path('connect_discord') }}">{{ 'Sign in with Discord'|trans }}</a>{% endif %}
     <hr>
     <ul class="links">
-        <li><a href="{{ path('app_register') }}">Create an account</a></li>
+        <li><a href="{{ path('app_register') }}">{{ 'Create an account'|trans }}</a></li>
     </ul>
-    <p class="muted">Forgot your password? Ask an organizer of your LARP for a reset link.</p>
-    <p class="muted">To join a LARP, use your personal invitation link from the organizer.</p>
+    <p class="muted">{{ 'Forgot your password? Ask an organizer of your LARP for a reset link.'|trans }}</p>
+    <p class="muted">{{ 'To join a LARP, use your personal invitation link from the organizer.'|trans }}</p>
+    {{ include('_language_switch.html.twig') }}
 {% endblock %}

@@ -15,6 +15,7 @@
     const SEND_EVERY = 5000;
     const HEARTBEAT = 20000;
     const POLL_EVERY = 3000;
+    const t = window.pipT ?? ((text) => text);
     const say = (text) => { status.textContent = text; };
 
     let range = 100;
@@ -40,10 +41,10 @@
         try {
             const response = await post(root.dataset.positionUrl, { latitude, longitude, accuracy });
             if (!response.ok) {
-                say(response.status === 403 ? 'SESSION EXPIRED - RELOAD THE PAGE' : 'UPLINK ERROR');
+                say(response.status === 403 ? t('SESSION EXPIRED - RELOAD THE PAGE') : t('UPLINK ERROR'));
             }
         } catch {
-            say('NO SIGNAL - RETRYING');
+            say(t('NO SIGNAL - RETRYING'));
         }
     };
 
@@ -70,19 +71,19 @@
             const data = await response.json();
             draw(data.blips);
             if (!data.sharing) {
-                say('ACQUIRING YOUR POSITION…');
+                say(t('ACQUIRING YOUR POSITION…'));
             } else {
                 const n = data.blips.length;
-                say(n === 0 ? `NO MOTION WITHIN ${range} M` : `${n} CONTACT${n === 1 ? '' : 'S'} WITHIN ${range} M`);
+                say(n === 0 ? t('NO MOTION WITHIN {range} M', { range }) : (window.pipPlural ?? ((count) => `${count}`))(n, { range }));
             }
         } catch {
-            say('NO SIGNAL - RETRYING');
+            say(t('NO SIGNAL - RETRYING'));
         }
     };
 
     const setSharing = (on) => {
         toggle.setAttribute('aria-pressed', String(on));
-        state.textContent = on ? 'ON' : 'OFF';
+        state.textContent = t(on ? 'ON' : 'OFF');
         badge.hidden = !on;
         root.classList.toggle('is-sharing', on);
         try { sessionStorage.setItem('pipboy-motion-share', on ? '1' : '0'); } catch { /* private mode */ }
@@ -90,16 +91,16 @@
 
     const start = () => {
         if (!('geolocation' in navigator)) {
-            say('NO GPS ON THIS DEVICE');
+            say(t('NO GPS ON THIS DEVICE'));
             return;
         }
         setSharing(true);
-        say('ACQUIRING YOUR POSITION…');
+        say(t('ACQUIRING YOUR POSITION…'));
         watchId = navigator.geolocation.watchPosition((position) => {
             lastFix = position;
             send(lastSent === 0);
         }, (error) => {
-            say(error.code === 1 ? 'LOCATION PERMISSION DENIED' : 'NO GPS SIGNAL');
+            say(error.code === 1 ? t('LOCATION PERMISSION DENIED') : t('NO GPS SIGNAL'));
             if (error.code === 1) { stop(); }
         }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 30000 });
         // Keeps the shared position fresh while standing still.
@@ -119,7 +120,7 @@
         post(root.dataset.stopUrl, null, leaving).catch(() => { /* goes stale on the server anyway */ });
         if (!leaving) {
             setSharing(false);
-            say('Detector idle. Turn sharing on to scan.');
+            say(t('Detector idle. Turn sharing on to scan.'));
         }
     };
 

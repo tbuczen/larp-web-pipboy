@@ -10,7 +10,7 @@
 {% set screen_index = 0 %}
 {% for s in tab.screens %}{% if s.key == screen.key %}{% set screen_index = loop.index0 %}{% endif %}{% endfor %}
 
-{% block title %}{{ tab.label|upper }} · {{ screen.label }} · PipBoy{% endblock %}
+{% block title %}{{ tab.label|trans|upper }} · {{ screen.label|trans }} · PipBoy{% endblock %}
 {% block body_class %}is-pipboy{% endblock %}
 {% block head %}
     {%- if screen.key == 'messages' and selected %}<script src="{{ asset('js/pipboy-chat.js') }}" defer></script>{% endif %}
@@ -33,17 +33,24 @@
          data-next-tab="{{ path('app_pipboy_screen', {player: player.id, tab: next_tab.key}) }}">
         <div class="pip-tabs">
             {% for t in tabs %}
-                <a class="pip-tab{{ t.key == tab.key ? ' is-active' }}" href="{{ path('app_pipboy_screen', {player: player.id, tab: t.key}) }}"{{ t.key == tab.key ? ' aria-current="page"' }}>{{ t.label }}
-                    {%- if t.key == 'comms' and chat.unreadTotal > 0 %}<span class="pip-badge" title="Unread messages">{{ chat.unreadTotal }}</span>{% endif -%}
+                <a class="pip-tab{{ t.key == tab.key ? ' is-active' }}" href="{{ path('app_pipboy_screen', {player: player.id, tab: t.key}) }}"{{ t.key == tab.key ? ' aria-current="page"' }}>{{ t.label|trans }}
+                    {%- if t.key == 'comms' and chat.unreadTotal > 0 %}<span class="pip-badge" title="{{ 'Unread messages'|trans }}">{{ chat.unreadTotal }}</span>{% endif -%}
                 </a>
             {% endfor %}
-            <a class="pip-exit" href="{{ path('app_pipboy') }}" title="Back to your LARPs" aria-label="Back to your LARPs">&#x23FB;</a>
+            <details class="pip-menu">
+                <summary class="pip-exit" title="{{ 'Menu'|trans }}" aria-label="{{ 'Menu'|trans }}">&#x23FB;</summary>
+                <div class="pip-menu__panel">
+                    <a class="settings-list__item" href="{{ path('app_pipboy') }}">{{ 'Your LARPs'|trans }}</a>
+                    {{ include('_settings.html.twig') }}
+                    <a class="settings-list__item settings-list__item--danger" href="{{ path('app_logout') }}">{{ 'Sign out'|trans }}</a>
+                </div>
+            </details>
         </div>
         <div class="pip-subtabs">
             {% for s in tab.screens %}
                 {% set distance = (loop.index0 - screen_index)|abs %}
                 <a class="pip-subtab pip-subtab--d{{ min(distance, 3) }}{{ s.key == screen.key ? ' is-active' }}"
-                   href="{{ path('app_pipboy_screen', {player: player.id, tab: tab.key, screen: s.key}) }}"{{ s.key == screen.key ? ' aria-current="true"' }}>{{ s.label }}</a>
+                   href="{{ path('app_pipboy_screen', {player: player.id, tab: tab.key, screen: s.key}) }}"{{ s.key == screen.key ? ' aria-current="true"' }}>{{ s.label|trans }}</a>
             {% endfor %}
         </div>
     </nav>
@@ -71,9 +78,9 @@
 
 {% block footer %}
     <footer class="status-bar pip-status">
-        <span class="status-bar__cell" title="PipBoy number">PB {{ player.pipboyNumber }}</span>
+        <span class="status-bar__cell" title="{{ 'PipBoy number'|trans }}">PB {{ player.pipboyNumber }}</span>
         <span class="status-bar__cell status-bar__cell--wide">{{ player.name }}</span>
         <span class="status-bar__cell"><time data-clock datetime="{{ now|date('c') }}">{{ now|date('H:i') }}</time></span>
-        <button class="status-bar__cell fx-toggle" type="button" data-fx-toggle aria-pressed="true" title="Screen effects">FX</button>
+        <button class="status-bar__cell fx-toggle" type="button" data-fx-toggle aria-pressed="true" title="{{ 'Screen effects'|trans }}">FX</button>
     </footer>
 {% endblock %}

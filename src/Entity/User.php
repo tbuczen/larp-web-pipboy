@@ -42,6 +42,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'json')]
     private array $roles = [];
 
+    /** Chosen interface language ("en" or "pl"); null follows the browser. */
+    #[ORM\Column(length: 5, nullable: true)]
+    private ?string $locale = null;
+
     #[ORM\Column]
     private string $password = '';
 
@@ -152,6 +156,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __toString(): string
     {
         return $this->email;
+    }
+
+    public function getLocale(): ?string
+    {
+        return $this->locale;
+    }
+
+    public function setLocale(?string $locale): self
+    {
+        $this->locale = $locale;
+
+        return $this;
     }
 
     public function __serialize(): array

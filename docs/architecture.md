@@ -57,6 +57,8 @@ Password resets: `PasswordResetManager` issues organizer-created one-time links 
 
 Motion detector: `MotionDetector` stores one `PlayerPosition` per player (no history). `MotionController` (`/pipboy/{player}/motion/position|stop|blips`, JSON, CSRF in `X-CSRF-Token`, rate limiter `motion`) re-checks ownership, approval and `Feature::MOTION`. `blips()` returns only shuffled, rounded east/north offsets from the viewer, and only while the viewer shares. `public/js/pipboy-motion.js` drives sharing and the radar.
 
+Languages: player-facing pages are translated (English texts are the keys, Polish in `translations/messages.pl.yaml`; script texts go through `templates/_js_i18n.html.twig` as `window.pipT`). `LocaleSubscriber` uses the session language (set from `User.locale` at sign-in or by `SettingsController`), otherwise the browser's preferred language; `/admin` is always English. Add new player-facing text with `|trans` and a Polish entry.
+
 ## Player interface
 
 `/pipboy` lists the account's memberships; each opens `/pipboy/{player}/{tab}/{screen}/{item}` (`PipBoyController`). `App\PipBoy\Navigation` decides which tabs and screens exist: until approval only STAT › Status, afterwards one screen per granted feature. The controller returns 404 for another account's player, unknown or ungranted screens, and entries that are not the player's own. Add a new player module by adding its screen to `Navigation`, its records to `PipBoyController::entries()` and a partial under `templates/pipboy/screens/`.

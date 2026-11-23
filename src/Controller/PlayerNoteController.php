@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Players write, edit and delete their own notes in DATA › Notes. Notes from
@@ -30,6 +31,7 @@ final class PlayerNoteController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly ValidatorInterface $validator,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -41,7 +43,7 @@ final class PlayerNoteController extends AbstractController
             return $this->expired($player, null, 'new');
         }
         if ($this->entityManager->getRepository(Note::class)->count(['player' => $player, 'writtenByPlayer' => true]) >= self::MAX_NOTES) {
-            $this->addFlash('error', sprintf('Memory full: delete a note before adding more (limit %d).', self::MAX_NOTES));
+            $this->addFlash('error', 'Memory full: delete a note before adding more.');
 
             return $this->toNotes($player);
         }
@@ -99,7 +101,8 @@ final class PlayerNoteController extends AbstractController
             ->setContent(str_replace("\r\n", "\n", (string) $request->request->get('content')));
         $violations = $this->validator->validate($note);
         foreach ($violations as $violation) {
-            $this->addFlash('error', ucfirst($violation->getPropertyPath()).': '.$violation->getMessage());
+            // Validator messages are already translated; translate the field name too.
+            $this->addFlash('error', $this->translator->trans(ucfirst($violation->getPropertyPath())).': '.$violation->getMessage());
         }
 
         return count($violations) === 0;

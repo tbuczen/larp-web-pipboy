@@ -1,19 +1,19 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Holodisk signal{% endblock %}
+{% block title %}{{ 'Holodisk signal'|trans }}{% endblock %}
 {% block active_tab %}larps{% endblock %}
-{% block status %}Holodisk scanner{% endblock %}
+{% block status %}{{ 'Holodisk scanner'|trans }}{% endblock %}
 
 {% block body %}
     <section class="pip-offline pip-scan-link">
         <p class="pip-offline__signal" aria-hidden="true">▂ ▃ ▅ ▆ ▇</p>
-        <h1>Holodisk signal detected</h1>
-        <p class="muted">Download the data to your PipBoy. It stays in your Holodisks once downloaded.</p>
+        <h1>{{ 'Holodisk signal detected'|trans }}</h1>
+        <p class="muted">{{ 'Download the data to your PipBoy. It stays in your Holodisks once downloaded.'|trans }}</p>
         <form method="post" action="{{ path('app_holodisk_scan') }}">
             <input type="hidden" name="_token" value="{{ csrf_token('holodisk_scan') }}">
             <input type="hidden" name="code" value="{{ code }}">
-            <button type="submit">Download holodisk</button>
+            <button type="submit">{{ 'Download holodisk'|trans }}</button>
         </form>
-        <ul class="links"><li><a href="{{ path('app_pipboy') }}">Back to your LARPs</a></li></ul>
+        <ul class="links"><li><a href="{{ path('app_pipboy') }}">{{ 'Back to your LARPs'|trans }}</a></li></ul>
     </section>
 {% endblock %}

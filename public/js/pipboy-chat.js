@@ -2,6 +2,7 @@
 // The page works without this file (forms post and redirect). Messages are
 // inserted as text, never as HTML.
 (() => {
+    const t = window.pipT ?? ((text) => text);
     const ACTIVE_INTERVAL = 4000;
     const HIDDEN_INTERVAL = 30000;
 
@@ -28,7 +29,7 @@
                 body.textContent = message.body;
                 const time = document.createElement('time');
                 time.dateTime = message.sentAt;
-                time.textContent = `${message.mine ? 'You' : otherLabel} · ${message.time}`;
+                time.textContent = `${message.mine ? t('You') : otherLabel} · ${message.time}`;
                 item.append(body, time);
                 thread.append(item);
                 after = Math.max(after, message.id);
@@ -91,11 +92,11 @@
                     textarea.value = '';
                     error.hidden = true;
                 } else {
-                    error.textContent = data.error || 'The message could not be sent.';
+                    error.textContent = data.error || t('The message could not be sent.');
                     error.hidden = false;
                 }
             } catch {
-                error.textContent = 'No signal. The message was not sent.';
+                error.textContent = t('No signal. The message was not sent.');
                 error.hidden = false;
             } finally {
                 button.disabled = false;

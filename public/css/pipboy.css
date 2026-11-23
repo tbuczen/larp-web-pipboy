@@ -1678,3 +1678,144 @@ body.is-pipboy::after {
 [data-fx="off"] .pip-motion__radar .blip {
     animation: none;
 }
+
+/* PipBoy menu (power button): LARP list, device settings, language, sign out. */
+.pip-menu {
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.pip-menu > summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+.pip-menu > summary::-webkit-details-marker {
+    display: none;
+}
+
+.pip-menu[open] > summary {
+    color: var(--green);
+    text-shadow: var(--glow);
+}
+
+.pip-menu__panel {
+    position: absolute;
+    top: calc(100% + .4rem);
+    right: 0;
+    z-index: 900;
+    display: grid;
+    gap: .35rem;
+    width: min(18rem, 80vw);
+    padding: .6rem;
+    border: 2px solid var(--green);
+    background: var(--screen-deep);
+    box-shadow: 0 0 18px rgb(28 250 128 / 35%);
+}
+
+.settings-list {
+    display: grid;
+    gap: .35rem;
+}
+
+.settings-list__item,
+.pip-menu__panel .settings-list__item {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: .35rem .6rem;
+    border: 1px solid var(--green-dim);
+    background: transparent;
+    color: var(--green);
+    font: inherit;
+    font-size: 1.25rem;
+    letter-spacing: .08em;
+    text-align: left;
+    text-decoration: none;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.settings-list__item::before,
+.settings-list__item::after {
+    content: none;
+}
+
+.settings-list__item[aria-pressed]::after {
+    content: " [" attr(data-off) "]";
+    float: right;
+    color: var(--green-dim);
+}
+
+.settings-list__item[aria-pressed="true"]::after {
+    content: " [" attr(data-on) "]";
+    color: var(--green);
+}
+
+.settings-list__item:hover,
+.settings-list__item:focus-visible {
+    background: var(--green);
+    color: var(--screen);
+}
+
+.settings-list__item--danger {
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+.language-switch {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    margin: .2rem 0 0;
+}
+
+.language-switch__label {
+    flex: 1;
+    color: var(--green-dim);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.language-switch button {
+    width: auto;
+    min-height: 0;
+    margin: 0;
+    padding: .1rem .6rem;
+    font-size: 1.2rem;
+}
+
+.language-switch button::before,
+.language-switch button::after {
+    content: none;
+}
+
+.language-switch button[aria-pressed="true"] {
+    background: var(--green);
+    color: var(--screen);
+    text-shadow: none;
+}
+
+.device-settings {
+    margin-top: 1.4rem;
+}
+
+/*
+ * Rotate 180° for a phone worn on the other arm. The page is locked to the
+ * screen height and the terminal frame scrolls inside it, so the rotated
+ * page starts at its top instead of its bottom.
+ */
+html[data-rotate="180"] body {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    transform: rotate(180deg);
+}
+
+html[data-rotate="180"] .terminal {
+    height: 100%;
+    min-height: 0 !important;
+    max-height: 100%;
+    overflow-y: auto;
+}

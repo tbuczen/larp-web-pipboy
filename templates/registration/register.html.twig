@@ -2,25 +2,25 @@
 
 {% block active_tab %}register{% endblock %}
 
-{% block title %}Create your PipBoy account{% endblock %}
-{% block status %}Access terminal{% endblock %}
+{% block title %}{{ 'Create your PipBoy account'|trans }}{% endblock %}
+{% block status %}{{ 'Access terminal'|trans }}{% endblock %}
 
 {% block body %}
     {# Same structure as security/login.html.twig: heading, one-line intro,
        form, main button, Discord, divider, link to the other page, footnote. #}
-    <h1>Register</h1>
-    <p class="muted">Create your account, then join a LARP with your organizer's invitation.</p>
+    <h1>{{ 'Register'|trans }}</h1>
+    <p class="muted">{{ 'Create your account, then join a LARP with your organizer\'s invitation.'|trans }}</p>
     {% if discord_verified %}
-        <p class="notice" role="status">Your Discord email is verified. Enter your name to complete your account.</p>
+        <p class="notice" role="status">{{ 'Your Discord email is verified. Enter your name to complete your account.'|trans }}</p>
     {% endif %}
     {{ form_start(form) }}
         {{ form_widget(form) }}
-        <button type="submit">Create account</button>
+        <button type="submit">{{ 'Create account'|trans }}</button>
     {{ form_end(form) }}
-    {% if discord_enabled and not discord_verified %}<a class="button button--ghost" href="{{ path('connect_discord') }}">Register with Discord</a>{% endif %}
+    {% if discord_enabled and not discord_verified %}<a class="button button--ghost" href="{{ path('connect_discord') }}">{{ 'Register with Discord'|trans }}</a>{% endif %}
     <hr>
     <ul class="links">
-        <li><a href="{{ path('app_login') }}">Already have an account? Sign in</a></li>
+        <li><a href="{{ path('app_login') }}">{{ 'Already have an account? Sign in'|trans }}</a></li>
     </ul>
-    <p class="muted">Your first and last name are visible only to organizers.</p>
+    <p class="muted">{{ 'Your first and last name are visible only to organizers.'|trans }}</p>
 {% endblock %}

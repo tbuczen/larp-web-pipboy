@@ -1,0 +1,6 @@
+{# Device settings shared by the PipBoy menu and the LARP list. Rotation and effects are stored on this device only. #}
+<div class="settings-list">
+    <button type="button" class="settings-list__item" data-rotate-toggle aria-pressed="false" data-on="{{ 'ON'|trans }}" data-off="{{ 'OFF'|trans }}">{{ 'Rotate screen 180°'|trans }}</button>
+    <button type="button" class="settings-list__item" data-fx-toggle aria-pressed="true" data-on="{{ 'ON'|trans }}" data-off="{{ 'OFF'|trans }}">{{ 'Screen effects'|trans }}</button>
+    {{ include('_language_switch.html.twig') }}
+</div>

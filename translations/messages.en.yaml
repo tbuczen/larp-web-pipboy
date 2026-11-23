@@ -1,0 +1,5 @@
+# Keys that are not plain English sentences (plural forms used by scripts).
+contacts.one: '{n} CONTACT WITHIN {range} M'
+contacts.few: '{n} CONTACTS WITHIN {range} M'
+contacts.many: '{n} CONTACTS WITHIN {range} M'
+contacts.other: '{n} CONTACTS WITHIN {range} M'
